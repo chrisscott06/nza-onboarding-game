@@ -1,42 +1,78 @@
 /*
- * game.js — the glue (Part C: the level contract).
+ * game.js — the glue (Parts C & D: the level contract + the picker).
  *
- * The engine knows nothing about specific levels. THIS file reads a level from
- * data files and hands the engine a plain spec:
+ * The engine knows nothing about specific levels. THIS file:
+ *   1. reads data/levels.json (which levels exist) and builds the home-screen
+ *      picker from each level's meta.json,
+ *   2. when a level is chosen, reads its data files and hands the engine a
+ *      plain spec.
  *
  *   levels/<level>/meta.json   → name, author, theme, faceAsset, accentColor
  *   levels/<level>/level.json  → platforms, placements, startPosition, goal
  *   data/objects.json          → the SHARED table: id, type, sprite, points
  *
- * A "placement" in level.json just says "put objectId X at (x, y)". We look the
- * id up in objects.json to find its type/points/sprite. That's the whole
- * contract: edit the JSON, change the game — no engine code changes. Adding a
- * row to objects.json makes a new object available to EVERY level.
+ * A "placement" just says "put objectId X at (x, y)". We look the id up in
+ * objects.json to find its type/points/sprite. That's the whole contract: edit
+ * the JSON, change the game — no engine code changes. Adding a level is data
+ * only: drop a folder under levels/ and add its name to data/levels.json.
  */
-
-const DEFAULT_LEVEL = 'level-chris';
 
 (async function boot() {
   const canvas = document.getElementById('game');
+  const menu = document.getElementById('menu');
+  const menuBtn = document.getElementById('menu-btn');
+  const listEl = document.getElementById('level-list');
 
-  // Which level? (level picker wired in Part D; default for now.)
-  const levelName = DEFAULT_LEVEL;
+  menuBtn.addEventListener('click', () => location.reload()); // back to picker
+
+  try {
+    const manifest = await fetchJSON('data/levels.json');
+    const names = manifest.levels || [];
+
+    // Load each level's meta so the card can show name/author/theme/accent.
+    const cards = await Promise.all(
+      names.map(async (name) => ({ name, meta: await fetchJSON(`levels/${name}/meta.json`) }))
+    );
+
+    renderPicker(listEl, cards, (name) => startLevel(canvas, menu, name));
+  } catch (err) {
+    listEl.textContent = 'Could not load levels — see console';
+    console.error('[NZA] Level list failed:', err);
+    throw err;
+  }
+})();
+
+function renderPicker(listEl, cards, onPick) {
+  listEl.innerHTML = '';
+  for (const { name, meta } of cards) {
+    const btn = document.createElement('button');
+    btn.className = 'level-card';
+    btn.style.setProperty('--accent', meta.accentColor || '#2dd4bf');
+    btn.innerHTML =
+      `<div class="name">${escapeHTML(meta.name || name)}</div>` +
+      `<div class="meta"><span class="swatch"></span>${escapeHTML(meta.author || '—')} · ${escapeHTML(meta.theme || '')}</div>`;
+    btn.addEventListener('click', () => onPick(name));
+    listEl.appendChild(btn);
+  }
+}
+
+async function startLevel(canvas, menu, levelName) {
   const levelDir = `levels/${levelName}`;
-
   try {
     const [meta, level, objectTable] = await Promise.all([
       fetchJSON(`${levelDir}/meta.json`),
       fetchJSON(`${levelDir}/level.json`),
       fetchJSON('data/objects.json'),
     ]);
-
     const spec = buildSpec(level, objectTable, meta);
+    menu.style.display = 'none';
+    document.body.classList.add('playing');
     Engine.start(canvas, spec);
   } catch (err) {
     showFatal(err);
     throw err;
   }
-})();
+}
 
 // Resolve each placement (objectId + x,y) against the shared object table.
 function buildSpec(level, objectTable, meta) {
@@ -75,6 +111,12 @@ function fetchJSON(url) {
     if (!r.ok) throw new Error(`Could not load ${url} (HTTP ${r.status})`);
     return r.json();
   });
+}
+
+function escapeHTML(s) {
+  return String(s).replace(/[&<>"']/g, (c) =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])
+  );
 }
 
 // If a data file is missing or malformed, say so loudly instead of a blank canvas.

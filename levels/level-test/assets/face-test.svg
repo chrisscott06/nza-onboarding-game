@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges">
+  <!-- Placeholder pixel face for the demo level (distinct from Chris's). -->
+  <rect x="3" y="3" width="10" height="11" fill="#e7b48a"/>
+  <rect x="3" y="2" width="10" height="3" fill="#1f2937"/>
+  <rect x="2" y="3" width="2" height="3" fill="#1f2937"/>
+  <rect x="12" y="3" width="2" height="3" fill="#1f2937"/>
+  <rect x="5" y="7" width="2" height="2" fill="#0b1220"/>
+  <rect x="9" y="7" width="2" height="2" fill="#0b1220"/>
+  <rect x="6" y="11" width="4" height="1" fill="#7c3aed"/>
+</svg>

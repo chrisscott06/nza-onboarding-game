@@ -50,14 +50,27 @@ gates for each Part.
   - Verified in a real browser: engine loaded the level from JSON (9 platforms,
     5 placements, goal); sprites rendered; moving a platform in `level.json`
     visibly relocated it with NO code change, then reverted cleanly.
+- **Part D done and verified.** A second level proves the contract:
+  - `levels/level-test/` ("Traffic Jam") — created by copying the template and
+    changing ONLY data + a placeholder face. Uses different shared objects
+    (ICE car, oil slick, wind turbines) and a purple accent.
+  - `data/levels.json` — the level manifest the picker reads. Adding a level is
+    data-only: drop a folder + add its name here (no engine edits).
+  - Home-screen **level picker** on `index.html`: a card per level (name,
+    author, theme, accent), populated from each `meta.json`. A "☰ Menu" button
+    returns to the picker while playing.
+  - Verified in a real browser: both levels appear in the picker and load;
+    Traffic Jam rendered its ICE car / wind turbine / oil slick sprites. The
+    second level required ZERO engine-code edits — only data + a manifest line.
+  - `level-test` is kept as a demo / second worked example (not deleted).
 - No faces rendered on the character, no branding, no power-up yet.
 
 ## Next
 
-- **Part D** — Prove the contract: add a second level (`levels/level-test/`) by
-  copying the template and changing only data + a placeholder asset, plus a
-  level picker on `index.html`. Both levels playable with ZERO engine-code
-  edits. Verify in-browser, commit.
+- **Part E** — The face system. `src/face.js` renders the pixel-face SVG named
+  by a level's `meta.json` (`faceAsset`) as the character's head. Gate: Chris's
+  face appears in `level-chris`; swapping the SVG file swaps the face. (Real
+  face is a drop-in file; camera upload is deferred.) Verify in-browser, commit.
 
 (Build order: A → B → C → D → E → F → G → H → I. Each Part has a STOP-AND-PROVE
 gate in `BRIEF.md §6`. Nothing is "done" until verified working in a real
