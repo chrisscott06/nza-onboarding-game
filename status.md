@@ -86,14 +86,27 @@ gates for each Part.
     carry NZA identity.
   - NOTE: the logo is a placeholder — swap `public/nza-logo.svg` for the
     official asset when available (see CREDITS.md).
-- No power-up yet.
+- **Part G done and verified.** The heat-pump power-up:
+  - Collecting the heat pump (added to `level-chris`) gives the character a
+    glowing aura + brighter body, and a "⚡ HEAT PUMP" HUD readout with a
+    draining timer bar. Lasts 6s, then reverts.
+  - Super-skills while powered: **higher jump** (×1.32) and **invincibility**
+    (hazards are harmless — blast through boilers).
+  - Respects `prefers-reduced-motion` (steady glow instead of a pulse).
+  - Verified in a real browser: transformation visible; invincibility shown via
+    A/B (powered survives a boiler, unpowered dies); higher jump reaches the top
+    of the screen vs mid-screen unpowered; reverts to normal at timeout.
+    (Verified via forced-frame screenshots + state checks — the headless preview
+    throttles the rAF loop when backgrounded; real-time play is confirmed on a
+    phone in Part H.)
 
 ## Next
 
-- **Part G** — The heat-pump power-up. Collecting the heat pump triggers a
-  visible transformation + a temporary super-skill (e.g. higher jump or brief
-  invincibility) for a few seconds, then reverts. Cheap to render, obviously
-  fun. Verify in-browser, commit.
+- **Part H** — Deploy to Vercel + verify on a real phone. Needs Chris's Vercel
+  account and a physical device. Build side (this session): responsive layout +
+  touch controls (on-screen buttons / tap-to-jump), verified in a mobile
+  viewport, plus deploy config. The actual deploy + real-device check is Chris's
+  step. Then **Part I** — the self-documenting CLAUDE.md (cold-agent tested).
 
 (Build order: A → B → C → D → E → F → G → H → I. Each Part has a STOP-AND-PROVE
 gate in `BRIEF.md §6`. Nothing is "done" until verified working in a real

@@ -15,6 +15,7 @@
   "placements": [
     { "objectId": "gas-boiler",  "x": 430,  "y": 430 },
     { "objectId": "gas-boiler",  "x": 1180, "y": 430 },
+    { "objectId": "heat-pump",   "x": 1000, "y": 430 },
     { "objectId": "solar-panel", "x": 560,  "y": 240 },
     { "objectId": "solar-panel", "x": 1390, "y": 230 },
     { "objectId": "solar-panel", "x": 2030, "y": 260 }

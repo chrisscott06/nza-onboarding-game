@@ -30,6 +30,12 @@ const Engine = (() => {
   };
 
   const FIXED_DT = 1 / 120; // physics step (s)
+  const POWER_DURATION = 6; // heat-pump power-up lasts this many seconds
+  const POWER_JUMP_MULT = 1.32; // higher jump while powered
+
+  // Respect the user's motion preference for the power-up pulse.
+  const reduceMotion =
+    typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   let canvas, ctx;
   let world = null;        // { player, platforms, bounds }
@@ -52,6 +58,7 @@ const Engine = (() => {
         facing: 1,
         coyote: 0,
         jumpBufferT: 0,
+        powerT: 0, // seconds of heat-pump power-up remaining
       },
       platforms: spec.platforms.map((p) => ({ ...p })),
       // hazards + collectibles. Sensible default size if a placement omits w/h.
@@ -117,11 +124,14 @@ const Engine = (() => {
     p.coyote = p.onGround ? t.coyoteTime : Math.max(0, p.coyote - dt);
 
     if (p.jumpBufferT > 0 && p.coyote > 0) {
-      p.vy = -t.jumpSpeed;
+      p.vy = -t.jumpSpeed * (p.powerT > 0 ? POWER_JUMP_MULT : 1);
       p.onGround = false;
       p.coyote = 0;
       p.jumpBufferT = 0;
     }
+
+    // tick down the power-up timer
+    if (p.powerT > 0) p.powerT = Math.max(0, p.powerT - dt);
 
     // variable jump height: cut the rise short if jump released early
     if (p.vy < 0 && !Input.isJumpHeld()) {
@@ -161,7 +171,11 @@ const Engine = (() => {
       if (o.type === 'collectible') {
         o.collected = true;
         world.score += o.points || 0;
+      } else if (o.type === 'powerup') {
+        o.collected = true;
+        p.powerT = POWER_DURATION; // transform + super-skill for a few seconds
       } else if (o.type === 'hazard') {
+        if (p.powerT > 0) continue; // invincible while powered — blast through
         resetRun();
         return; // player has been moved; stop checking this frame
       }
@@ -195,6 +209,7 @@ const Engine = (() => {
     p.x = world.start.x; p.y = world.start.y;
     p.vx = 0; p.vy = 0;
     p.onGround = false; p.coyote = 0; p.jumpBufferT = 0;
+    p.powerT = 0;
     world.score = 0;
     for (const o of world.objects) o.collected = false;
   }
@@ -287,9 +302,27 @@ const Engine = (() => {
   }
 
   function drawPlayer(p) {
-    // The face system draws the head (the level's faceAsset) + a body tinted
-    // with the level's accent colour.
-    Face.drawCharacter(ctx, p, world.accent);
+    // While powered up (heat pump), the character glows and brightens.
+    if (p.powerT > 0) drawPowerAura(p);
+    const color = p.powerT > 0 ? '#7ef9e6' : world.accent;
+    Face.drawCharacter(ctx, p, color);
+  }
+
+  function drawPowerAura(p) {
+    const cx = p.x + p.w / 2;
+    const cy = p.y + p.h / 2;
+    const pulse = reduceMotion ? 0.5 : 0.5 + 0.5 * Math.sin(p.powerT * 12);
+    const r = p.w * (1.05 + 0.28 * pulse);
+    const grad = ctx.createRadialGradient(cx, cy, 2, cx, cy, r);
+    grad.addColorStop(0, 'rgba(94,234,212,0.55)');
+    grad.addColorStop(1, 'rgba(94,234,212,0)');
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, p.powerT); // fade out in the final second
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
   }
 
   function drawHUD() {
@@ -298,6 +331,19 @@ const Engine = (() => {
     ctx.textBaseline = 'top';
     ctx.textAlign = 'left';
     ctx.fillText('SCORE ' + String(world.score).padStart(4, '0'), 22, 20);
+
+    // Power-up indicator: a label + a draining bar while the heat pump is active
+    const pt = world.player.powerT;
+    if (pt > 0) {
+      ctx.fillStyle = '#5eead4';
+      ctx.font = '600 16px "IBM Plex Mono", ui-monospace, Menlo, monospace';
+      ctx.fillText('⚡ HEAT PUMP', 22, 54);
+      const w = 150;
+      ctx.globalAlpha = 0.25;
+      ctx.fillRect(22, 76, w, 7);
+      ctx.globalAlpha = 1;
+      ctx.fillRect(22, 76, w * (pt / POWER_DURATION), 7);
+    }
   }
 
   // ---- Loop ------------------------------------------------------------
