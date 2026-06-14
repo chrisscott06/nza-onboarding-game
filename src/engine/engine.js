@@ -60,12 +60,15 @@ const Engine = (() => {
       })),
       score: 0,
       meta: spec.meta || null,
+      accent: (spec.meta && spec.meta.accentColor) || '#2dd4bf',
       start: { x: spec.startPosition.x, y: spec.startPosition.y },
       goal: spec.goal || null,
       bounds: spec.bounds || { x: 0, y: 0, w: 3000, h: 540 },
     };
     // preload any sprites the objects reference (rendered with a fallback)
     for (const o of world.objects) loadSprite(o.sprite);
+    // point the face system at this level's face asset (Part E)
+    Face.setFace(spec.meta && spec.meta.faceAsset);
     camera = { x: 0, y: 0 };
   }
 
@@ -270,13 +273,9 @@ const Engine = (() => {
   }
 
   function drawPlayer(p) {
-    // placeholder body — the pixel face replaces the head in Part E
-    ctx.fillStyle = '#2dd4bf'; // teal
-    ctx.fillRect(p.x, p.y, p.w, p.h);
-    // a little eye so facing direction is visible
-    ctx.fillStyle = '#0b1220';
-    const eyeX = p.facing >= 0 ? p.x + p.w - 12 : p.x + 6;
-    ctx.fillRect(eyeX, p.y + 12, 6, 6);
+    // The face system draws the head (the level's faceAsset) + a body tinted
+    // with the level's accent colour.
+    Face.drawCharacter(ctx, p, world.accent);
   }
 
   function drawHUD() {

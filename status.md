@@ -63,14 +63,25 @@ gates for each Part.
     Traffic Jam rendered its ICE car / wind turbine / oil slick sprites. The
     second level required ZERO engine-code edits — only data + a manifest line.
   - `level-test` is kept as a demo / second worked example (not deleted).
-- No faces rendered on the character, no branding, no power-up yet.
+- **Part E done and verified.** The face system is live:
+  - `src/face.js` loads the level's `meta.json` → `faceAsset` SVG and draws it
+    as the character's HEAD, on a body tinted with the level's `accentColor`,
+    with little legs. The face mirrors when walking left. Falls back to a plain
+    head until the asset loads / if it's missing.
+  - The collision box is unchanged — only rendering changed.
+  - Verified in a real browser: Chris's pixel face appeared on the character in
+    `level-chris`; editing the SVG file (orange hair + sunglasses) visibly
+    swapped the face on reload with NO code change, then reverted.
+  - Camera upload is deliberately deferred — faces are drop-in files.
+- No branding or power-up yet.
 
 ## Next
 
-- **Part E** — The face system. `src/face.js` renders the pixel-face SVG named
-  by a level's `meta.json` (`faceAsset`) as the character's head. Gate: Chris's
-  face appears in `level-chris`; swapping the SVG file swaps the face. (Real
-  face is a drop-in file; camera upload is deferred.) Verify in-browser, commit.
+- **Part F** — NZA branding. Apply the design system (Part 10 of the brief):
+  navy base, teal/purple/coral/cream accents, DM Serif Display / Inter / IBM
+  Plex Mono type, NZA logo subtly in the background. Make it look intentional
+  and expensive. Gate: the game visibly carries NZA identity. Screenshot,
+  verify, commit.
 
 (Build order: A → B → C → D → E → F → G → H → I. Each Part has a STOP-AND-PROVE
 gate in `BRIEF.md §6`. Nothing is "done" until verified working in a real
