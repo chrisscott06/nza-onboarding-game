@@ -54,6 +54,12 @@ const Engine = (() => {
         jumpBufferT: 0,
       },
       platforms: spec.platforms.map((p) => ({ ...p })),
+      // hazards + collectibles. Sensible default size if a placement omits w/h.
+      objects: (spec.objects || []).map((o) => ({
+        w: 36, h: 36, points: 0, collected: false, ...o,
+      })),
+      score: 0,
+      start: { x: spec.startPosition.x, y: spec.startPosition.y },
       bounds: spec.bounds || { x: 0, y: 0, w: 3000, h: 540 },
     };
     camera = { x: 0, y: 0 };
@@ -112,8 +118,28 @@ const Engine = (() => {
     if (p.x < b.x) { p.x = b.x; p.vx = 0; }
     if (p.x + p.w > b.x + b.w) { p.x = b.x + b.w - p.w; p.vx = 0; }
 
-    // --- fell off the bottom: respawn at start (death lands in Part B) ---
-    if (p.y > b.y + b.h + 200) respawn();
+    // --- hazards / collectibles ---
+    handleObjects();
+
+    // --- fell off the bottom: that's a death, restart the run ---
+    if (p.y > b.y + b.h + 200) resetRun();
+  }
+
+  // Collide the player against world objects: collect collectibles (score up),
+  // die on hazards (restart the run). Power-ups are handled in Part G.
+  function handleObjects() {
+    const p = world.player;
+    for (const o of world.objects) {
+      if (o.collected) continue;
+      if (!aabb(p, o)) continue;
+      if (o.type === 'collectible') {
+        o.collected = true;
+        world.score += o.points || 0;
+      } else if (o.type === 'hazard') {
+        resetRun();
+        return; // player has been moved; stop checking this frame
+      }
+    }
   }
 
   function resolveAxis(axis) {
@@ -136,10 +162,15 @@ const Engine = (() => {
     }
   }
 
-  function respawn() {
+  // Restart the whole run: player back to start, score zeroed, collectibles
+  // returned. "The run" is the unit you lose when you touch a hazard.
+  function resetRun() {
     const p = world.player;
-    // For Part A: reset to a sensible start. Part B wires this to death.
-    p.x = 80; p.y = 80; p.vx = 0; p.vy = 0;
+    p.x = world.start.x; p.y = world.start.y;
+    p.vx = 0; p.vy = 0;
+    p.onGround = false; p.coyote = 0; p.jumpBufferT = 0;
+    world.score = 0;
+    for (const o of world.objects) o.collected = false;
   }
 
   // ---- Camera ----------------------------------------------------------
@@ -163,9 +194,12 @@ const Engine = (() => {
     ctx.translate(-Math.round(camera.x), -Math.round(camera.y));
 
     for (const plat of world.platforms) drawPlatform(plat);
+    for (const o of world.objects) if (!o.collected) drawObject(o);
     drawPlayer(world.player);
 
     ctx.restore();
+
+    drawHUD(); // screen-space, not affected by the camera
   }
 
   function drawBackground() {
@@ -183,6 +217,20 @@ const Engine = (() => {
     ctx.fillRect(plat.x, plat.y, plat.w, 6); // top lip
   }
 
+  // Placeholder object art: a coloured block + a glyph so the TYPE reads at a
+  // glance. Real sprites arrive with the level contract (Part C) and assets.
+  function drawObject(o) {
+    const isHazard = o.type === 'hazard';
+    ctx.fillStyle = isHazard ? '#fb7185' : '#fbbf24'; // coral hazard / amber pickup
+    ctx.fillRect(o.x, o.y, o.w, o.h);
+    ctx.fillStyle = '#0b1220';
+    ctx.font = `${Math.floor(o.h * 0.6)}px system-ui, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(isHazard ? '☠' : '✦', o.x + o.w / 2, o.y + o.h / 2 + 1);
+    ctx.textAlign = 'left';
+  }
+
   function drawPlayer(p) {
     // placeholder body — the pixel face replaces the head in Part E
     ctx.fillStyle = '#2dd4bf'; // teal
@@ -191,6 +239,13 @@ const Engine = (() => {
     ctx.fillStyle = '#0b1220';
     const eyeX = p.facing >= 0 ? p.x + p.w - 12 : p.x + 6;
     ctx.fillRect(eyeX, p.y + 12, 6, 6);
+  }
+
+  function drawHUD() {
+    ctx.fillStyle = '#f5f1e6'; // cream
+    ctx.font = '700 26px ui-monospace, "IBM Plex Mono", Menlo, monospace';
+    ctx.textBaseline = 'top';
+    ctx.fillText('SCORE ' + String(world.score).padStart(4, '0'), 22, 20);
   }
 
   // ---- Loop ------------------------------------------------------------

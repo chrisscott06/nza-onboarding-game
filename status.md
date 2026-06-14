@@ -26,13 +26,25 @@ gates for each Part.
     airborne), and landed back on the ground (`onGround` true); camera scrolled.
     Screenshot confirmed the character, platforms and camera render correctly.
 - `README.md` (how to run locally) and `CREDITS.md` (engine provenance) added.
+- **Part B done and verified.** Collision outcomes added:
+  - Touching a **hazard** (gas boiler, ☠) resets the run — player back to start,
+    score zeroed, collectibles restored.
+  - Touching a **collectible** (solar panel, ✦) adds points and removes it.
+  - A **SCORE** readout is drawn in screen space (monospace, top-left).
+  - Verified in a real browser: collectibles accumulated 100 → 200 → 300;
+    hazard reset the run (score 0, player at start, collectibles back); HUD and
+    object art confirmed on screen via screenshot.
 - Level content is still hardcoded in `src/game.js` — moves to JSON in Part C.
-- No hazards, collectibles, faces, branding, or power-up yet.
+- Object art is placeholder blocks + glyphs; real sprites land with later Parts.
+- No faces, branding, or power-up yet.
 
 ## Next
 
-- **Part B** — Add collision outcomes: touching a hazard ends/resets the run;
-  touching a collectible increments a visible score. Verify in-browser, commit.
+- **Part C** — The level contract. Move all level content into
+  `levels/level-chris/level.json` + `data/objects.json`; the engine reads these
+  instead of hardcoded values. Create `levels/_template-level/` with documented
+  stub files. Gate: editing `level.json` (e.g. moving a platform) visibly
+  changes the game with no code change. Verify in-browser, commit.
 
 (Build order: A → B → C → D → E → F → G → H → I. Each Part has a STOP-AND-PROVE
 gate in `BRIEF.md §6`. Nothing is "done" until verified working in a real

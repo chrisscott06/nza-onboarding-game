@@ -29,6 +29,18 @@
       { x: 1640, y: 360, w: 200,  h: 24 },
       { x: 1980, y: 300, w: 180,  h: 24 },
     ],
+    // Hazards (☠) reset the run; collectibles (✦) add to the score. In Part C
+    // these become rows in data/objects.json referenced by id — for now they
+    // carry their own type/points inline.
+    objects: [
+      // boilers on the ground path — jump over them or lose the run
+      { type: 'hazard', x: 430, y: 414, w: 44, h: 56 },
+      { type: 'hazard', x: 1180, y: 414, w: 44, h: 56 },
+      // solar panels resting on the floating platforms — grab for points
+      { type: 'collectible', x: 560,  y: 240, points: 100 },
+      { type: 'collectible', x: 1394, y: 230, points: 100 },
+      { type: 'collectible', x: 2034, y: 260, points: 100 },
+    ],
   };
 
   Engine.start(canvas, level);
