@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>NZA Onboarding Game</title>
+  <style>
+    :root {
+      /* NZA palette (full design system applied in Part F) */
+      --navy: #0b1220;
+      --teal: #2dd4bf;
+      --cream: #f5f1e6;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: var(--navy);
+      color: var(--cream);
+      font-family: system-ui, sans-serif;
+      overflow: hidden;
+    }
+    #stage {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+    }
+    /* The canvas scales to fit while preserving aspect ratio. */
+    #game {
+      width: 100%;
+      height: 100%;
+      max-width: 100vw;
+      max-height: 100vh;
+      image-rendering: pixelated;
+      background: #1a2438;
+      touch-action: none;
+    }
+    #hint {
+      position: fixed;
+      left: 50%;
+      bottom: 14px;
+      transform: translateX(-50%);
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      opacity: 0.55;
+      text-transform: uppercase;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="stage">
+    <canvas id="game" width="960" height="540"></canvas>
+  </div>
+  <div id="hint">← → move &nbsp;·&nbsp; space / ↑ jump</div>
+
+  <!-- Plain web: no build tool, no framework. Load order matters. -->
+  <script src="src/engine/input.js"></script>
+  <script src="src/engine/engine.js"></script>
+  <script src="src/game.js"></script>
+</body>
+</html>
