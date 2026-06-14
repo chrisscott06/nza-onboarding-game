@@ -1,0 +1,24 @@
+{
+  "_README": "Copy this whole folder to levels/level-<yourname>/ then edit the values below. The _README and _doc_* keys are notes for you — the engine ignores any key it doesn't recognise, so they won't break anything, but a tidy level deletes them once you understand the shape.",
+
+  "startPosition": { "x": 80, "y": 80 },
+  "_doc_startPosition": "Where the player spawns, in canvas pixels (top-left of the player). Gravity then drops them onto the nearest platform below.",
+
+  "bounds": { "x": 0, "y": 0, "w": 2400, "h": 540 },
+  "_doc_bounds": "The world rectangle. Increase w for a longer level — the camera scrolls within it. Keep h at 540 (the canvas height).",
+
+  "platforms": [
+    { "x": 0, "y": 470, "w": 760, "h": 70 },
+    { "x": 900, "y": 470, "w": 1500, "h": 70 }
+  ],
+  "_doc_platforms": "Solid ground and ledges. Each is x,y (top-left) + width + height, in pixels. The player stands on, and is blocked by, every platform. Leave gaps between platforms to jump across.",
+
+  "placements": [
+    { "objectId": "solar-panel", "x": 400, "y": 430 },
+    { "objectId": "gas-boiler", "x": 1000, "y": 430 }
+  ],
+  "_doc_placements": "Where hazards / collectibles / power-ups sit. objectId MUST match an id in data/objects.json (e.g. gas-boiler, ice-car, oil-slick, solar-panel, wind-turbine, heat-pump). x,y is the top-left in pixels — to rest an object on a platform, set y = (platform top y) - 40.",
+
+  "goal": { "x": 2330, "y": 410 },
+  "_doc_goal": "The finish-flag position (top-left, pixels). Put it at the far end of your level."
+}

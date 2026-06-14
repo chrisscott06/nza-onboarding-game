@@ -34,17 +34,30 @@ gates for each Part.
   - Verified in a real browser: collectibles accumulated 100 → 200 → 300;
     hazard reset the run (score 0, player at start, collectibles back); HUD and
     object art confirmed on screen via screenshot.
-- Level content is still hardcoded in `src/game.js` — moves to JSON in Part C.
-- Object art is placeholder blocks + glyphs; real sprites land with later Parts.
-- No faces, branding, or power-up yet.
+- **Part C done and verified.** The level contract is live:
+  - `data/objects.json` — the SHARED table (id, type, sprite, points) for gas
+    boiler / ICE car / oil slick / solar panel / wind turbine / heat pump.
+  - `levels/level-chris/level.json` — platforms, placements (objectId + x,y),
+    startPosition, goal. `meta.json` — name, author, theme, faceAsset,
+    accentColor. Plus a placeholder `assets/face-chris.svg`.
+  - `levels/_template-level/` — documented stub `level.json` + `meta.json`
+    (every field explained via `_doc_*` comment-strings the engine ignores) and
+    an empty `assets/.gitkeep`. This is the contract Will and Imi copy.
+  - `src/game.js` now READS the JSON and resolves placements against the object
+    table; the engine has zero hardcoded level content. Object sprites are
+    loaded from the paths in `objects.json` (with a placeholder fallback).
+  - Real shared sprites added under `public/sprites/` (SVG).
+  - Verified in a real browser: engine loaded the level from JSON (9 platforms,
+    5 placements, goal); sprites rendered; moving a platform in `level.json`
+    visibly relocated it with NO code change, then reverted cleanly.
+- No faces rendered on the character, no branding, no power-up yet.
 
 ## Next
 
-- **Part C** — The level contract. Move all level content into
-  `levels/level-chris/level.json` + `data/objects.json`; the engine reads these
-  instead of hardcoded values. Create `levels/_template-level/` with documented
-  stub files. Gate: editing `level.json` (e.g. moving a platform) visibly
-  changes the game with no code change. Verify in-browser, commit.
+- **Part D** — Prove the contract: add a second level (`levels/level-test/`) by
+  copying the template and changing only data + a placeholder asset, plus a
+  level picker on `index.html`. Both levels playable with ZERO engine-code
+  edits. Verify in-browser, commit.
 
 (Build order: A → B → C → D → E → F → G → H → I. Each Part has a STOP-AND-PROVE
 gate in `BRIEF.md §6`. Nothing is "done" until verified working in a real

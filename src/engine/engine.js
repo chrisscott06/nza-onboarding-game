@@ -56,13 +56,31 @@ const Engine = (() => {
       platforms: spec.platforms.map((p) => ({ ...p })),
       // hazards + collectibles. Sensible default size if a placement omits w/h.
       objects: (spec.objects || []).map((o) => ({
-        w: 36, h: 36, points: 0, collected: false, ...o,
+        w: 40, h: 40, points: 0, collected: false, ...o,
       })),
       score: 0,
+      meta: spec.meta || null,
       start: { x: spec.startPosition.x, y: spec.startPosition.y },
+      goal: spec.goal || null,
       bounds: spec.bounds || { x: 0, y: 0, w: 3000, h: 540 },
     };
+    // preload any sprites the objects reference (rendered with a fallback)
+    for (const o of world.objects) loadSprite(o.sprite);
     camera = { x: 0, y: 0 };
+  }
+
+  // ---- Sprite cache ----------------------------------------------------
+  // Object art is data-driven: objects.json gives each object a sprite PATH.
+  // We load it once and draw it; until it's ready (or if it's missing) we fall
+  // back to a coloured placeholder so the game never blanks out.
+  const sprites = {}; // path -> { img, ready }
+  function loadSprite(path) {
+    if (!path || sprites[path]) return;
+    const rec = { img: new Image(), ready: false };
+    rec.img.onload = () => { rec.ready = true; };
+    rec.img.onerror = () => { rec.ready = false; };
+    rec.img.src = path;
+    sprites[path] = rec;
   }
 
   // ---- Physics ---------------------------------------------------------
@@ -194,6 +212,7 @@ const Engine = (() => {
     ctx.translate(-Math.round(camera.x), -Math.round(camera.y));
 
     for (const plat of world.platforms) drawPlatform(plat);
+    drawGoal(world.goal);
     for (const o of world.objects) if (!o.collected) drawObject(o);
     drawPlayer(world.player);
 
@@ -217,9 +236,14 @@ const Engine = (() => {
     ctx.fillRect(plat.x, plat.y, plat.w, 6); // top lip
   }
 
-  // Placeholder object art: a coloured block + a glyph so the TYPE reads at a
-  // glance. Real sprites arrive with the level contract (Part C) and assets.
+  // Draw an object from its sprite (path comes from data/objects.json). If the
+  // sprite isn't loaded yet, fall back to a coloured block + glyph by type.
   function drawObject(o) {
+    const rec = o.sprite && sprites[o.sprite];
+    if (rec && rec.ready) {
+      ctx.drawImage(rec.img, o.x, o.y, o.w, o.h);
+      return;
+    }
     const isHazard = o.type === 'hazard';
     ctx.fillStyle = isHazard ? '#fb7185' : '#fbbf24'; // coral hazard / amber pickup
     ctx.fillRect(o.x, o.y, o.w, o.h);
@@ -229,6 +253,20 @@ const Engine = (() => {
     ctx.textBaseline = 'middle';
     ctx.fillText(isHazard ? '☠' : '✦', o.x + o.w / 2, o.y + o.h / 2 + 1);
     ctx.textAlign = 'left';
+  }
+
+  // The finish flag, drawn from the level's goal position.
+  function drawGoal(g) {
+    if (!g) return;
+    ctx.fillStyle = '#cbd5e1';
+    ctx.fillRect(g.x, g.y, 4, 64); // pole
+    ctx.fillStyle = '#2dd4bf';
+    ctx.beginPath();
+    ctx.moveTo(g.x + 4, g.y);
+    ctx.lineTo(g.x + 30, g.y + 9);
+    ctx.lineTo(g.x + 4, g.y + 18);
+    ctx.closePath();
+    ctx.fill();
   }
 
   function drawPlayer(p) {

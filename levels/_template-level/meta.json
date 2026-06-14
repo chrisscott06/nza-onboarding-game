@@ -1,0 +1,18 @@
+{
+  "_README": "Your level's identity card. Fill in every field. Delete the _README/_doc_* notes when you're done.",
+
+  "name": "Your Level Name",
+  "_doc_name": "Shown in the level picker on the home screen.",
+
+  "author": "Your Name",
+  "_doc_author": "Who built this level — you.",
+
+  "theme": "free text — e.g. underwater, city, volcano",
+  "_doc_theme": "Free-text flavour describing your level's world.",
+
+  "faceAsset": "levels/_template-level/assets/face.svg",
+  "_doc_faceAsset": "Path to YOUR pixel-face SVG. Drop the file into THIS level's assets/ folder and point here. It becomes your character's head. Update the path to match your level folder name.",
+
+  "accentColor": "#2dd4bf",
+  "_doc_accentColor": "A hex colour that is your level's own identity (used for UI accents). Make it yours."
+}

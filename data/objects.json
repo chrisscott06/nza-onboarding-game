@@ -1,0 +1,8 @@
+[
+  { "id": "gas-boiler",   "type": "hazard",      "sprite": "public/sprites/gas-boiler.svg",   "points": 0 },
+  { "id": "ice-car",      "type": "hazard",      "sprite": "public/sprites/ice-car.svg",      "points": 0 },
+  { "id": "oil-slick",    "type": "hazard",      "sprite": "public/sprites/oil-slick.svg",    "points": 0 },
+  { "id": "solar-panel",  "type": "collectible", "sprite": "public/sprites/solar-panel.svg",  "points": 100 },
+  { "id": "wind-turbine", "type": "collectible", "sprite": "public/sprites/wind-turbine.svg", "points": 150 },
+  { "id": "heat-pump",    "type": "powerup",     "sprite": "public/sprites/heat-pump.svg",    "points": 0 }
+]

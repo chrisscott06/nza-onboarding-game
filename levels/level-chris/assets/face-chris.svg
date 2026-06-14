@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges">
+  <!-- Placeholder pixel face for Chris. Drop a real face in to replace it
+       (Part E renders whatever meta.json -> faceAsset points at). -->
+  <rect x="3" y="3" width="10" height="11" fill="#f1c9a5"/>
+  <rect x="3" y="2" width="10" height="3" fill="#5b4636"/>
+  <rect x="2" y="3" width="2" height="4" fill="#5b4636"/>
+  <rect x="12" y="3" width="2" height="4" fill="#5b4636"/>
+  <rect x="5" y="7" width="2" height="2" fill="#1f2937"/>
+  <rect x="9" y="7" width="2" height="2" fill="#1f2937"/>
+  <rect x="6" y="11" width="4" height="1" fill="#9b5b4a"/>
+</svg>
