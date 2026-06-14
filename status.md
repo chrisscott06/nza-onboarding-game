@@ -73,15 +73,27 @@ gates for each Part.
     `level-chris`; editing the SVG file (orange hair + sunglasses) visibly
     swapped the face on reload with NO code change, then reverted.
   - Camera upload is deliberately deferred — faces are drop-in files.
-- No branding or power-up yet.
+- **Part F done and verified.** NZA branding applied:
+  - Type system wired via Google Fonts — DM Serif Display (display, 400 only),
+    Inter (body/UI), IBM Plex Mono (score + labels). All SIL OFL.
+  - Palette: navy base, teal/purple/coral/cream. Teal is the dominant UI accent;
+    each level's `accentColor` colours its card + character body.
+  - `public/nza-logo.svg` (placeholder NZA mark) shown on the menu and drawn as
+    a faint watermark behind the play area.
+  - Home screen restyled (serif title, mono labels, accent-bordered cards,
+    "Net Zero Advisory" footer); focus states + reduced-motion respected.
+  - Verified in a real browser via screenshots: menu and in-game both visibly
+    carry NZA identity.
+  - NOTE: the logo is a placeholder — swap `public/nza-logo.svg` for the
+    official asset when available (see CREDITS.md).
+- No power-up yet.
 
 ## Next
 
-- **Part F** — NZA branding. Apply the design system (Part 10 of the brief):
-  navy base, teal/purple/coral/cream accents, DM Serif Display / Inter / IBM
-  Plex Mono type, NZA logo subtly in the background. Make it look intentional
-  and expensive. Gate: the game visibly carries NZA identity. Screenshot,
-  verify, commit.
+- **Part G** — The heat-pump power-up. Collecting the heat pump triggers a
+  visible transformation + a temporary super-skill (e.g. higher jump or brief
+  invincibility) for a few seconds, then reverts. Cheap to render, obviously
+  fun. Verify in-browser, commit.
 
 (Build order: A → B → C → D → E → F → G → H → I. Each Part has a STOP-AND-PROVE
 gate in `BRIEF.md §6`. Nothing is "done" until verified working in a real

@@ -4,12 +4,29 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>NZA Onboarding Game</title>
+
+  <!-- NZA type system: DM Serif Display (display), Inter (body/UI),
+       IBM Plex Mono (data/score). All SIL OFL — logged in CREDITS.md. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=IBM+Plex+Mono:wght@500;600&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+
   <style>
     :root {
-      /* NZA palette (full design system applied in Part F) */
-      --navy: #0b1220;
-      --teal: #2dd4bf;
-      --cream: #f5f1e6;
+      /* NZA design system */
+      --navy:   #0b1220;
+      --navy-2: #131d33;
+      --line:   #24304d;
+      --teal:   #2dd4bf;
+      --purple: #c084fc;
+      --coral:  #fb7185;
+      --cream:  #f5f1e6;
+
+      --font-display: "DM Serif Display", Georgia, serif;
+      --font-ui: "Inter", system-ui, sans-serif;
+      --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
     }
     * { box-sizing: border-box; }
     html, body {
@@ -18,7 +35,7 @@
       height: 100%;
       background: var(--navy);
       color: var(--cream);
-      font-family: system-ui, sans-serif;
+      font-family: var(--font-ui);
       overflow: hidden;
     }
     #stage {
@@ -41,9 +58,10 @@
       left: 50%;
       bottom: 14px;
       transform: translateX(-50%);
-      font-size: 13px;
-      letter-spacing: 0.08em;
-      opacity: 0.55;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      opacity: 0.5;
       text-transform: uppercase;
       pointer-events: none;
     }
@@ -56,24 +74,34 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 28px;
+      gap: 22px;
       padding: 24px;
-      background: radial-gradient(120% 120% at 50% 0%, #16203a 0%, #0b1220 70%);
+      background: radial-gradient(120% 120% at 50% 0%, #16203a 0%, #0b1220 72%);
       z-index: 10;
+    }
+    #menu .brand-mark {
+      width: 64px;
+      height: 64px;
+      opacity: 0.95;
+      margin-bottom: 2px;
     }
     #menu h1 {
       margin: 0;
-      font-size: clamp(28px, 6vw, 52px);
-      font-weight: 400;
-      letter-spacing: 0.01em;
+      font-family: var(--font-display);
+      font-weight: 400; /* DM Serif Display: 400 only, never bold */
+      font-size: clamp(30px, 6.4vw, 58px);
+      line-height: 1.04;
+      letter-spacing: 0.005em;
       text-align: center;
     }
     #menu h1 .accent { color: var(--teal); }
     #menu .tagline {
-      margin: -14px 0 0;
-      opacity: 0.6;
-      font-size: 14px;
-      letter-spacing: 0.16em;
+      margin: -10px 0 6px;
+      font-family: var(--font-mono);
+      opacity: 0.55;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.22em;
       text-transform: uppercase;
     }
     #level-list {
@@ -84,29 +112,52 @@
       max-width: 760px;
     }
     .level-card {
-      width: 220px;
+      width: 230px;
+      min-height: 84px;
       text-align: left;
-      background: #131d33;
-      border: 1px solid #24304d;
+      background: var(--navy-2);
+      border: 1px solid var(--line);
       border-left: 4px solid var(--accent, var(--teal));
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 16px 18px;
       color: var(--cream);
       cursor: pointer;
       font: inherit;
-      transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+      transition: transform 0.14s ease, border-color 0.14s ease, background 0.14s ease;
     }
     .level-card:hover,
     .level-card:focus-visible {
       transform: translateY(-3px);
       background: #18233d;
+      border-color: var(--accent, var(--teal));
       outline: none;
     }
-    .level-card .name { font-size: 19px; margin-bottom: 4px; }
-    .level-card .meta { font-size: 12px; opacity: 0.6; letter-spacing: 0.04em; }
+    .level-card:focus-visible { box-shadow: 0 0 0 2px var(--accent, var(--teal)); }
+    .level-card .name {
+      font-family: var(--font-display);
+      font-weight: 400;
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
+    .level-card .meta {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      opacity: 0.6;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
     .level-card .swatch {
-      display: inline-block; width: 10px; height: 10px; border-radius: 2px;
-      background: var(--accent, var(--teal)); margin-right: 6px; vertical-align: middle;
+      display: inline-block; width: 9px; height: 9px; border-radius: 2px;
+      background: var(--accent, var(--teal)); margin-right: 7px; vertical-align: middle;
+    }
+    #menu .footer {
+      position: absolute;
+      bottom: 18px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      opacity: 0.32;
     }
 
     /* Menu button shown only while playing */
@@ -117,14 +168,16 @@
       display: none;
       background: #131d33cc;
       color: var(--cream);
-      border: 1px solid #24304d;
-      border-radius: 8px;
-      padding: 8px 14px;
-      font: inherit; font-size: 13px;
-      letter-spacing: 0.06em;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.08em;
       cursor: pointer;
       backdrop-filter: blur(4px);
     }
+    #menu-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--teal); }
     body.playing #menu-btn { display: block; }
     body.playing #hint { display: block; }
     body:not(.playing) #hint { display: none; }
@@ -144,9 +197,11 @@
 
   <!-- Home screen: the level picker. Populated from data/levels.json. -->
   <div id="menu">
+    <img class="brand-mark" src="public/nza-logo.svg" alt="" />
     <h1>NZA <span class="accent">Onboarding Game</span></h1>
     <p class="tagline">Pick a level</p>
     <div id="level-list">Loading levels…</div>
+    <div class="footer">Net Zero Advisory</div>
   </div>
 
   <!-- Plain web: no build tool, no framework. Load order matters. -->

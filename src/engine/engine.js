@@ -86,6 +86,11 @@ const Engine = (() => {
     sprites[path] = rec;
   }
 
+  // NZA branding: the logo, drawn as a faint watermark behind the play area.
+  const logo = { img: new Image(), ready: false };
+  logo.img.onload = () => { logo.ready = true; };
+  logo.img.src = 'public/nza-logo.svg';
+
   // ---- Physics ---------------------------------------------------------
   function update(dt) {
     const p = world.player;
@@ -230,6 +235,15 @@ const Engine = (() => {
     g.addColorStop(1, '#0b1220');
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // NZA logo watermark, subtly, behind the play area (screen-space)
+    if (logo.ready) {
+      const size = Math.min(canvas.width, canvas.height) * 0.66;
+      ctx.save();
+      ctx.globalAlpha = 0.05;
+      ctx.drawImage(logo.img, (canvas.width - size) / 2, (canvas.height - size) / 2, size, size);
+      ctx.restore();
+    }
   }
 
   function drawPlatform(plat) {
@@ -280,8 +294,9 @@ const Engine = (() => {
 
   function drawHUD() {
     ctx.fillStyle = '#f5f1e6'; // cream
-    ctx.font = '700 26px ui-monospace, "IBM Plex Mono", Menlo, monospace';
+    ctx.font = '600 26px "IBM Plex Mono", ui-monospace, Menlo, monospace';
     ctx.textBaseline = 'top';
+    ctx.textAlign = 'left';
     ctx.fillText('SCORE ' + String(world.score).padStart(4, '0'), 22, 20);
   }
 

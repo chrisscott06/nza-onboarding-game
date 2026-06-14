@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="NZA">
+  <!-- PLACEHOLDER NZA mark: a peak (delta = change) over a horizon line
+       (net zero), inside a ring. Replace with the official NZA logo when
+       available — see CREDITS.md. -->
+  <g fill="none" stroke="#2dd4bf" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">
+    <circle cx="100" cy="100" r="76"/>
+    <path d="M58 128 L100 56 L142 128"/>
+    <line x1="52" y1="146" x2="148" y2="146"/>
+  </g>
+</svg>

@@ -28,16 +28,26 @@ original to this repo and therefore carries the repo's own licence.
 If we later swap in a third-party engine, its name, repo URL, and licence go
 here.
 
-## Fonts
+## Fonts (Part F)
 
-To be added in Part F (NZA design system): DM Serif Display, Inter / Inter
-Tight, IBM Plex Mono — all open-licence (SIL OFL / Apache), sourced via Google
-Fonts. Licences logged when wired in.
+Loaded via Google Fonts, all under the SIL Open Font License 1.1 (free for
+commercial use, embedding allowed):
+- **DM Serif Display** (Colophon Foundry) — display / headings, weight 400 only.
+- **Inter** (Rasmus Andersson) — body and UI.
+- **IBM Plex Mono** (IBM) — data/score readouts and labels.
+
+## Logo (Part F)
+
+- `public/nza-logo.svg` — a **placeholder** NZA mark (peak over a horizon line
+  in a ring) created for this repo. **Replace with the official NZA logo** when
+  available; this stand-in carries the repo's own licence in the meantime.
 
 ## Assets (sprites)
 
-Placeholder shapes only so far. Pixel-face and object sprites are added in later
-Parts; each gets a line here with its source and licence.
+- `public/sprites/*.svg` — the six shared object sprites (gas boiler, ICE car,
+  oil slick, solar panel, wind turbine, heat pump). Original to this repo.
+- `levels/*/assets/face-*.svg` — placeholder pixel faces. Original to this repo;
+  authors drop in their own face SVG to replace them.
 
 ## Audio
 
