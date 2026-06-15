@@ -219,6 +219,16 @@
       letter-spacing: 0.08em;
     }
     .tbtn.active { background: rgba(94, 234, 212, 0.3); }
+    #touch .pad-right { display: flex; gap: 16px; align-items: flex-end; pointer-events: none; }
+    .tbtn.dash {
+      width: 70px; height: 70px;
+      background: rgba(165, 243, 252, 0.16);
+      border-color: rgba(165, 243, 252, 0.6);
+      color: #a5f3fc;
+      font-size: 26px;
+      display: none; /* shown only when a grid-surge is available */
+    }
+    body.surge-ready .tbtn.dash { display: grid; }
     body.playing #touch { display: flex; }
     /* Hide on desktops with a real mouse + room for a keyboard. */
     @media (pointer: fine) and (min-width: 820px) {
@@ -248,7 +258,10 @@
       <button class="tbtn" data-action="left" aria-label="Move left">◄</button>
       <button class="tbtn" data-action="right" aria-label="Move right">►</button>
     </div>
-    <button class="tbtn jump" data-action="jump" aria-label="Jump">JUMP</button>
+    <div class="pad-right">
+      <button class="tbtn dash" data-action="dash" aria-label="Grid-surge dash">⚡</button>
+      <button class="tbtn jump" data-action="jump" aria-label="Jump">JUMP</button>
+    </div>
   </div>
 
   <!-- Home screen: the level picker. Populated from data/levels.json. -->

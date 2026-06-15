@@ -32,6 +32,9 @@ const Engine = (() => {
   const FIXED_DT = 1 / 120; // physics step (s)
   const POWER_DURATION = 6; // heat-pump power-up lasts this many seconds
   const POWER_JUMP_MULT = 1.32; // higher jump while powered
+  const SURGE_SPEED_MULT = 1.9; // grid-surge dash speed multiplier
+  const SHIELD_INVULN = 0.9; // brief invulnerability after insulation absorbs a hit
+  const GREMLIN_DRAIN_CD = 0.7; // seconds between storage drains from one gremlin
 
   // Respect the user's motion preference for the power-up pulse.
   const reduceMotion =
@@ -58,12 +61,14 @@ const Engine = (() => {
         facing: 1,
         coyote: 0,
         jumpBufferT: 0,
-        powerT: 0, // seconds of heat-pump power-up remaining
+        powerT: 0,    // seconds of heat-pump power-up remaining
+        shield: false, // insulation: absorbs one hazard hit
+        invulnT: 0,   // brief grace after a shield break
       },
       platforms: spec.platforms.map((p) => ({ ...p })),
       // hazards + collectibles. Sensible default size if a placement omits w/h.
       objects: (spec.objects || []).map((o) => ({
-        w: 40, h: 40, points: 0, collected: false, ...o,
+        w: 40, h: 40, points: 0, collected: false, drainCD: 0, ...o,
       })),
       score: 0,
       meta: spec.meta || null,
@@ -71,7 +76,20 @@ const Engine = (() => {
       start: { x: spec.startPosition.x, y: spec.startPosition.y },
       goal: spec.goal || null,
       bounds: spec.bounds || { x: 0, y: 0, w: 3000, h: 540 },
+      // storage-meter mechanic (only some levels have it)
+      mechanic: spec.mechanic || null,
+      storage: null,
+      surgeT: 0,
+      surgeReady: false,
+      curtailT: 0,
     };
+    if (world.mechanic && world.mechanic.type === 'storage-meter') {
+      world.storage = {
+        capacity: world.mechanic.startSegments || 0, // segments unlocked (grown by batteries)
+        fill: 0,                                      // segments currently holding clean energy
+        max: world.mechanic.maxSegments || 8,
+      };
+    }
     // preload any sprites the objects reference (rendered with a fallback)
     for (const o of world.objects) loadSprite(o.sprite);
     // point the face system at this level's face asset (Part E)
@@ -116,7 +134,8 @@ const Engine = (() => {
       p.vx -= sign * t.friction * dt;
       if (Math.sign(p.vx) !== sign) p.vx = 0;
     }
-    p.vx = clamp(p.vx, -t.maxRunSpeed, t.maxRunSpeed);
+    const maxRun = world.surgeT > 0 ? t.maxRunSpeed * SURGE_SPEED_MULT : t.maxRunSpeed;
+    p.vx = clamp(p.vx, -maxRun, maxRun);
 
     // --- jump: coyote time + input buffering ---
     if (Input.consumeJumpPress()) p.jumpBufferT = t.jumpBuffer;
@@ -130,8 +149,13 @@ const Engine = (() => {
       p.jumpBufferT = 0;
     }
 
-    // tick down the power-up timer
+    // tick down timers
     if (p.powerT > 0) p.powerT = Math.max(0, p.powerT - dt);
+    if (p.invulnT > 0) p.invulnT = Math.max(0, p.invulnT - dt);
+    for (const o of world.objects) if (o.drainCD > 0) o.drainCD -= dt;
+
+    // grid-surge: spend a full storage meter on a dash
+    updateSurge(dt, Input.consumeDashPress ? Input.consumeDashPress() : false);
 
     // variable jump height: cut the rise short if jump released early
     if (p.vy < 0 && !Input.isJumpHeld()) {
@@ -161,21 +185,83 @@ const Engine = (() => {
     if (p.y > b.y + b.h + 200) resetRun();
   }
 
-  // Collide the player against world objects: collect collectibles (score up),
-  // die on hazards (restart the run). Power-ups are handled in Part G.
+  // Storage-meter surge: when the meter is full you can spend it on a dash that
+  // boosts speed and makes you briefly invincible. Only active on levels whose
+  // mechanic is 'storage-meter'.
+  function updateSurge(dt, dashPressed) {
+    const s = world.storage;
+    if (world.surgeT > 0) world.surgeT = Math.max(0, world.surgeT - dt);
+    if (world.curtailT > 0) world.curtailT = Math.max(0, world.curtailT - dt);
+    // "meter full" = every unlocked segment is holding energy
+    world.surgeReady = !!(s && s.capacity >= 1 && s.fill >= s.capacity && world.surgeT <= 0);
+    if (dashPressed && world.surgeReady) {
+      const dur = (world.mechanic.surge && world.mechanic.surge.duration) || 4;
+      world.surgeT = dur;
+      s.fill = 0; // spend the stored energy
+      world.surgeReady = false;
+      const p = world.player;
+      p.vx = p.facing * TUNING.maxRunSpeed * SURGE_SPEED_MULT; // instant dash kick
+    }
+  }
+
+  function invincible() {
+    const p = world.player;
+    return p.powerT > 0 || world.surgeT > 0 || p.invulnT > 0;
+  }
+
+  // Collide the player against world objects. Behaviour depends on type and the
+  // object's `effect` (from objects.json) and whether the level runs the
+  // storage-meter mechanic.
   function handleObjects() {
     const p = world.player;
+    const s = world.storage;
     for (const o of world.objects) {
       if (o.collected) continue;
       if (!aabb(p, o)) continue;
+
       if (o.type === 'collectible') {
-        o.collected = true;
-        world.score += o.points || 0;
+        if (o.effect === 'grow-storage') {
+          // battery: unlock another storage segment, and score its points
+          if (s) s.capacity = Math.min(s.max, s.capacity + 1);
+          o.collected = true;
+          world.score += o.points || 0;
+        } else if (s) {
+          // renewable on a storage-meter level: only banks if there's room
+          if (s.fill < s.capacity) {
+            s.fill += 1;
+            world.score += o.points || 0; // banked
+            o.collected = true;
+          } else {
+            o.collected = true;     // curtailment: storage full → energy wasted
+            world.curtailT = 1.6;   // brief on-screen warning, no points
+          }
+        } else {
+          // no storage mechanic on this level: score normally
+          o.collected = true;
+          world.score += o.points || 0;
+        }
       } else if (o.type === 'powerup') {
         o.collected = true;
-        p.powerT = POWER_DURATION; // transform + super-skill for a few seconds
+        if (o.effect === 'shield-one-hit') {
+          p.shield = true; // insulation: fabric first
+        } else {
+          p.powerT = POWER_DURATION; // supercharge (heat pump)
+        }
       } else if (o.type === 'hazard') {
-        if (p.powerT > 0) continue; // invincible while powered — blast through
+        if (o.effect === 'drain-storage') {
+          // standby gremlin: nibbles a stored segment on contact, doesn't kill
+          if (s && o.drainCD <= 0 && s.fill > 0) {
+            s.fill -= 1;
+            o.drainCD = GREMLIN_DRAIN_CD;
+          }
+          continue;
+        }
+        if (invincible()) continue; // powered / surging / post-shield grace
+        if (p.shield) {
+          p.shield = false;   // insulation absorbs the hit
+          p.invulnT = SHIELD_INVULN;
+          continue;
+        }
         resetRun();
         return; // player has been moved; stop checking this frame
       }
@@ -209,9 +295,14 @@ const Engine = (() => {
     p.x = world.start.x; p.y = world.start.y;
     p.vx = 0; p.vy = 0;
     p.onGround = false; p.coyote = 0; p.jumpBufferT = 0;
-    p.powerT = 0;
+    p.powerT = 0; p.shield = false; p.invulnT = 0;
     world.score = 0;
-    for (const o of world.objects) o.collected = false;
+    world.surgeT = 0; world.surgeReady = false; world.curtailT = 0;
+    if (world.storage) {
+      world.storage.capacity = world.mechanic.startSegments || 0;
+      world.storage.fill = 0;
+    }
+    for (const o of world.objects) { o.collected = false; o.drainCD = 0; }
   }
 
   // ---- Camera ----------------------------------------------------------
@@ -302,10 +393,35 @@ const Engine = (() => {
   }
 
   function drawPlayer(p) {
-    // While powered up (heat pump), the character glows and brightens.
-    if (p.powerT > 0) drawPowerAura(p);
-    const color = p.powerT > 0 ? '#7ef9e6' : world.accent;
+    if (world.surgeT > 0) drawSurgeTrail(p);
+    else if (p.powerT > 0) drawPowerAura(p);
+
+    let color = world.accent;
+    if (world.surgeT > 0) color = '#a5f3fc';      // surging: bright cyan
+    else if (p.powerT > 0) color = '#7ef9e6';     // heat-pump: bright teal
     Face.drawCharacter(ctx, p, color);
+
+    if (p.shield) drawShield(p);
+  }
+
+  function drawSurgeTrail(p) {
+    ctx.save();
+    for (let i = 3; i >= 1; i--) {
+      ctx.globalAlpha = 0.16 / i;
+      ctx.fillStyle = '#a5f3fc';
+      ctx.fillRect(p.x - p.facing * i * 13, p.y, p.w, p.h);
+    }
+    ctx.restore();
+  }
+
+  function drawShield(p) {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(244,114,182,0.85)'; // insulation pink
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(p.x + p.w / 2, p.y + p.h / 2, p.w * 0.95, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
   }
 
   function drawPowerAura(p) {
@@ -326,23 +442,58 @@ const Engine = (() => {
   }
 
   function drawHUD() {
-    ctx.fillStyle = '#f5f1e6'; // cream
-    ctx.font = '600 26px "IBM Plex Mono", ui-monospace, Menlo, monospace';
     ctx.textBaseline = 'top';
     ctx.textAlign = 'left';
+    ctx.fillStyle = '#f5f1e6'; // cream
+    ctx.font = '600 26px "IBM Plex Mono", ui-monospace, Menlo, monospace';
     ctx.fillText('SCORE ' + String(world.score).padStart(4, '0'), 22, 20);
 
-    // Power-up indicator: a label + a draining bar while the heat pump is active
+    let y = 58;
+
+    // Storage meter (storage-meter levels only): segments show fill / capacity.
+    const s = world.storage;
+    if (s) {
+      ctx.fillStyle = '#cbd5e1';
+      ctx.font = '600 14px "IBM Plex Mono", ui-monospace, monospace';
+      ctx.fillText('STORAGE', 22, y);
+      const by = y + 18, seg = 16, gap = 5;
+      for (let i = 0; i < s.max; i++) {
+        const bx = 22 + i * (seg + gap);
+        if (i < s.fill) {                 // banked clean energy
+          ctx.fillStyle = '#34d399'; ctx.fillRect(bx, by, seg, seg);
+        } else if (i < s.capacity) {      // unlocked but empty
+          ctx.strokeStyle = '#34d399'; ctx.lineWidth = 2; ctx.strokeRect(bx + 1, by + 1, seg - 2, seg - 2);
+        } else {                          // locked (need more batteries)
+          ctx.fillStyle = '#1f2937'; ctx.fillRect(bx, by, seg, seg);
+        }
+      }
+      y = by + seg + 8;
+      ctx.font = '600 14px "IBM Plex Mono", ui-monospace, monospace';
+      if (world.curtailT > 0) {
+        ctx.fillStyle = '#fb7185'; ctx.fillText('STORAGE FULL — ENERGY WASTED', 22, y); y += 22;
+      } else if (world.surgeT > 0) {
+        ctx.fillStyle = '#a5f3fc'; ctx.fillText('⚡ SURGING', 22, y); y += 22;
+      } else if (world.surgeReady) {
+        ctx.fillStyle = '#5eead4'; ctx.fillText('SURGE READY — DASH', 22, y); y += 22;
+      }
+    }
+
+    // Heat-pump power-up: a label + draining bar.
     const pt = world.player.powerT;
     if (pt > 0) {
       ctx.fillStyle = '#5eead4';
-      ctx.font = '600 16px "IBM Plex Mono", ui-monospace, Menlo, monospace';
-      ctx.fillText('⚡ HEAT PUMP', 22, 54);
-      const w = 150;
-      ctx.globalAlpha = 0.25;
-      ctx.fillRect(22, 76, w, 7);
-      ctx.globalAlpha = 1;
-      ctx.fillRect(22, 76, w * (pt / POWER_DURATION), 7);
+      ctx.font = '600 16px "IBM Plex Mono", ui-monospace, monospace';
+      ctx.fillText('⚡ HEAT PUMP', 22, y);
+      const bw = 150, byy = y + 22;
+      ctx.globalAlpha = 0.25; ctx.fillRect(22, byy, bw, 7);
+      ctx.globalAlpha = 1; ctx.fillRect(22, byy, bw * (pt / POWER_DURATION), 7);
+      y = byy + 18;
+    }
+
+    if (world.player.shield) {
+      ctx.fillStyle = '#f472b6';
+      ctx.font = '600 14px "IBM Plex Mono", ui-monospace, monospace';
+      ctx.fillText('INSULATED — ONE HIT', 22, y);
     }
   }
 

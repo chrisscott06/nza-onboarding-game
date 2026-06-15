@@ -8,11 +8,11 @@
 
 const Input = (() => {
   // Logical actions, decoupled from physical keys.
-  const held = { left: false, right: false, jump: false };
+  const held = { left: false, right: false, jump: false, dash: false };
 
-  // Edge-detection: was "jump" pressed THIS frame (not just held)?
-  let jumpPressed = false;
+  // Edge-detection: was this action pressed THIS frame (not just held)?
   let jumpQueued = false;
+  let dashQueued = false;
 
   const keyMap = {
     ArrowLeft: 'left',
@@ -22,6 +22,8 @@ const Input = (() => {
     ArrowUp: 'jump',
     KeyW: 'jump',
     Space: 'jump',
+    ShiftLeft: 'dash',
+    ShiftRight: 'dash',
   };
 
   window.addEventListener('keydown', (e) => {
@@ -29,6 +31,7 @@ const Input = (() => {
     if (!action) return;
     e.preventDefault();
     if (action === 'jump' && !held.jump) jumpQueued = true; // rising edge
+    if (action === 'dash' && !held.dash) dashQueued = true;
     held[action] = true;
   });
 
@@ -41,19 +44,26 @@ const Input = (() => {
 
   return {
     held,
-    // Call once per frame, at the top of update, to consume the jump press.
+    // Call once per frame to consume the jump press (rising edge).
     consumeJumpPress() {
-      jumpPressed = jumpQueued;
+      const was = jumpQueued;
       jumpQueued = false;
-      return jumpPressed;
+      return was;
+    },
+    // Same, for the grid-surge dash.
+    consumeDashPress() {
+      const was = dashQueued;
+      dashQueued = false;
+      return was;
     },
     isJumpHeld() {
       return held.jump;
     },
-    // Used by touch controls (Part H) to drive the same actions.
+    // Used by touch controls to drive the same actions.
     setAction(action, isDown) {
       if (!(action in held)) return;
       if (action === 'jump' && isDown && !held.jump) jumpQueued = true;
+      if (action === 'dash' && isDown && !held.dash) dashQueued = true;
       held[action] = isDown;
     },
   };

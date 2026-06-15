@@ -1,0 +1,476 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 800">
+  <defs>
+    <style>
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5, .cls-6, .cls-7 {
+        fill: none;
+      }
+
+      .cls-1, .cls-4, .cls-5 {
+        stroke-width: 1.21px;
+      }
+
+      .cls-1, .cls-7 {
+        stroke: #666;
+      }
+
+      .cls-8 {
+        letter-spacing: -.12em;
+      }
+
+      .cls-9, .cls-10 {
+        fill: #e67e22;
+      }
+
+      .cls-11, .cls-10, .cls-12, .cls-13, .cls-14, .cls-15, .cls-16, .cls-17, .cls-18, .cls-19, .cls-20 {
+        isolation: isolate;
+      }
+
+      .cls-11, .cls-10, .cls-12, .cls-13, .cls-14, .cls-17, .cls-18, .cls-20 {
+        font-size: 13.26px;
+      }
+
+      .cls-11, .cls-10, .cls-12, .cls-14, .cls-16, .cls-17, .cls-19, .cls-20 {
+        font-family: Stolzl-Light, Stolzl;
+        font-weight: 300;
+      }
+
+      .cls-11, .cls-21 {
+        fill: #e84393;
+      }
+
+      .cls-22 {
+        letter-spacing: 0em;
+      }
+
+      .cls-23 {
+        letter-spacing: 0em;
+      }
+
+      .cls-12, .cls-24 {
+        fill: #3498db;
+      }
+
+      .cls-13, .cls-25 {
+        fill: #ed6359;
+      }
+
+      .cls-13, .cls-18 {
+        font-family: Stolzl-Regular, Stolzl;
+      }
+
+      .cls-2 {
+        stroke-dasharray: 3 3;
+      }
+
+      .cls-2, .cls-4 {
+        stroke: #e6e6e6;
+      }
+
+      .cls-26 {
+        letter-spacing: -.02em;
+      }
+
+      .cls-27 {
+        opacity: .53;
+      }
+
+      .cls-28 {
+        letter-spacing: 0em;
+      }
+
+      .cls-3 {
+        stroke: #ccc;
+      }
+
+      .cls-29, .cls-20 {
+        fill: #ecb01f;
+      }
+
+      .cls-30 {
+        letter-spacing: -.01em;
+      }
+
+      .cls-31 {
+        opacity: .47;
+      }
+
+      .cls-32, .cls-14 {
+        fill: #27ae60;
+      }
+
+      .cls-33 {
+        letter-spacing: -.06em;
+      }
+
+      .cls-4 {
+        stroke-dasharray: 3.62 3.62;
+      }
+
+      .cls-34 {
+        letter-spacing: -.01em;
+      }
+
+      .cls-5 {
+        stroke: #ed6359;
+        stroke-miterlimit: 10;
+      }
+
+      .cls-16 {
+        font-size: 10.85px;
+      }
+
+      .cls-16, .cls-19 {
+        fill: #95a5a6;
+      }
+
+      .cls-35, .cls-17 {
+        fill: #9b59b6;
+      }
+
+      .cls-36 {
+        letter-spacing: -.02em;
+      }
+
+      .cls-37 {
+        letter-spacing: 0em;
+      }
+
+      .cls-38 {
+        letter-spacing: 0em;
+      }
+
+      .cls-39 {
+        letter-spacing: 0em;
+      }
+
+      .cls-18 {
+        fill: #2d495c;
+      }
+
+      .cls-40 {
+        fill: #ed6359;
+        stroke: #fff;
+        stroke-width: 2px;
+      }
+
+      .cls-41 {
+        letter-spacing: 0em;
+      }
+
+      .cls-6 {
+        stroke: #ed6359;
+        stroke-dasharray: 5.07 5.07;
+        stroke-width: 1.79px;
+      }
+
+      .cls-19 {
+        font-size: 9px;
+      }
+
+      .cls-42 {
+        letter-spacing: -.03em;
+      }
+
+      .cls-43 {
+        letter-spacing: 0em;
+      }
+
+      .cls-44 {
+        letter-spacing: 0em;
+      }
+    </style>
+  </defs>
+  <g>
+    <g>
+      <line class="cls-4" x1="89.88" y1="624.63" x2="441.97" y2="624.63"/>
+      <line class="cls-4" x1="89.88" y1="546.96" x2="441.97" y2="546.96"/>
+      <line class="cls-4" x1="89.88" y1="469.28" x2="441.97" y2="469.28"/>
+      <line class="cls-4" x1="89.88" y1="391.61" x2="441.97" y2="391.61"/>
+      <line class="cls-4" x1="89.88" y1="313.94" x2="441.97" y2="313.94"/>
+      <line class="cls-4" x1="89.88" y1="236.27" x2="441.97" y2="236.27"/>
+    </g>
+    <g>
+      <line class="cls-4" x1="177.9" y1="236.27" x2="177.9" y2="624.63"/>
+      <line class="cls-4" x1="353.95" y1="236.27" x2="353.95" y2="624.63"/>
+      <line class="cls-4" x1="89.88" y1="236.27" x2="89.88" y2="624.63"/>
+      <line class="cls-4" x1="441.97" y1="236.27" x2="441.97" y2="624.63"/>
+    </g>
+  </g>
+  <g>
+    <g id="recharts-bar-_r" data-name="recharts-bar- r">
+      <path class="cls-29" d="M317.77,531.13h72.35v93.49h-72.35v-93.49Z"/>
+    </g>
+    <g id="recharts-bar-_r-2" data-name="recharts-bar- r">
+      <path class="cls-24" d="M141.73,354.87h72.35v269.76h-72.35v-269.76Z"/>
+    </g>
+    <g id="recharts-bar-_r-3" data-name="recharts-bar- r">
+      <g>
+        <path class="cls-21" d="M141.73,298.49h72.35v57.32h-72.35v-57.32Z"/>
+        <path class="cls-21" d="M317.77,455.18h72.35v75.95h-72.35v-75.95Z"/>
+      </g>
+    </g>
+    <g id="recharts-bar-_r_7a_" data-name="recharts-bar- r 7a ">
+      <path class="cls-35" d="M317.77,390.58h72.35v64.6h-72.35v-64.6Z"/>
+    </g>
+    <g id="recharts-bar-_r_7b_" data-name="recharts-bar- r 7b ">
+      <path class="cls-32" d="M317.77,359.99h72.35v30.59h-72.35v-30.59Z"/>
+    </g>
+    <g id="recharts-bar-_r_7c_" data-name="recharts-bar- r 7c ">
+      <path class="cls-9" d="M317.77,345.43h72.35v14.57h-72.35v-14.57Z"/>
+    </g>
+  </g>
+  <g>
+    <g>
+      <line class="cls-1" x1="89.88" y1="624.63" x2="441.97" y2="624.63"/>
+      <g>
+        <line class="cls-1" x1="177.9" y1="631.86" x2="177.9" y2="624.63"/>
+        <line class="cls-1" x1="353.95" y1="631.86" x2="353.95" y2="624.63"/>
+      </g>
+    </g>
+    <g>
+      <line class="cls-1" x1="89.88" y1="236.27" x2="89.88" y2="624.63"/>
+      <g>
+        <line class="cls-1" x1="82.65" y1="624.63" x2="89.88" y2="624.63"/>
+        <line class="cls-1" x1="82.65" y1="546.96" x2="89.88" y2="546.96"/>
+        <line class="cls-1" x1="82.65" y1="469.28" x2="89.88" y2="469.28"/>
+        <line class="cls-1" x1="82.65" y1="391.61" x2="89.88" y2="391.61"/>
+        <line class="cls-1" x1="82.65" y1="313.94" x2="89.88" y2="313.94"/>
+        <line class="cls-1" x1="82.65" y1="236.27" x2="89.88" y2="236.27"/>
+      </g>
+    </g>
+  </g>
+  <g>
+    <g class="cls-15">
+      <text class="cls-16" transform="translate(65.16 628.48)"><tspan x="0" y="0">£0</tspan></text>
+    </g>
+    <g class="cls-15">
+      <text class="cls-16" transform="translate(52.43 550.81)"><tspan x="0" y="0">£</tspan><tspan class="cls-28" x="7.77" y="0">2</tspan><tspan x="14.32" y="0">0k</tspan></text>
+    </g>
+    <g class="cls-15">
+      <text class="cls-16" transform="translate(52.24 473.13)"><tspan x="0" y="0">£40k</tspan></text>
+    </g>
+    <g class="cls-15">
+      <text class="cls-16" transform="translate(52.39 395.46)"><tspan x="0" y="0">£60k</tspan></text>
+    </g>
+    <g class="cls-15">
+      <text class="cls-16" transform="translate(52.46 317.79)"><tspan x="0" y="0">£80k</tspan></text>
+    </g>
+    <g class="cls-15">
+      <text class="cls-16" transform="translate(48 240.12)"><tspan x="0" y="0">£1</tspan><tspan class="cls-37" x="11.55" y="0">0</tspan><tspan x="18.76" y="0">0k</tspan></text>
+    </g>
+  </g>
+  <g id="recharts-bar-_r_7d_" data-name="recharts-bar- r 7d " class="cls-31">
+    <g class="cls-27">
+      <path class="cls-25" d="M317.77,303.31c0-2.66,2.16-4.82,4.82-4.82h62.7c2.66,0,4.82,2.16,4.82,4.82v42.11h-72.35v-42.11Z"/>
+    </g>
+  </g>
+  <g id="recharts-bar-_r_7d_-2" data-name="recharts-bar- r 7d ">
+    <g class="cls-27">
+      <path class="cls-5" d="M317.77,303.31c0-2.66,2.16-4.82,4.82-4.82h62.7c2.66,0,4.82,2.16,4.82,4.82v42.11h-72.35v-42.11Z"/>
+    </g>
+  </g>
+  <g class="cls-15">
+    <text class="cls-18" transform="translate(151.71 646.05)"><tspan class="cls-8" x="0" y="0">Y</tspan><tspan x="7.44" y="0">our Bill</tspan></text>
+  </g>
+  <g class="cls-15">
+    <text class="cls-18" transform="translate(299.27 646.05)"><tspan class="cls-8" x="0" y="0">Y</tspan><tspan x="7.44" y="0">our B</tspan><tspan class="cls-44" x="42.68" y="0">r</tspan><tspan x="48.11" y="0">ea</tspan><tspan class="cls-33" x="65.71" y="0">k</tspan><tspan x="73.05" y="0">d</tspan><tspan class="cls-42" x="82.06" y="0">o</tspan><tspan x="90.54" y="0">wn</tspan></text>
+  </g>
+  <text class="cls-13" transform="translate(400.16 326.87)"><tspan x="0" y="0">Cost Gap</tspan></text>
+  <text class="cls-20" transform="translate(402 585.64)"><tspan x="0" y="0">Wholesale</tspan></text>
+  <text class="cls-12" transform="translate(224.59 495.53)"><tspan class="cls-26" x="0" y="0">R</tspan><tspan x="8.36" y="0">e</tspan><tspan class="cls-36" x="17.03" y="0">t</tspan><tspan class="cls-38" x="23.5" y="0">ail</tspan><tspan class="cls-36" x="0" y="15.92">t</tspan><tspan class="cls-38" x="6.47" y="15.92">ariff</tspan></text>
+  <text class="cls-11" transform="translate(224.59 325.83)"><tspan x="0" y="0">Capaci</tspan><tspan class="cls-23" x="49.29" y="0">t</tspan><tspan x="56" y="0">y</tspan><tspan x="0" y="15.92">cha</tspan><tspan class="cls-34" x="25.96" y="15.92">r</tspan><tspan class="cls-38" x="31.22" y="15.92">ge</tspan></text>
+  <text class="cls-11" transform="translate(402 495.52)"><tspan x="0" y="0">DUoS</tspan></text>
+  <text class="cls-17" transform="translate(402 426.9)"><tspan x="0" y="0">TNUoS</tspan></text>
+  <text class="cls-14" transform="translate(402 381.61)"><tspan class="cls-26" x="0" y="0">L</tspan><tspan class="cls-30" x="6.83" y="0">e</tspan><tspan x="15.33" y="0">vies</tspan></text>
+  <text class="cls-10" transform="translate(402 357.54)"><tspan class="cls-41" x="0" y="0">O</tspan><tspan x="11.13" y="0">ther</tspan></text>
+  <g>
+    <g>
+      <line class="cls-2" x1="602.88" y1="627.06" x2="1177.88" y2="627.06"/>
+      <line class="cls-2" x1="602.88" y1="528.26" x2="1177.88" y2="528.26"/>
+      <line class="cls-2" x1="602.88" y1="429.46" x2="1177.88" y2="429.46"/>
+      <line class="cls-2" x1="602.88" y1="330.66" x2="1177.88" y2="330.66"/>
+      <line class="cls-2" x1="602.88" y1="231.86" x2="1177.88" y2="231.86"/>
+    </g>
+    <g>
+      <line class="cls-2" x1="622.05" y1="231.86" x2="622.05" y2="627.06"/>
+      <line class="cls-2" x1="698.72" y1="231.86" x2="698.72" y2="627.06"/>
+      <line class="cls-2" x1="775.38" y1="231.86" x2="775.38" y2="627.06"/>
+      <line class="cls-2" x1="852.05" y1="231.86" x2="852.05" y2="627.06"/>
+      <line class="cls-2" x1="928.72" y1="231.86" x2="928.72" y2="627.06"/>
+      <line class="cls-2" x1="1005.38" y1="231.86" x2="1005.38" y2="627.06"/>
+      <line class="cls-2" x1="1082.05" y1="231.86" x2="1082.05" y2="627.06"/>
+      <line class="cls-2" x1="1158.72" y1="231.86" x2="1158.72" y2="627.06"/>
+      <line class="cls-2" x1="602.88" y1="231.86" x2="602.88" y2="627.06"/>
+      <line class="cls-2" x1="1177.88" y1="231.86" x2="1177.88" y2="627.06"/>
+    </g>
+  </g>
+  <g>
+    <g id="recharts-bar-_r_7u_" data-name="recharts-bar- r 7u ">
+      <g>
+        <path class="cls-29" d="M609.88,579.49h24v47.57h-24v-47.57Z"/>
+        <path class="cls-29" d="M648.21,577.67h24v49.39h-24v-49.39Z"/>
+        <path class="cls-29" d="M686.54,575.79h24v51.27h-24v-51.27Z"/>
+        <path class="cls-29" d="M724.88,573.85h24v53.21h-24v-53.21Z"/>
+        <path class="cls-29" d="M763.21,571.86h24v55.2h-24v-55.2Z"/>
+        <path class="cls-29" d="M801.54,569.81h24v57.25h-24v-57.25Z"/>
+        <path class="cls-29" d="M839.87,567.71h24v59.36h-24v-59.36Z"/>
+        <path class="cls-29" d="M878.21,565.53h24v61.53h-24v-61.53Z"/>
+        <path class="cls-29" d="M916.54,563.3h24v63.76h-24v-63.76Z"/>
+        <path class="cls-29" d="M954.87,561h24v66.06h-24v-66.06Z"/>
+        <path class="cls-29" d="M993.2,558.64h24v68.42h-24v-68.42Z"/>
+        <path class="cls-29" d="M1031.53,556.2h24v70.86h-24v-70.86Z"/>
+        <path class="cls-29" d="M1069.87,553.7h24v73.36h-24v-73.36Z"/>
+        <path class="cls-29" d="M1108.2,551.13h24v75.94h-24v-75.94Z"/>
+        <path class="cls-29" d="M1146.53,548.48h24v78.59h-24v-78.59Z"/>
+      </g>
+    </g>
+    <g id="recharts-bar-_r-4" data-name="recharts-bar- r">
+      <g>
+        <path class="cls-21" d="M609.88,543.44h24v36.05h-24v-36.05Z"/>
+        <path class="cls-21" d="M648.21,538.25h24v39.42h-24v-39.42Z"/>
+        <path class="cls-21" d="M686.54,525.54h24v50.25h-24v-50.25Z"/>
+        <path class="cls-21" d="M724.88,521.37h24v52.49h-24v-52.49Z"/>
+        <path class="cls-21" d="M763.21,517.07h24v54.79h-24v-54.79Z"/>
+        <path class="cls-21" d="M801.54,512.65h24v57.17h-24v-57.17Z"/>
+        <path class="cls-21" d="M839.87,508.09h24v59.62h-24v-59.62Z"/>
+        <path class="cls-21" d="M878.21,503.39h24v62.14h-24v-62.14Z"/>
+        <path class="cls-21" d="M916.54,498.56h24v64.74h-24v-64.74Z"/>
+        <path class="cls-21" d="M954.87,493.58h24v67.42h-24v-67.42Z"/>
+        <path class="cls-21" d="M993.2,488.46h24v70.18h-24v-70.18Z"/>
+        <path class="cls-21" d="M1031.53,483.18h24v73.03h-24v-73.03Z"/>
+        <path class="cls-21" d="M1069.87,477.74h24v75.96h-24v-75.96Z"/>
+        <path class="cls-21" d="M1108.2,472.15h24v78.97h-24v-78.97Z"/>
+        <path class="cls-21" d="M1146.53,466.39h24v82.08h-24v-82.08Z"/>
+      </g>
+    </g>
+    <g id="recharts-bar-_r-5" data-name="recharts-bar- r">
+      <g>
+        <path class="cls-35" d="M609.88,521.15h24v22.29h-24v-22.29Z"/>
+        <path class="cls-35" d="M648.21,504.72h24v33.53h-24v-33.53Z"/>
+        <path class="cls-35" d="M686.54,476.46h24v49.08h-24v-49.08Z"/>
+        <path class="cls-35" d="M724.88,462.13h24v59.24h-24v-59.24Z"/>
+        <path class="cls-35" d="M763.21,447.86h24v69.22h-24v-69.22Z"/>
+        <path class="cls-35" d="M801.54,436.77h24v75.88h-24v-75.88Z"/>
+        <path class="cls-35" d="M839.87,428.37h24v79.72h-24v-79.72Z"/>
+        <path class="cls-35" d="M878.21,419.71h24v83.68h-24v-83.68Z"/>
+        <path class="cls-35" d="M916.54,410.79h24v87.77h-24v-87.77Z"/>
+        <path class="cls-35" d="M954.87,401.6h24v91.99h-24v-91.99Z"/>
+        <path class="cls-35" d="M993.2,392.12h24v96.34h-24v-96.34Z"/>
+        <path class="cls-35" d="M1031.53,382.34h24v100.83h-24v-100.83Z"/>
+        <path class="cls-35" d="M1069.87,372.28h24v105.46h-24v-105.46Z"/>
+        <path class="cls-35" d="M1108.2,361.91h24v110.24h-24v-110.24Z"/>
+        <path class="cls-35" d="M1146.53,351.23h24v115.16h-24v-115.16Z"/>
+      </g>
+    </g>
+    <g id="recharts-bar-_r-6" data-name="recharts-bar- r">
+      <g>
+        <path class="cls-32" d="M609.88,505.59h24v15.56h-24v-15.56Z"/>
+        <path class="cls-32" d="M648.21,488.69h24v16.03h-24v-16.03Z"/>
+        <path class="cls-32" d="M686.54,459.95h24v16.52h-24v-16.52Z"/>
+        <path class="cls-32" d="M724.88,445.12h24v17.01h-24v-17.01Z"/>
+        <path class="cls-32" d="M763.21,430.34h24v17.52h-24v-17.52Z"/>
+        <path class="cls-32" d="M801.54,418.73h24v18.04h-24v-18.04Z"/>
+        <path class="cls-32" d="M839.87,409.8h24v18.58h-24v-18.58Z"/>
+        <path class="cls-32" d="M878.21,400.59h24v19.13h-24v-19.13Z"/>
+        <path class="cls-32" d="M916.54,391.1h24v19.69h-24v-19.69Z"/>
+        <path class="cls-32" d="M954.87,381.32h24v20.27h-24v-20.27Z"/>
+        <path class="cls-32" d="M993.2,371.25h24v20.87h-24v-20.87Z"/>
+        <path class="cls-32" d="M1031.53,360.87h24v21.48h-24v-21.48Z"/>
+        <path class="cls-32" d="M1069.87,350.18h24v22.11h-24v-22.11Z"/>
+        <path class="cls-32" d="M1108.2,339.16h24v22.75h-24v-22.75Z"/>
+        <path class="cls-32" d="M1146.53,327.82h24v23.41h-24v-23.41Z"/>
+      </g>
+    </g>
+    <g id="recharts-bar-_r-7" data-name="recharts-bar- r">
+      <g>
+        <path class="cls-9" d="M609.88,498.17h24v7.41h-24v-7.41Z"/>
+        <path class="cls-9" d="M648.21,481.03h24v7.66h-24v-7.66Z"/>
+        <path class="cls-9" d="M686.54,452.03h24v7.91h-24v-7.91Z"/>
+        <path class="cls-9" d="M724.88,436.94h24v8.17h-24v-8.17Z"/>
+        <path class="cls-9" d="M763.21,421.9h24v8.44h-24v-8.44Z"/>
+        <path class="cls-9" d="M801.54,410.01h24v8.72h-24v-8.72Z"/>
+        <path class="cls-9" d="M839.87,400.8h24v9h-24v-9Z"/>
+        <path class="cls-9" d="M878.21,391.3h24v9.29h-24v-9.29Z"/>
+        <path class="cls-9" d="M916.54,381.51h24v9.59h-24v-9.59Z"/>
+        <path class="cls-9" d="M954.87,371.43h24v9.9h-24v-9.9Z"/>
+        <path class="cls-9" d="M993.2,361.04h24v10.21h-24v-10.21Z"/>
+        <path class="cls-9" d="M1031.53,350.33h24v10.53h-24v-10.53Z"/>
+        <path class="cls-9" d="M1069.87,339.31h24v10.87h-24v-10.87Z"/>
+        <path class="cls-9" d="M1108.2,327.95h24v11.21h-24v-11.21Z"/>
+        <path class="cls-9" d="M1146.53,316.26h24v11.56h-24v-11.56Z"/>
+      </g>
+    </g>
+    <g id="recharts-bar-_r-8" data-name="recharts-bar- r" class="cls-27">
+      <g>
+        <path class="cls-25" d="M609.88,463.12c0-1.1.9-2,2-2h20c1.1,0,2,.9,2,2v35.05h-24v-35.05Z"/>
+        <path class="cls-25" d="M648.21,444.86c0-1.1.9-2,2-2h20c1.1,0,2,.9,2,2v36.17h-24v-36.17Z"/>
+        <path class="cls-25" d="M686.54,414.72c0-1.1.9-2,2-2h20c1.1,0,2,.9,2,2v37.32h-24v-37.32Z"/>
+        <path class="cls-25" d="M724.88,398.45c0-1.1.9-2,2-2h20c1.1,0,2,.9,2,2v38.5h-24v-38.5Z"/>
+        <path class="cls-25" d="M763.21,382.19c0-1.1.9-2,2-2h20c1.1,0,2,.9,2,2v39.71h-24v-39.71Z"/>
+        <path class="cls-25" d="M801.54,369.06c0-1.1.9-2,2-2h20c1.1,0,2,.9,2,2v40.95h-24v-40.95Z"/>
+        <path class="cls-25" d="M839.87,358.57c0-1.1.9-2,2-2h20c1.1,0,2,.9,2,2v42.23h-24v-42.23Z"/>
+        <path class="cls-25" d="M878.21,347.76c0-1.1.9-2,2-2h20c1.1,0,2,.9,2,2v43.54h-24v-43.54Z"/>
+        <path class="cls-25" d="M916.54,336.63c0-1.1.9-2,2-2h20c1.1,0,2,.9,2,2v44.88h-24v-44.88Z"/>
+        <path class="cls-25" d="M954.87,325.16c0-1.1.9-2,2-2h20c1.1,0,2,.9,2,2v46.26h-24v-46.26Z"/>
+        <path class="cls-25" d="M993.2,313.36c0-1.1.9-2,2-2h20c1.1,0,2,.9,2,2v47.68h-24v-47.68Z"/>
+        <path class="cls-25" d="M1031.53,301.2c0-1.1.9-2,2-2h20c1.1,0,2,.9,2,2v49.13h-24v-49.13Z"/>
+        <path class="cls-25" d="M1069.87,288.68c0-1.1.9-2,2-2h20c1.1,0,2,.9,2,2v50.63h-24v-50.63Z"/>
+        <path class="cls-25" d="M1108.2,275.8c0-1.1.9-2,2-2h20c1.1,0,2,.9,2,2v52.16h-24v-52.16Z"/>
+        <path class="cls-25" d="M1146.53,262.53c0-1.1.9-2,2-2h20c1.1,0,2,.9,2,2v53.73h-24v-53.73Z"/>
+      </g>
+    </g>
+  </g>
+  <path id="recharts-line-_r" data-name="recharts-line- r" class="cls-6" d="M622.05,461.05c12.78-5.1,25.55-10.19,38.33-18.26,12.78-8.07,25.55-22.4,38.33-30.14,12.78-7.73,25.55-10.85,38.33-16.27,12.78-5.42,25.55-11.36,38.33-16.26,12.78-4.9,25.55-9.19,38.33-13.12,12.78-3.94,25.55-6.94,38.33-10.49,12.78-3.55,25.55-7.15,38.33-10.8,12.78-3.66,25.55-7.37,38.33-11.13,12.77-3.76,25.55-7.59,38.33-11.46,12.77-3.88,25.55-7.81,38.33-11.8,12.78-3.99,25.55-8.04,38.33-12.15,12.78-4.11,25.55-8.28,38.33-12.51s25.55-8.53,38.33-12.88c12.78-4.36,25.55-8.81,38.33-13.26"/>
+  <g>
+    <line class="cls-7" x1="602.88" y1="627.06" x2="1177.88" y2="627.06"/>
+    <line class="cls-7" x1="602.88" y1="231.86" x2="602.88" y2="627.06"/>
+  </g>
+  <path class="cls-3" d="M1120.38,231.86v395.2" pointer-events="none"/>
+  <circle class="cls-40" cx="1120.38" cy="273.79" r="4"/>
+  <g>
+    <g>
+      <g class="cls-15">
+        <text class="cls-19" transform="translate(610.82 641.45)"><tspan class="cls-39" x="0" y="0">2</tspan><tspan class="cls-22" x="5.44" y="0">0</tspan><tspan x="11.46" y="0">26</tspan></text>
+      </g>
+      <g class="cls-15">
+        <text class="cls-19" transform="translate(687.52 641.45)"><tspan class="cls-39" x="0" y="0">2</tspan><tspan class="cls-22" x="5.44" y="0">0</tspan><tspan x="11.46" y="0">28</tspan></text>
+      </g>
+      <g class="cls-15">
+        <text class="cls-19" transform="translate(763.86 641.45)"><tspan class="cls-39" x="0" y="0">2</tspan><tspan x="5.44" y="0">030</tspan></text>
+      </g>
+      <g class="cls-15">
+        <text class="cls-19" transform="translate(840.79 641.45)"><tspan class="cls-39" x="0" y="0">2</tspan><tspan x="5.44" y="0">032</tspan></text>
+      </g>
+      <g class="cls-15">
+        <text class="cls-19" transform="translate(917.42 641.45)"><tspan class="cls-39" x="0" y="0">2</tspan><tspan x="5.44" y="0">034</tspan></text>
+      </g>
+      <g class="cls-15">
+        <text class="cls-19" transform="translate(994.15 641.45)"><tspan class="cls-39" x="0" y="0">2</tspan><tspan x="5.44" y="0">036</tspan></text>
+      </g>
+      <g class="cls-15">
+        <text class="cls-19" transform="translate(1070.84 641.45)"><tspan class="cls-39" x="0" y="0">2</tspan><tspan x="5.44" y="0">038</tspan></text>
+      </g>
+      <g class="cls-15">
+        <text class="cls-19" transform="translate(1147.14 641.45)"><tspan class="cls-39" x="0" y="0">2</tspan><tspan x="5.44" y="0">040</tspan></text>
+      </g>
+    </g>
+    <g>
+      <g class="cls-15">
+        <text class="cls-19" transform="translate(582.38 630.26)"><tspan x="0" y="0">£0</tspan></text>
+      </g>
+      <g class="cls-15">
+        <text class="cls-19" transform="translate(571.74 531.46)"><tspan x="0" y="0">£50k</tspan></text>
+      </g>
+      <g class="cls-15">
+        <text class="cls-19" transform="translate(568.14 432.66)"><tspan x="0" y="0">£1</tspan><tspan class="cls-43" x="9.58" y="0">0</tspan><tspan x="15.56" y="0">0k</tspan></text>
+      </g>
+      <g class="cls-15">
+        <text class="cls-19" transform="translate(568.6 333.86)"><tspan x="0" y="0">£150k</tspan></text>
+      </g>
+      <g class="cls-15">
+        <text class="cls-19" transform="translate(565.84 235.06)"><tspan x="0" y="0">£</tspan><tspan class="cls-39" x="6.44" y="0">2</tspan><tspan class="cls-43" x="11.88" y="0">0</tspan><tspan x="17.86" y="0">0k</tspan></text>
+      </g>
+    </g>
+  </g>
+</svg>

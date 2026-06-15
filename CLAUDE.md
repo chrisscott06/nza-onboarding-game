@@ -129,13 +129,34 @@ you never edit engine code.**
 ```
 
 Three `type`s: `hazard` (resets the run), `collectible` (adds `points`),
-`powerup` (the heat pump — transforms the player + grants higher jump and brief
-invincibility). This table is shared by **every** level — adding a row here makes
-a new object available to all levels at once. That's the
+`powerup` (transforms the player). This table is shared by **every** level —
+adding a row here makes a new object available to all levels at once. That's the
 "edit shared data → change everyone's world" lesson.
 
-Current object ids: `gas-boiler`, `ice-car`, `oil-slick` (hazards);
-`solar-panel`, `wind-turbine` (collectibles); `heat-pump` (powerup).
+Optional fields on a row:
+- `label` — human name. `sound` — path to an SFX (played when wired up).
+- `realValue` `{ metric, value, unit, note }` — a true-ish real-world figure
+  (capacity factor, carbon intensity, SCOP…). The disguised data lesson.
+- `effect` / `behaviour` — gives an object special behaviour, read by the
+  engine. Current effects: `grow-storage` (battery-cell adds a storage segment),
+  `drain-storage` (gremlin nibbles a stored segment, doesn't kill),
+  `supercharge` (heat pump → higher jump + invincibility),
+  `shield-one-hit` (insulation absorbs one hazard hit).
+
+Current object ids: `gas-boiler`, `ice-car`, `oil-slick`, `ccgt`, `peaker`,
+`standby-gremlin` (hazards); `solar-panel`, `wind-turbine`, `battery-cell`
+(collectibles); `heat-pump`, `insulation` (power-ups).
+
+### Optional: a level's signature mechanic + world
+
+A `level.json` may add two optional blocks (see `levels/level-grid/`):
+- `mechanic` — a named, level-scoped mechanic the engine wires up. The one built
+  so far is `storage-meter`: battery-cells grow a storage meter; solar/wind only
+  *bank* (score) if there's room, else they're *curtailed* (wasted, with a
+  warning); a full meter can be spent on a `grid-surge` dash (Shift / the ⚡ touch
+  button). Levels without a `mechanic` just score collectibles normally.
+- `world` — `startState`/`endState` + sky colours for a level that visibly
+  transforms (e.g. dirty → clean). (Rendering of the transform is a later piece.)
 
 ---
 

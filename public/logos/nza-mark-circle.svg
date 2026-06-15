@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 300 298">
+  
+  <defs>
+    
+    <linearGradient id="linear-gradient" x1="179.24" y1="646.52" x2="119.73" y2="646.52" gradientTransform="translate(0 794) scale(1 -1)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fbb45d"></stop>
+      <stop offset=".07" stop-color="#f7994b"></stop>
+      <stop offset=".14" stop-color="#f4833e"></stop>
+      <stop offset=".21" stop-color="#f27635"></stop>
+      <stop offset=".28" stop-color="#f27233"></stop>
+      <stop offset=".74" stop-color="#f06380"></stop>
+      <stop offset="1" stop-color="#a75ea4"></stop>
+    </linearGradient>
+    <linearGradient id="linear-gradient1" x1="250.35" y1="643.49" x2="50.2" y2="643.49" xlink:href="#linear-gradient"></linearGradient>
+    <linearGradient id="linear-gradient2" x1="250.35" y1="689.51" x2="50.2" y2="689.51" xlink:href="#linear-gradient"></linearGradient>
+    <linearGradient id="linear-gradient3" x1="282.49" y1="646.87" x2="17.51" y2="646.87" xlink:href="#linear-gradient"></linearGradient>
+  </defs>
+  <path id="bottom-triangle" class="st3" d="M169.48,166.16c-7.13-8.75-13.45-16.73-19.21-24.26-.2-.26-.58-.26-.78,0l-19.61,24.09c-.09.12-.24.18-.39.18h-9.27c-.42,0-.65-.49-.39-.82l29.88-36.38c.21-.25.59-.24.79.02l2.68,3.56c6.43,8.56,17.5,22.43,25.94,32.81.27.33.03.81-.39.81h-9.26.01Z"></path>
+  <path id="middle-triangle" class="st1" d="M250.35,213.07H50.7c-.42,0-.65-.48-.39-.81l99.3-124.12c.2-.25.58-.25.78,0l99.96,124.93h0ZM66.24,205.1h166.47c.42,0,.65-.48.39-.81l-82.72-103.39c-.2-.25-.58-.25-.78,0l-83.36,104.2h0Z"></path>
+  <path id="top-triangle" class="st0" d="M250.35,167.05H50.7c-.42,0-.65-.48-.39-.81l99.3-124.12c.2-.25.58-.25.78,0l99.96,124.93h0ZM66.24,159.08h166.47c.42,0,.65-.48.39-.81l-82.72-103.39c-.2-.25-.58-.25-.78,0l-83.36,104.2h0Z"></path>
+  <path id="cirlce" class="st2" d="M149.99,279.63c-73.06,0-132.49-59.44-132.49-132.5S76.93,14.63,149.99,14.63s132.5,59.44,132.5,132.5-59.44,132.5-132.5,132.5h0ZM149.99,22.61c-68.66,0-124.52,55.86-124.52,124.52s55.86,124.52,124.52,124.52,124.52-55.86,124.52-124.52S218.66,22.61,150,22.61h0Z"></path>
+</svg>

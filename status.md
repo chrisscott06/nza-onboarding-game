@@ -130,6 +130,35 @@ a real phone with touch — the real-device acceptance for Part H. Steps are in
 README → "Deploy (Vercel)". Also: swap `public/nza-logo.svg` and the placeholder
 faces for the real assets when ready.
 
+## Level 1 — "Power Up the Grid" (folded in from the level-1 bundle)
+
+The first real content level, built on the foundation contract. Done in three
+verified pieces:
+
+- **Objects merged** into `data/objects.json` (still a bare array): kept the
+  foundation hazards, enriched solar/wind/heat-pump (points, `realValue`,
+  `effect`), and added `battery-cell`, `ccgt`, `peaker`, `standby-gremlin`,
+  `insulation`. Placeholder sprites for the new ones under `public/sprites/`.
+  `game.js` now cache-busts JSON (and scripts via an inline loader) so editing
+  data and reloading shows the change immediately.
+- **Level placed** at `levels/level-grid/` ("Power Up the Grid"), registered
+  first in `data/levels.json`. `buildSpec` carries object `effect`/`realValue`
+  through, normalises platforms, and passes the `mechanic`/`world` blocks.
+- **Storage-meter mechanic wired** (level-scoped — other levels unaffected):
+  battery-cells grow the meter; solar/wind only bank (score) if there's room,
+  else they're curtailed (wasted + warning); a full meter spends on a grid-surge
+  dash (Shift / ⚡ touch button) giving a speed boost + invincibility;
+  standby-gremlins drain the meter (non-lethal); insulation shields one hit.
+  Storage meter + status drawn in the HUD. All behaviours verified in-browser.
+
+**Deferred from the bundle (not yet built — flagged for a follow-up):**
+- World dirty→clean sky transform + the substation-flip win/level-complete.
+- Peaker "darts when near" AI (currently a static hazard).
+- On-screen narrative strings (`narrative/story.md`) — intro/prompts/win-lose.
+- Audio: CC0 SFX per `audio/AUDIO-GUIDE.md` (sound paths are in the data; no
+  playback wired, no files fetched yet).
+- Displaying each object's `realValue` in-game (the data is carried).
+
 ## Next (after the foundation, per BRIEF §11 — not this session)
 
 - The onboarding app (branded landing + live GitHub checklist).

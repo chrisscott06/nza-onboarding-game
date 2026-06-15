@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 35.47 35.47">
+  <!-- Generator: Adobe Illustrator 29.5.0, SVG Export Plug-In . SVG Version: 2.1.0 Build 137)  -->
+  <defs>
+    <style>
+      .st0, .st1, .st2, .st3, .st4, .st5, .st6, .st7 {
+        fill: none;
+        stroke-miterlimit: 10;
+      }
+
+      .st0, .st2 {
+        stroke-width: .64px;
+      }
+
+      .st0, .st2, .st3, .st5, .st6, .st7 {
+        stroke: #0e1120;
+      }
+
+      .st1 {
+        stroke-dasharray: .11 1.58;
+      }
+
+      .st1, .st2, .st4 {
+        stroke-linecap: round;
+      }
+
+      .st1, .st4 {
+        stroke: #f75a55;
+      }
+
+      .st1, .st4, .st6 {
+        stroke-width: .66px;
+      }
+
+      .st8 {
+        fill: #0e1120;
+      }
+
+      .st3 {
+        stroke-width: .37px;
+      }
+
+      .st9 {
+        opacity: .47;
+      }
+
+      .st5 {
+        stroke-width: .53px;
+      }
+
+      .st10 {
+        fill: #f75a55;
+      }
+
+      .st7 {
+        stroke-width: .41px;
+      }
+    </style>
+  </defs>
+  <rect class="st6" x="24.83" y="12.99" width="9.61" height="9.61"/>
+  <rect class="st0" x="3.64" y="9.77" width="2" height="2"/>
+  <rect class="st7" x="14.78" y="19.91" width="1.27" height="1.27"/>
+  <rect class="st5" x="1.05" y="18.91" width="2" height="2"/>
+  <rect class="st8" x="7.1" y="25.38" width="2.37" height="2.37"/>
+  <g>
+    <line class="st4" x1="11.83" y1="17.56" x2="23.26" y2="17.56"/>
+    <polygon class="st10" points="21.62 19.58 21.29 19.22 23.07 17.56 21.29 15.9 21.62 15.54 23.8 17.56 21.62 19.58"/>
+  </g>
+  <g class="st9">
+    <g>
+      <line class="st4" x1="20.47" y1="20.18" x2="20.43" y2="20.22"/>
+      <line class="st1" x1="19.24" y1="21.26" x2="10.96" y2="28.55"/>
+      <line class="st4" x1="10.36" y1="29.07" x2="10.32" y2="29.11"/>
+    </g>
+  </g>
+  <g class="st9">
+    <g>
+      <line class="st4" x1="20.47" y1="14.77" x2="20.43" y2="14.73"/>
+      <line class="st1" x1="19.24" y1="13.69" x2="10.96" y2="6.4"/>
+      <line class="st4" x1="10.36" y1="5.88" x2="10.32" y2="5.84"/>
+    </g>
+  </g>
+  <line class="st2" x1="8.97" y1="7.56" x2="11.39" y2="9.62"/>
+  <circle class="st8" cx="3.21" cy="15.48" r=".52"/>
+  <circle class="st8" cx="5.87" cy="20.7" r=".52"/>
+  <circle class="st8" cx="10.58" cy="19.91" r=".52"/>
+  <circle class="st3" cx="3.21" cy="25.63" r=".71"/>
+  <circle class="st3" cx="9.48" cy="14.77" r=".71"/>
+  <circle class="st3" cx="3.92" cy="6.84" r=".71"/>
+  <circle class="st8" cx="15.4" cy="14.77" r=".52"/>
+  <line class="st2" x1="9.16" y1="23.03" x2="12.7" y2="23.03"/>
+  <line class="st2" x1="6.87" y1="13.8" x2="6.87" y2="17.34"/>
+</svg>

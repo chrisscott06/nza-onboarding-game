@@ -69,6 +69,7 @@ async function startLevel(canvas, menu, levelName) {
     menu.style.display = 'none';
     document.body.classList.add('playing');
     Engine.start(canvas, spec);
+    watchSurge(); // toggles the touch dash button when a grid-surge is ready
   } catch (err) {
     showFatal(err);
     throw err;
@@ -112,6 +113,13 @@ function buildSpec(level, objectTable, meta) {
     mechanic: level.mechanic || null, // drives level-specific mechanics (Part: storage-meter)
     world: level.world || null,
   };
+}
+
+// Show the touch dash button only while a grid-surge is available.
+function watchSurge() {
+  const ready = !!(Engine.world && Engine.world.surgeReady);
+  document.body.classList.toggle('surge-ready', ready);
+  requestAnimationFrame(watchSurge);
 }
 
 function fetchJSON(url) {
