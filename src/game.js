@@ -87,23 +87,30 @@ function buildSpec(level, objectTable, meta) {
         `level.json references objectId "${pl.objectId}", which is not in data/objects.json`
       );
     }
-    return {
-      id: def.id,
-      type: def.type,
-      sprite: def.sprite,
-      points: def.points || 0,
-      x: pl.x,
-      y: pl.y,
-    };
+    // Carry the whole object definition through (type, sprite, points, and the
+    // richer fields: effect, behaviour, label, realValue, sound), plus where it
+    // sits. The engine uses effect/behaviour for level-specific mechanics.
+    return { ...def, points: def.points || 0, x: pl.x, y: pl.y };
   });
+
+  // Normalise platforms to the engine's {x,y,w,h}. Accept the shorthand `width`
+  // and default a height so a level can omit it.
+  const platforms = (level.platforms || []).map((p) => ({
+    x: p.x,
+    y: p.y,
+    w: p.w != null ? p.w : p.width,
+    h: p.h != null ? p.h : 28,
+  }));
 
   return {
     meta,
     startPosition: level.startPosition,
     bounds: level.bounds,
-    platforms: level.platforms || [],
+    platforms,
     objects,
     goal: level.goal || null,
+    mechanic: level.mechanic || null, // drives level-specific mechanics (Part: storage-meter)
+    world: level.world || null,
   };
 }
 

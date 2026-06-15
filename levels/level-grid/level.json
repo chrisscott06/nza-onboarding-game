@@ -1,0 +1,50 @@
+{
+  "_comment": "Level 1 — 'Power Up the Grid'. The signature mechanic is 'storage-meter' (see mechanic block): renewables only bank if storage has room; full storage + more renewables = curtailment (waste); a full meter can be spent on a grid-surge dash. Reaching the substation is the goal. Coordinates are illustrative — tune in-browser. Platforms use the repo's {x,y,w,h}; bounds added (the source bundle omitted it).",
+  "id": "level-grid",
+  "startPosition": { "x": 50, "y": 280 },
+  "bounds": { "x": 0, "y": 0, "w": 3900, "h": 540 },
+  "goal": { "x": 3600, "y": 280, "type": "substation", "label": "Flip the substation" },
+  "mechanic": {
+    "type": "storage-meter",
+    "startSegments": 0,
+    "maxSegments": 8,
+    "rule": "battery-cell grows segments; solar/wind fill them; full + more renewables = curtailment (points wasted, brief warning); spend full meter on a grid-surge dash",
+    "surge": { "trigger": "meter-full", "effect": "dash-and-light-dark-section", "duration": 4 }
+  },
+  "world": {
+    "startState": "dirty",
+    "endState": "clean",
+    "transformOn": "substation-flip",
+    "skyDirty": "#C8743A",
+    "skyClean": "#3FA9C4",
+    "note": "world visibly brightens as renewables are collected; snaps fully clean on substation flip"
+  },
+  "platforms": [
+    { "x": 0,    "y": 360, "w": 600,  "h": 180 },
+    { "x": 700,  "y": 320, "w": 220,  "h": 24 },
+    { "x": 1000, "y": 260, "w": 180,  "h": 24 },
+    { "x": 1300, "y": 360, "w": 400,  "h": 180 },
+    { "x": 1800, "y": 300, "w": 200,  "h": 24 },
+    { "x": 2100, "y": 240, "w": 180,  "h": 24 },
+    { "x": 2400, "y": 360, "w": 500,  "h": 180 },
+    { "x": 3000, "y": 320, "w": 300,  "h": 24 },
+    { "x": 3400, "y": 300, "w": 400,  "h": 240 }
+  ],
+  "placements": [
+    { "objectId": "solar-panel",    "x": 250,  "y": 320 },
+    { "objectId": "solar-panel",    "x": 420,  "y": 320 },
+    { "objectId": "battery-cell",   "x": 760,  "y": 280 },
+    { "objectId": "wind-turbine",   "x": 1060, "y": 220 },
+    { "objectId": "ccgt",           "x": 1400, "y": 320 },
+    { "objectId": "solar-panel",    "x": 1550, "y": 320 },
+    { "objectId": "battery-cell",   "x": 1850, "y": 260 },
+    { "objectId": "wind-turbine",   "x": 2160, "y": 200 },
+    { "objectId": "peaker",         "x": 2300, "y": 320 },
+    { "objectId": "standby-gremlin","x": 2500, "y": 320 },
+    { "objectId": "insulation",     "x": 2650, "y": 320 },
+    { "objectId": "standby-gremlin","x": 2800, "y": 320 },
+    { "objectId": "heat-pump",      "x": 3050, "y": 280 },
+    { "objectId": "solar-panel",    "x": 3250, "y": 280 },
+    { "objectId": "wind-turbine",   "x": 3450, "y": 260 }
+  ]
+}
