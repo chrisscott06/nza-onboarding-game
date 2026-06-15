@@ -38,9 +38,15 @@ commercial use, embedding allowed):
 
 ## Logo (Part F)
 
-- `public/nza-logo.svg` — a **placeholder** NZA mark (peak over a horizon line
-  in a ring) created for this repo. **Replace with the official NZA logo** when
-  available; this stand-in carries the repo's own licence in the meantime.
+- `public/nza-logo.svg` — the **official NZA mark** (layered triangles in a ring,
+  brand line style), used on the menu and as the faint in-game watermark. Copied
+  from the NZA brand asset set (`public/logos/NZA-LOGO-LINE.svg`).
+
+## NZA brand asset library
+
+- `public/logos/`, `public/icons/`, `public/infographics/` — official NZA / NZAI
+  / Pablo brand SVGs (and a Pablo `.ai` source), kept in the repo as a handy
+  asset set to draw on. NZA-owned; not all are used by the game yet.
 
 ## Assets (sprites)
 
