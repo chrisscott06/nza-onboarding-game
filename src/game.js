@@ -24,6 +24,7 @@
   const listEl = document.getElementById('level-list');
 
   menuBtn.addEventListener('click', () => location.reload()); // back to picker
+  setupTouch();
 
   try {
     const manifest = await fetchJSON('data/levels.json');
@@ -110,6 +111,23 @@ function fetchJSON(url) {
   return fetch(url).then((r) => {
     if (!r.ok) throw new Error(`Could not load ${url} (HTTP ${r.status})`);
     return r.json();
+  });
+}
+
+// Wire the on-screen buttons to the SAME logical actions the keyboard uses, so
+// the engine never knows whether input came from touch or keys (Part H).
+function setupTouch() {
+  const pad = document.getElementById('touch');
+  if (!pad) return;
+  pad.querySelectorAll('.tbtn').forEach((btn) => {
+    const action = btn.dataset.action;
+    const down = (e) => { e.preventDefault(); Input.setAction(action, true); btn.classList.add('active'); };
+    const up = (e) => { e.preventDefault(); Input.setAction(action, false); btn.classList.remove('active'); };
+    btn.addEventListener('pointerdown', down);
+    btn.addEventListener('pointerup', up);
+    btn.addEventListener('pointercancel', up);
+    btn.addEventListener('pointerleave', up);
+    btn.addEventListener('contextmenu', (e) => e.preventDefault());
   });
 }
 

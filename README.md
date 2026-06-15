@@ -26,8 +26,21 @@ npx serve .
 
 Then open <http://localhost:5173> in a browser.
 
-**Controls:** ← / → (or A / D) to move, Space / ↑ / W to jump. Touch controls
-arrive in Part H.
+**Controls:** ← / → (or A / D) to move, Space / ↑ / W to jump. On a touch
+device, on-screen buttons appear automatically.
+
+## Deploy (Vercel)
+
+It's a static site — no build step. `vercel.json` already sets it up
+(`framework: null`, no build, serve from repo root).
+
+- **CLI:** `npm i -g vercel`, then run `vercel` in the repo root and follow the
+  prompts (`vercel --prod` to promote).
+- **Dashboard:** import the GitHub repo at vercel.com. Framework preset
+  "Other", leave the build command empty, output directory `.`.
+
+After deploying, **open the live URL on a real phone** and play it with the
+touch buttons — that's the real-device check the build is designed to pass.
 
 ## Project layout
 

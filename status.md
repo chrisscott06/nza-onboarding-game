@@ -100,13 +100,23 @@ gates for each Part.
     throttles the rAF loop when backgrounded; real-time play is confirmed on a
     phone in Part H.)
 
+- **Part H — build side done and verified; deploy + phone is Chris's step.**
+  - Canvas now keeps its 16:9 aspect (letterboxed) at any viewport size.
+  - On-screen **touch controls** (◄ ► + JUMP) wired into the same logical input
+    the keyboard uses (via `Input.setAction`), shown on touch / small screens,
+    hidden on desktop-with-mouse. Keyboard hint hidden on mobile.
+  - `vercel.json` for a zero-build static deploy; README has deploy steps.
+  - Verified in a 375px mobile viewport: buttons visible with good touch
+    targets; pressing ◄/►/JUMP drives the player; layout letterboxes correctly.
+  - **NOT yet done (Chris's gate):** deploy to Vercel and play it on a real
+    phone with touch. That real-device check is the actual Part H acceptance
+    and cannot be done from here — see README "Deploy (Vercel)".
+
 ## Next
 
-- **Part H** — Deploy to Vercel + verify on a real phone. Needs Chris's Vercel
-  account and a physical device. Build side (this session): responsive layout +
-  touch controls (on-screen buttons / tap-to-jump), verified in a mobile
-  viewport, plus deploy config. The actual deploy + real-device check is Chris's
-  step. Then **Part I** — the self-documenting CLAUDE.md (cold-agent tested).
+- **Part I** — the self-documenting `CLAUDE.md`, tested by a cold agent building
+  a level from the template.
+- **Chris:** deploy to Vercel + real-phone playtest to close the Part H gate.
 
 (Build order: A → B → C → D → E → F → G → H → I. Each Part has a STOP-AND-PROVE
 gate in `BRIEF.md §6`. Nothing is "done" until verified working in a real
