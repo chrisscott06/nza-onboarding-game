@@ -1,4 +1,4 @@
 {
   "_README": "The list of levels the home-screen picker offers, in order. To add your level: copy levels/_template-level to levels/level-<yourname>, fill in its JSON, then add your folder name to this array. That is the ONLY shared file you touch — no engine code changes.",
-  "levels": ["level-chris", "level-test"]
+  "levels": ["level-chris", "level-test", "level-lava"]
 }

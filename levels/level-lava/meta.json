@@ -1,0 +1,7 @@
+{
+  "name": "Lava Leap",
+  "author": "Chris",
+  "theme": "volcano — leap across erupting ledges, dodge oil slicks and stalled ICE cars, grab a heat pump and reach the cool green summit",
+  "faceAsset": "levels/level-lava/assets/face-lava.svg",
+  "accentColor": "#f97316"
+}

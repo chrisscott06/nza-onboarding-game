@@ -111,12 +111,29 @@ gates for each Part.
   - **NOT yet done (Chris's gate):** deploy to Vercel and play it on a real
     phone with touch. That real-device check is the actual Part H acceptance
     and cannot be done from here — see README "Deploy (Vercel)".
+- **Part I done and verified.** `CLAUDE.md` written for a cold agent — explains
+  the game, the level contract, folder structure, asset locations, naming rules,
+  and the `status.md` house style. **Passed the cold-agent test:** a fresh agent
+  with no prior context, given only the repo + CLAUDE.md, built a correct new
+  level (`levels/level-lava/` "Lava Leap"), registered it, added a placeholder
+  face, touched no engine code, and it loads cleanly in the picker. CLAUDE.md
+  was then tightened (added the player size 34×46 so start/goal placement isn't
+  guesswork). `level-lava` is kept as a third demo + proof of the test.
 
-## Next
+## Foundation status — what's done vs. left
 
-- **Part I** — the self-documenting `CLAUDE.md`, tested by a cold agent building
-  a level from the template.
-- **Chris:** deploy to Vercel + real-phone playtest to close the Part H gate.
+Parts A–G and I are built and verified in-browser. Part H's build side
+(responsive + touch + deploy config) is done and verified in a mobile viewport.
+
+**Left for Chris (the one open gate):** deploy to Vercel and play the live URL on
+a real phone with touch — the real-device acceptance for Part H. Steps are in
+README → "Deploy (Vercel)". Also: swap `public/nza-logo.svg` and the placeholder
+faces for the real assets when ready.
+
+## Next (after the foundation, per BRIEF §11 — not this session)
+
+- The onboarding app (branded landing + live GitHub checklist).
+- The wall reference / posters (the data-sharing cycle + NZA Build Checklist).
 
 (Build order: A → B → C → D → E → F → G → H → I. Each Part has a STOP-AND-PROVE
 gate in `BRIEF.md §6`. Nothing is "done" until verified working in a real

@@ -1,0 +1,24 @@
+{
+  "startPosition": { "x": 60, "y": 80 },
+  "bounds": { "x": 0, "y": 0, "w": 3000, "h": 540 },
+  "platforms": [
+    { "x": 0,    "y": 470, "w": 520,  "h": 70 },
+    { "x": 660,  "y": 470, "w": 360,  "h": 70 },
+    { "x": 1120, "y": 400, "w": 300,  "h": 140 },
+    { "x": 1560, "y": 470, "w": 420,  "h": 70 },
+    { "x": 2120, "y": 360, "w": 260,  "h": 180 },
+    { "x": 2520, "y": 470, "w": 480,  "h": 70 }
+  ],
+  "placements": [
+    { "objectId": "solar-panel",  "x": 200,  "y": 430 },
+    { "objectId": "oil-slick",    "x": 380,  "y": 430 },
+    { "objectId": "wind-turbine", "x": 760,  "y": 430 },
+    { "objectId": "ice-car",      "x": 900,  "y": 430 },
+    { "objectId": "heat-pump",    "x": 1240, "y": 360 },
+    { "objectId": "gas-boiler",   "x": 1700, "y": 430 },
+    { "objectId": "oil-slick",    "x": 1820, "y": 430 },
+    { "objectId": "solar-panel",  "x": 2220, "y": 320 },
+    { "objectId": "wind-turbine", "x": 2700, "y": 430 }
+  ],
+  "goal": { "x": 2930, "y": 410 }
+}
