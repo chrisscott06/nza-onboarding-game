@@ -108,7 +108,10 @@ function buildSpec(level, objectTable, meta) {
 }
 
 function fetchJSON(url) {
-  return fetch(url).then((r) => {
+  // Always fetch fresh: editing a JSON file and reloading must show the change
+  // immediately — that "edit data → change the world" loop is the whole lesson.
+  const bust = (url.includes('?') ? '&' : '?') + '_=' + Date.now();
+  return fetch(url + bust, { cache: 'no-store' }).then((r) => {
     if (!r.ok) throw new Error(`Could not load ${url} (HTTP ${r.status})`);
     return r.json();
   });

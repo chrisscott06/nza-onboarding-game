@@ -1,8 +1,25 @@
 [
-  { "id": "gas-boiler",   "type": "hazard",      "sprite": "public/sprites/gas-boiler.svg",   "points": 0 },
-  { "id": "ice-car",      "type": "hazard",      "sprite": "public/sprites/ice-car.svg",      "points": 0 },
-  { "id": "oil-slick",    "type": "hazard",      "sprite": "public/sprites/oil-slick.svg",    "points": 0 },
-  { "id": "solar-panel",  "type": "collectible", "sprite": "public/sprites/solar-panel.svg",  "points": 100 },
-  { "id": "wind-turbine", "type": "collectible", "sprite": "public/sprites/wind-turbine.svg", "points": 150 },
-  { "id": "heat-pump",    "type": "powerup",     "sprite": "public/sprites/heat-pump.svg",    "points": 0 }
+  { "id": "gas-boiler",     "type": "hazard",      "label": "Gas boiler",         "sprite": "public/sprites/gas-boiler.svg",     "points": 0 },
+  { "id": "ice-car",        "type": "hazard",      "label": "ICE car",            "sprite": "public/sprites/ice-car.svg",        "points": 0 },
+  { "id": "oil-slick",      "type": "hazard",      "label": "Oil slick",          "sprite": "public/sprites/oil-slick.svg",      "points": 0 },
+
+  { "id": "solar-panel",    "type": "collectible", "label": "Solar panel",        "sprite": "public/sprites/solar-panel.svg",    "points": 10,  "sound": "audio/collect-soft.mp3",
+    "realValue": { "metric": "UK solar capacity factor", "value": 11, "unit": "%", "note": "approx annual average" } },
+  { "id": "wind-turbine",   "type": "collectible", "label": "Wind turbine",       "sprite": "public/sprites/wind-turbine.svg",   "points": 25,  "sound": "audio/collect-bright.mp3",
+    "realValue": { "metric": "UK offshore wind capacity factor", "value": 41, "unit": "%", "note": "higher + steadier than solar — that's why it's worth more and sits up high" } },
+  { "id": "battery-cell",   "type": "collectible", "label": "Battery cell",       "sprite": "public/sprites/battery-cell.svg",   "points": 5,   "sound": "audio/collect-low.mp3",
+    "effect": "grow-storage", "note": "grows the storage meter by one segment. Renewables only bank if there's storage to hold them." },
+
+  { "id": "ccgt",           "type": "hazard",      "label": "CCGT gas plant",     "sprite": "public/sprites/ccgt.svg",           "points": 0,   "sound": "audio/lose.mp3",
+    "realValue": { "metric": "CCGT carbon intensity", "value": 350, "unit": "gCO2/kWh", "note": "the main villain — gas-fired power" } },
+  { "id": "peaker",         "type": "hazard",      "label": "Peaker plant",       "sprite": "public/sprites/peaker.svg",         "points": 0,   "sound": "audio/hit.mp3",
+    "behaviour": "darts when player is near", "note": "fast little hazard — fires up at demand spikes" },
+  { "id": "standby-gremlin","type": "hazard",      "label": "Standby load gremlin","sprite": "public/sprites/standby-gremlin.svg","points": 0,  "sound": "audio/drain.mp3",
+    "effect": "drain-storage", "note": "nibbles the storage meter on contact (does not kill) — vampire/standby load" },
+
+  { "id": "heat-pump",      "type": "powerup",     "label": "Heat pump",          "sprite": "public/sprites/heat-pump.svg",      "points": 0,   "sound": "audio/powerup.mp3",
+    "effect": "supercharge",
+    "realValue": { "metric": "Heat pump efficiency (SCOP)", "value": 3.5, "unit": "x", "note": "3.5 units of heat per unit of electricity — that's why it powers you up" } },
+  { "id": "insulation",     "type": "powerup",     "label": "Insulation",         "sprite": "public/sprites/insulation.svg",     "points": 0,   "sound": "audio/shield.mp3",
+    "effect": "shield-one-hit", "note": "absorbs one hazard hit, then is used up. Fabric first." }
 ]

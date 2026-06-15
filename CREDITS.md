@@ -44,8 +44,10 @@ commercial use, embedding allowed):
 
 ## Assets (sprites)
 
-- `public/sprites/*.svg` — the six shared object sprites (gas boiler, ICE car,
-  oil slick, solar panel, wind turbine, heat pump). Original to this repo.
+- `public/sprites/*.svg` — the shared object sprites. Original to this repo.
+  Foundation six: gas boiler, ICE car, oil slick, solar panel, wind turbine,
+  heat pump. Level-1 ("Power Up the Grid") additions: battery cell, CCGT gas
+  plant, peaker plant, standby-load gremlin, insulation.
 - `levels/*/assets/face-*.svg` — placeholder pixel faces. Original to this repo;
   authors drop in their own face SVG to replace them.
 
