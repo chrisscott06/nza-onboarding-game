@@ -149,6 +149,32 @@
       font-size: 11px;
       opacity: 0.6;
     }
+
+    /* ---- World map (the four pillars) ---- */
+    #menu .worldmap {
+      display: flex; flex-wrap: wrap; gap: 14px; justify-content: center;
+      max-width: 760px;
+    }
+    #menu .world {
+      width: 168px; min-height: 98px;
+      text-align: left; background: var(--navy-2);
+      border: 1px solid var(--line); border-radius: 14px;
+      padding: 12px 14px; color: var(--cream); font: inherit;
+      display: flex; flex-direction: column; gap: 3px; position: relative;
+    }
+    #menu .world.open {
+      border-left: 4px solid var(--teal); cursor: pointer;
+      transition: transform 0.14s ease, background 0.14s ease;
+    }
+    #menu .world.open:hover, #menu .world.open:focus-visible {
+      transform: translateY(-3px); background: #18233d; outline: none;
+    }
+    #menu .world.locked { opacity: 0.45; }
+    #menu .world-num { font-family: var(--font-display); font-size: 24px; line-height: 1; color: var(--teal); }
+    #menu .world.locked .world-num { color: #94a3b8; }
+    #menu .world-name { font-family: var(--font-display); font-size: 17px; }
+    #menu .world-pillar { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase; opacity: 0.6; }
+    #menu .world-lock { position: absolute; top: 12px; right: 12px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; opacity: 0.8; }
     #menu h1 {
       margin: 0;
       font-family: var(--font-display);
@@ -492,7 +518,34 @@
       </div>
     </div>
 
-    <p class="tagline" style="margin-top:6px">Pick a level</p>
+    <p class="tagline" style="margin-top:6px">Choose your world</p>
+    <div class="worldmap" aria-label="World map">
+      <button class="world open" data-level="level-grid">
+        <span class="world-num">1</span>
+        <span class="world-name">Power Up the Grid</span>
+        <span class="world-pillar">Decarbonisation</span>
+      </button>
+      <div class="world locked">
+        <span class="world-num">2</span>
+        <span class="world-name">Beat the Heat</span>
+        <span class="world-pillar">Adaptation</span>
+        <span class="world-lock">🔒 soon</span>
+      </div>
+      <div class="world locked">
+        <span class="world-num">3</span>
+        <span class="world-name">Bring It Back</span>
+        <span class="world-pillar">Nature</span>
+        <span class="world-lock">🔒 soon</span>
+      </div>
+      <div class="world locked">
+        <span class="world-num">4</span>
+        <span class="world-name">School's In</span>
+        <span class="world-pillar">Education</span>
+        <span class="world-lock">🔒 soon</span>
+      </div>
+    </div>
+
+    <p class="tagline" style="margin-top:14px">All levels · sandbox</p>
     <div id="level-list">Loading levels…</div>
     <div class="footer">Net Zero Advisory</div>
   </div>

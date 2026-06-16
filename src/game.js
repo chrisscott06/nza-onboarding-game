@@ -44,6 +44,7 @@
       startLevel(canvas, menu, autoLevel);
     } else {
       renderPicker(listEl, cards, (name) => startLevel(canvas, menu, name));
+      setupWorldMap((name) => startLevel(canvas, menu, name));
       setupBoot(); // PRESS START → reveal the landing page + type the intro
     }
   } catch (err) {
@@ -52,6 +53,13 @@
     throw err;
   }
 })();
+
+// Wire the open world-map nodes (locked ones are inert). World 1 → its level.
+function setupWorldMap(onPick) {
+  document.querySelectorAll('.world.open[data-level]').forEach((el) => {
+    el.addEventListener('click', () => { Sound.play('click'); onPick(el.dataset.level); });
+  });
+}
 
 function renderPicker(listEl, cards, onPick) {
   listEl.innerHTML = '';
