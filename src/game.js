@@ -234,7 +234,7 @@ function portraitFor(who) {
     'You': { c: '#2dd4bf', g: '🙂' },
     'Ed Megawatt': { c: '#fbbf24', g: '🦺' },        // hi-vis-over-a-suit grid champion
     'Mr Net Stupid Zero': { c: '#fb7185', g: '😡' }, // the red-faced excuse
-    'PABLO': { c: '#a78bfa', g: '🤖' },              // NZA's optimisation engine, befriended
+    'PABLO': { c: '#f5f1e6', g: '🤖', img: 'public/logos/pablo-logo.svg' }, // real PABLO logo
     'Oil Baron': { c: '#111827', g: '🎩' },          // top-hatted fossil tycoon
   };
   return map[who] || { c: '#94a3b8', g: (who || '?').charAt(0) };
@@ -256,7 +256,8 @@ function showCutscene(beat) {
     nameEl.textContent = line.who || '';
     textEl.textContent = line.text || '';
     portraitEl.style.setProperty('--p', p.c);
-    portraitEl.textContent = p.g;
+    if (p.img) portraitEl.innerHTML = '<img alt="" src="' + p.img + '">';
+    else portraitEl.textContent = p.g;
   };
   const end = () => {
     el.hidden = true;
