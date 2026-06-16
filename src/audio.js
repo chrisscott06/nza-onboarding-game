@@ -88,6 +88,7 @@ const Sound = (() => {
     drain:            () => tone({ type: 'sawtooth', f0: 440, f1: 120, dur: 0.2, gain: 0.18 }),
     break:            () => { noise(0.09, 0.2); tone({ type: 'square', f0: 200, f1: 90, dur: 0.1, gain: 0.18 }); },
     spring:           () => tone({ type: 'sine', f0: 320, f1: 920, dur: 0.16, gain: 0.22 }),
+    hit:              () => { noise(0.1, 0.2); tone({ type: 'sawtooth', f0: 260, f1: 130, dur: 0.14, gain: 0.18 }); },
     lose:             () => { noise(0.13, 0.22); arp([330, 233, 165], 'square', 0.1, 0.2); },
     win:              () => arp([523, 659, 784, 1047, 1319], 'square', 0.11, 0.25),
     click:            () => tone({ type: 'square', f0: 600, f1: 600, dur: 0.04, gain: 0.15 }),

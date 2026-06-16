@@ -30,7 +30,8 @@ const Engine = (() => {
   };
 
   const FIXED_DT = 1 / 120; // physics step (s)
-  const RETRO_SCALE = 0.5;  // render to a half-res buffer, upscale chunky (retro look)
+  const RETRO_SCALE = 1;    // 1 = crisp full-res (pixel-art sprites stay sharp).
+                            // Lower (e.g. 0.5) downsamples for a chunkier look.
   const POWER_DURATION = 6; // heat-pump power-up lasts this many seconds
   const POWER_JUMP_MULT = 1.32; // higher jump while powered
   const SURGE_SPEED_MULT = 1.9; // grid-surge dash speed multiplier
@@ -38,6 +39,8 @@ const Engine = (() => {
   const GREMLIN_DRAIN_CD = 0.7; // seconds between storage drains from one gremlin
   const STOMP_BOUNCE = 540; // upward hop after stomping an enemy
   const CRUMBLE_FUSE = 0.5; // seconds a collapsing platform lasts after you land
+  const LIVES_START = 3;    // hits you can take before a game-over (Sonic-style)
+  const HURT_INVULN = 1.3;  // mercy invulnerability after a non-fatal hit
 
   // Respect the user's motion preference for the power-up pulse.
   const reduceMotion =
@@ -93,6 +96,7 @@ const Engine = (() => {
         w: 40, h: 40, points: 0, collected: false, drainCD: 0, ...o,
       })),
       score: 0,
+      lives: LIVES_START,
       meta: spec.meta || null,
       accent: (spec.meta && spec.meta.accentColor) || '#2dd4bf',
       start: { x: spec.startPosition.x, y: spec.startPosition.y },
@@ -254,8 +258,12 @@ const Engine = (() => {
     // --- reached the goal? celebrate ---
     if (world.goal && !world.won && aabb(p, goalBox(world.goal))) triggerWin();
 
-    // --- fell off the bottom: that's a death, restart the run ---
-    if (p.y > b.y + b.h + 200) resetRun();
+    // --- fell off the bottom: costs a life; respawn at start (or game over) ---
+    if (p.y > b.y + b.h + 200) {
+      world.lives -= 1;
+      if (world.lives <= 0) startDeath();
+      else { respawnAtStart(); addShake(6); sfx('hit'); }
+    }
   }
 
   // Storage-meter surge: when the meter is full you can spend it on a dash that
@@ -353,8 +361,8 @@ const Engine = (() => {
           sfx('shield');
           continue;
         }
-        startDeath();
-        return; // the death sequence takes over
+        hurt(o.x + o.w / 2); // lose a life (or game over on the last)
+        return;
       }
     }
   }
@@ -512,7 +520,7 @@ const Engine = (() => {
       ps.splice(i, 1);
       if (invincible()) continue;
       if (p.shield) { p.shield = false; p.invulnT = SHIELD_INVULN; sfx('shield'); continue; }
-      startDeath();
+      hurt(q.x + q.w / 2);
       return;
     }
   }
@@ -534,7 +542,7 @@ const Engine = (() => {
         sfx('break');
       } else if (!invincible() && aabb(hurtBox(), e)) { // forgiving lethal box
         if (p.shield) { p.shield = false; p.invulnT = SHIELD_INVULN; sfx('shield'); continue; }
-        startDeath();
+        hurt(e.x + e.w / 2);
         return;
       }
     }
@@ -567,6 +575,47 @@ const Engine = (() => {
     }
     world.objects = world.objects.filter((o) => !o.spawned); // drop block-spawned items
     for (const o of world.objects) { o.collected = false; o.drainCD = 0; }
+    world.lives = LIVES_START; // game over → fresh lives
+  }
+
+  // A non-fatal hit: lose a life (and a bit of progress, with a comedy CO2
+  // puff), get knocked back with brief mercy-invulnerability, and KEEP GOING.
+  // Only a hit with the last life ends the run.
+  function hurt(sourceX) {
+    const p = world.player;
+    if (p.invulnT > 0 || p.dying || world.won) return;
+    world.lives -= 1;
+    if (world.lives <= 0) { startDeath(); return; } // game over
+    p.invulnT = HURT_INVULN;
+    p.vy = -320; // knockback hop
+    p.vx = (sourceX != null && p.x + p.w / 2 < sourceX ? -1 : 1) * 220;
+    co2Puff(p.x + p.w / 2, p.y + p.h / 2); // "you released CO2!"
+    if (world.storage && world.storage.fill > 0) world.storage.fill -= 1; // drop a banked renewable
+    else world.score = Math.max(0, world.score - 10);
+    addShake(6);
+    sfx('hit');
+  }
+
+  // Fell in a pit: costs a life and respawns at the start (keeps score/progress).
+  function respawnAtStart() {
+    const p = world.player;
+    p.x = world.start.x; p.y = world.start.y;
+    p.vx = 0; p.vy = 0; p.onGround = false; p.coyote = 0; p.jumpBufferT = 0;
+    p.ridingActor = null; p.invulnT = HURT_INVULN;
+  }
+
+  // A little plume of grey CO2 (rises, then disperses).
+  function co2Puff(x, y) {
+    const colors = ['#4b5563', '#6b7280', '#374151'];
+    for (let i = 0; i < 9; i++) {
+      const a = -Math.PI / 2 + (Math.random() - 0.5) * 1.4;
+      const sp = 60 + Math.random() * 120;
+      const life = 0.6 + Math.random() * 0.5;
+      world.particles.push({
+        x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+        life, max: life, color: colors[(Math.random() * 3) | 0], size: 4 + Math.random() * 4,
+      });
+    }
   }
 
   // ---- Death (Mario-style) ---------------------------------------------
@@ -1033,6 +1082,13 @@ const Engine = (() => {
     if (world.surgeT > 0) color = '#a5f3fc';      // surging: bright cyan
     else if (p.powerT > 0) color = '#7ef9e6';     // heat-pump: bright teal
 
+    // flash while in mercy-invulnerability after a hit
+    const flashing = p.invulnT > 0;
+    if (flashing) {
+      ctx.save();
+      ctx.globalAlpha = reduceMotion ? 0.55 : 0.3 + 0.45 * Math.abs(Math.sin(p.invulnT * 28));
+    }
+
     const drawBody = () => {
       Face.drawCharacter(ctx, p, color);
       if (p.shield) drawShield(p);
@@ -1048,6 +1104,8 @@ const Engine = (() => {
     } else {
       drawBody();
     }
+
+    if (flashing) ctx.restore();
   }
 
   function drawSurgeTrail(p) {
@@ -1093,6 +1151,13 @@ const Engine = (() => {
     ctx.fillStyle = '#f5f1e6'; // cream
     ctx.font = '600 26px "IBM Plex Mono", ui-monospace, Menlo, monospace';
     ctx.fillText('SCORE ' + String(world.score).padStart(4, '0'), 22, 20);
+
+    // lives (hearts) on the score line
+    ctx.fillStyle = '#fb7185';
+    ctx.font = '600 22px "IBM Plex Mono", ui-monospace, monospace';
+    let hearts = '';
+    for (let i = 0; i < world.lives; i++) hearts += '♥ ';
+    ctx.fillText(hearts.trim(), 300, 22);
 
     let y = 58;
 
