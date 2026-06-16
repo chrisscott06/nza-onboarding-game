@@ -30,6 +30,7 @@ const Engine = (() => {
   };
 
   const FIXED_DT = 1 / 120; // physics step (s)
+  const RETRO_SCALE = 0.5;  // render to a half-res buffer, upscale chunky (retro look)
   const POWER_DURATION = 6; // heat-pump power-up lasts this many seconds
   const POWER_JUMP_MULT = 1.32; // higher jump while powered
   const SURGE_SPEED_MULT = 1.9; // grid-surge dash speed multiplier
@@ -42,7 +43,9 @@ const Engine = (() => {
   const reduceMotion =
     typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  let canvas, ctx;
+  let canvas, ctx;         // ctx draws to the low-res buffer
+  let screenCtx, buffer;   // the visible canvas ctx + the offscreen render buffer
+  let logicalW = 960, logicalH = 540; // the logical drawing size (world view)
   let world = null;        // { player, platforms, bounds }
   let camera = { x: 0, y: 0 };
   let accumulator = 0;
@@ -604,7 +607,7 @@ const Engine = (() => {
   }
 
   function spawnConfetti(count) {
-    const left = camera.x, W = canvas.width;
+    const left = camera.x, W = logicalW;
     const colors = ['#2dd4bf', '#c084fc', '#fbbf24', '#34d399', '#f5f1e6', '#fb7185'];
     for (let i = 0; i < count; i++) {
       const life = 1.8 + Math.random() * 0.8;
@@ -625,14 +628,16 @@ const Engine = (() => {
     const p = world.player;
     const b = world.bounds;
     // center the player, then clamp to the level so we never show the void
-    let targetX = p.x + p.w / 2 - canvas.width / 2;
-    camera.x = clamp(targetX, b.x, Math.max(b.x, b.x + b.w - canvas.width));
+    let targetX = p.x + p.w / 2 - logicalW / 2;
+    camera.x = clamp(targetX, b.x, Math.max(b.x, b.x + b.w - logicalW));
     camera.y = 0;
   }
 
   // ---- Render ----------------------------------------------------------
   function render() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // draw in logical coords; the transform maps them into the low-res buffer
+    ctx.setTransform(RETRO_SCALE, 0, 0, RETRO_SCALE, 0, 0);
+    ctx.clearRect(0, 0, logicalW, logicalH);
 
     // simple parallax sky bands so motion reads clearly
     drawBackground();
@@ -651,6 +656,10 @@ const Engine = (() => {
     ctx.restore();
 
     drawHUD(); // screen-space, not affected by the camera
+
+    // upscale the low-res buffer onto the visible canvas (chunky, no smoothing)
+    screenCtx.imageSmoothingEnabled = false;
+    screenCtx.drawImage(buffer, 0, 0, buffer.width, buffer.height, 0, 0, canvas.width, canvas.height);
   }
 
   // Parallax background: sky, stars, an accent horizon glow, two rolling hill
@@ -659,7 +668,7 @@ const Engine = (() => {
   // no flicker and nothing auto-animates — reduced-motion safe). Themed by the
   // level's accent colour.
   function drawBackground() {
-    const W = canvas.width, H = canvas.height, cx = camera.x;
+    const W = logicalW, H = logicalH, cx = camera.x;
     const accent = world.accent || '#2dd4bf';
 
     const sky = ctx.createLinearGradient(0, 0, 0, H);
@@ -1097,7 +1106,16 @@ const Engine = (() => {
 
   function start(canvasEl, spec, opts) {
     canvas = canvasEl;
-    ctx = canvas.getContext('2d');
+    screenCtx = canvas.getContext('2d');
+    screenCtx.imageSmoothingEnabled = false;
+    logicalW = canvas.width;
+    logicalH = canvas.height;
+    // render into a half-res offscreen buffer; the loop upscales it nearest-
+    // neighbour onto the visible canvas, for chunky retro pixels.
+    if (!buffer) buffer = document.createElement('canvas');
+    buffer.width = Math.round(logicalW * RETRO_SCALE);
+    buffer.height = Math.round(logicalH * RETRO_SCALE);
+    ctx = buffer.getContext('2d');
     ctx.imageSmoothingEnabled = false;
     onWin = (opts && opts.onWin) || null;
     load(spec);

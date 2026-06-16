@@ -39,10 +39,12 @@
     // "Play again" reloads with ?level=<name> so it jumps straight back in.
     const autoLevel = new URLSearchParams(location.search).get('level');
     if (autoLevel && names.includes(autoLevel)) {
+      const boot = document.getElementById('boot');
+      if (boot) boot.hidden = true;
       startLevel(canvas, menu, autoLevel);
     } else {
       renderPicker(listEl, cards, (name) => startLevel(canvas, menu, name));
-      typeIntro();
+      setupBoot(); // PRESS START → reveal the landing page + type the intro
     }
   } catch (err) {
     listEl.textContent = 'Could not load levels — see console';
@@ -199,6 +201,22 @@ function showWin(score) {
     Sound.play('click');
     location.href = base + '?level=' + encodeURIComponent(currentLevel || '');
   };
+}
+
+// Boot screen: a "PRESS START" tone-setter. On dismiss, reveal the landing
+// page and type the intro (also a user gesture, so it unlocks audio).
+function setupBoot() {
+  const bootEl = document.getElementById('boot');
+  if (!bootEl) { typeIntro(); return; }
+  const dismiss = () => {
+    if (bootEl.hidden) return;
+    bootEl.hidden = true;
+    Sound.unlock();
+    Sound.play('click');
+    typeIntro();
+  };
+  bootEl.addEventListener('click', dismiss);
+  window.addEventListener('keydown', dismiss, { once: true });
 }
 
 // Sound toggle button + unlock audio on the first user gesture.

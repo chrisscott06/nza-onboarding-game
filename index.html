@@ -320,6 +320,32 @@
       body.playing #hint { display: none; }
     }
 
+    /* ---- Boot screen (PRESS START) ---- */
+    #boot {
+      position: fixed; inset: 0; z-index: 30;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 10px; padding: 24px; cursor: pointer;
+      background: radial-gradient(120% 120% at 50% 38%, #16203a 0%, #0b1220 75%);
+    }
+    #boot[hidden] { display: none; }
+    #boot .brand-mark { width: 96px; height: 96px; opacity: 0.95; }
+    #boot .boot-title {
+      margin: 8px 0 0;
+      font-family: var(--font-display); font-weight: 400;
+      font-size: clamp(36px, 8vw, 72px); line-height: 1; color: var(--cream);
+      letter-spacing: 0.01em; text-align: center;
+    }
+    #boot .boot-title .accent { color: var(--teal); }
+    #boot .boot-press {
+      margin: 22px 0 0; font-family: var(--font-mono); font-size: 16px;
+      letter-spacing: 0.34em; color: var(--teal); text-transform: uppercase;
+      animation: blink 1.1s steps(1) infinite;
+    }
+    #boot .boot-hint {
+      margin: 4px 0 0; font-family: var(--font-mono); font-size: 11px;
+      letter-spacing: 0.16em; opacity: 0.4; text-transform: uppercase;
+    }
+
     /* ---- Win / celebration overlay ---- */
     #win {
       position: fixed; inset: 0; z-index: 20;
@@ -371,10 +397,19 @@
     @media (prefers-reduced-motion: reduce) {
       .level-card { transition: none; }
       #menu .intro-text .cursor { animation: none; }
+      #boot .boot-press { animation: none; }
     }
   </style>
 </head>
 <body>
+  <!-- Boot screen — the two-second tone-setter before the landing page. -->
+  <div id="boot">
+    <img class="brand-mark" src="public/nza-logo.svg" alt="" />
+    <h1 class="boot-title">Net Zero <span class="accent">Hero</span></h1>
+    <p class="boot-press">Press Start</p>
+    <p class="boot-hint">click or press any key</p>
+  </div>
+
   <div id="stage">
     <canvas id="game" width="960" height="540"></canvas>
   </div>
