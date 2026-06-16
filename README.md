@@ -12,7 +12,23 @@ stages, branch, push, open a PR, deploy, and verify on a real device.
 See [`BRIEF.md`](BRIEF.md) for the full specification and
 [`status.md`](status.md) for what currently works.
 
-## Run it locally
+## Quick start — just double-click
+
+- **macOS:** double-click **`launch.command`**.
+- **Windows:** double-click **`launch.bat`**.
+
+Each one pulls the latest version from GitHub (safely — it never overwrites your
+local changes; if it can't fast-forward it just runs your current copy), serves
+the game on a free port (away from other dev servers), and opens it in your
+browser. Leave the little terminal window open while you play; close it to stop.
+
+> First time on macOS, Gatekeeper may block it: right-click `launch.command` →
+> **Open** → **Open**. After that, a normal double-click works.
+
+The game always loads the freshest files (it cache-busts its own data and
+scripts), so every launch uses the latest version.
+
+## Run it locally (manual)
 
 It's plain web — HTML, CSS, JS. No build step. You just need a tiny static
 server (browsers block JS modules / fetch on `file://`).
