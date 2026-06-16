@@ -108,6 +108,8 @@ const Engine = (() => {
       winT: 0,         // time since winning (drives the confetti shower)
       freezeT: 0,      // hit-stop timer
       shake: 0,        // screen-shake magnitude (decays)
+      tip: '', tipT: 0, // on-screen caption (narrative + data one-liners)
+      shownTips: new Set(), // tips that have already fired (once each)
       particles: [],   // transient visual bits (death burst, confetti)
       projectiles: [], // emitter bolts in flight
     };
@@ -123,6 +125,20 @@ const Engine = (() => {
     // point the face system at this level's face asset (Part E)
     Face.setFace(spec.meta && spec.meta.faceAsset);
     camera = { x: 0, y: 0 };
+    if (spec.meta && spec.meta.intro) showTip(spec.meta.intro, 5);
+  }
+
+  // ---- On-screen captions (narrative + data one-liners) ----------------
+  function showTip(text, dur) { world.tip = text; world.tipT = dur || 3.6; }
+  function tipOnce(key, text, dur) {
+    if (world.shownTips.has(key)) return;
+    world.shownTips.add(key);
+    showTip(text, dur);
+  }
+  // "Wind turbine: 41% UK offshore wind capacity factor" — the real datum.
+  function realValueTip(o) {
+    const r = o.realValue;
+    return `${o.label || o.id}: ${r.value}${r.unit} ${r.metric}`;
   }
 
   // ---- Sprite cache ----------------------------------------------------
@@ -195,6 +211,7 @@ const Engine = (() => {
     // tick down timers
     if (p.powerT > 0) p.powerT = Math.max(0, p.powerT - dt);
     if (p.invulnT > 0) p.invulnT = Math.max(0, p.invulnT - dt);
+    if (world.tipT > 0) world.tipT = Math.max(0, world.tipT - dt);
     for (const o of world.objects) if (o.drainCD > 0) o.drainCD -= dt;
 
     // grid-surge: spend a full storage meter on a dash
@@ -250,6 +267,7 @@ const Engine = (() => {
     if (world.curtailT > 0) world.curtailT = Math.max(0, world.curtailT - dt);
     // "meter full" = every unlocked segment is holding energy
     world.surgeReady = !!(s && s.capacity >= 1 && s.fill >= s.capacity && world.surgeT <= 0);
+    if (world.surgeReady) tipOnce('surge', 'Storage maxed — press DASH (Shift / ⚡) to surge the grid!');
     if (dashPressed && world.surgeReady) {
       const dur = (world.mechanic.surge && world.mechanic.surge.duration) || 4;
       world.surgeT = dur;
@@ -285,6 +303,7 @@ const Engine = (() => {
           o.collected = true;
           world.score += o.points || 0;
           sfx('collect-low');
+          tipOnce('battery', 'Storage online — now clean energy banks instead of going to waste.');
         } else if (s) {
           // renewable on a storage-meter level: only banks if there's room
           if (s.fill < s.capacity) {
@@ -292,25 +311,30 @@ const Engine = (() => {
             world.score += o.points || 0; // banked
             o.collected = true;
             sfx('bank');
+            if (o.realValue) tipOnce('rv-' + o.id, realValueTip(o));
           } else {
             o.collected = true;     // curtailment: storage full → energy wasted
             world.curtailT = 1.6;   // brief on-screen warning, no points
             sfx('curtail');
+            tipOnce('curtail', 'Storage full — that energy is wasted. Build more storage!');
           }
         } else {
           // no storage mechanic on this level: score normally
           o.collected = true;
           world.score += o.points || 0;
           sfx(soundKey(o));
+          if (o.realValue) tipOnce('rv-' + o.id, realValueTip(o));
         }
       } else if (o.type === 'powerup') {
         o.collected = true;
         if (o.effect === 'shield-one-hit') {
           p.shield = true; // insulation: fabric first
           sfx('shield');
+          tipOnce('insulation', 'Insulated — you can take one hit. Fabric first.');
         } else {
           p.powerT = POWER_DURATION; // supercharge (heat pump)
           sfx('powerup');
+          tipOnce('heatpump', o.realValue ? `Heat pump! ${o.realValue.value}${o.realValue.unit} efficient — supercharged!` : 'Heat pump — supercharged!');
         }
       } else if (o.type === 'hazard') {
         if (o.effect === 'drain-storage') {
@@ -526,7 +550,7 @@ const Engine = (() => {
     p.powerT = 0; p.shield = false; p.invulnT = 0;
     p.dying = false; p.deathT = 0;
     p.stretch = 0; p.wasOnGround = false;
-    world.score = 0; world.shake = 0;
+    world.score = 0; world.shake = 0; world.tipT = 0;
     world.surgeT = 0; world.surgeReady = false; world.curtailT = 0;
     world.won = false; world.winT = 0;
     world.freezeT = 0; world.particles = [];
@@ -1117,6 +1141,28 @@ const Engine = (() => {
       ctx.font = '600 14px "IBM Plex Mono", ui-monospace, monospace';
       ctx.fillText('INSULATED — ONE HIT', 22, y);
     }
+
+    drawTip();
+  }
+
+  // A caption at the bottom — narrative beats + the real data values.
+  function drawTip() {
+    if (world.tipT <= 0 || !world.tip) return;
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, world.tipT * 2.5); // fade out at the end
+    ctx.font = '600 15px "IBM Plex Mono", ui-monospace, monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const cx = logicalW / 2, ty = logicalH - 74;
+    const tw = ctx.measureText(world.tip).width + 28;
+    ctx.fillStyle = 'rgba(11,18,32,0.86)';
+    ctx.fillRect(cx - tw / 2, ty - 16, tw, 32);
+    ctx.fillStyle = hexA(world.accent || '#2dd4bf', 0.75);
+    ctx.fillRect(cx - tw / 2, ty - 16, tw, 2);
+    ctx.fillStyle = '#f5f1e6';
+    ctx.fillText(world.tip, cx, ty + 1);
+    ctx.textAlign = 'left';
+    ctx.restore();
   }
 
   // ---- Loop ------------------------------------------------------------
