@@ -36,6 +36,7 @@
     );
 
     renderPicker(listEl, cards, (name) => startLevel(canvas, menu, name));
+    typeIntro();
   } catch (err) {
     listEl.textContent = 'Could not load levels — see console';
     console.error('[NZA] Level list failed:', err);
@@ -113,6 +114,44 @@ function buildSpec(level, objectTable, meta) {
     mechanic: level.mechanic || null, // drives level-specific mechanics (Part: storage-meter)
     world: level.world || null,
   };
+}
+
+// The landing-page intro, typed out like a classic game's opening crawl.
+const INTRO = [
+  { t: 'Welcome, hero.\n' },
+  { t: "The grid's running dirty and the planet's getting toasty.\n" },
+  { t: 'Grab the ' }, { t: 'clean stuff', c: 'hi' },
+  { t: ' — solar panels, wind turbines — and dodge the ' },
+  { t: 'fossil fiends', c: 'bad' },
+  { t: ' — gas boilers, ICE cars, oil slicks.\n' },
+  { t: 'Snag a heat pump to power up, then reach the flag and flip the grid ' },
+  { t: 'GREEN', c: 'hi' }, { t: '.' },
+];
+
+function typeIntro() {
+  const el = document.getElementById('intro-text');
+  if (!el) return;
+  const full = INTRO.reduce((n, s) => n + s.t.length, 0);
+  const render = (shown) => {
+    let html = '', count = 0;
+    for (const s of INTRO) {
+      if (count >= shown) break;
+      const part = escapeHTML(s.t.slice(0, Math.min(s.t.length, shown - count)));
+      html += s.c ? `<span class="${s.c}">${part}</span>` : part;
+      count += s.t.length;
+    }
+    el.innerHTML = html + (shown >= full ? '' : '<span class="cursor">▋</span>');
+  };
+  const reduce = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) { render(full); return; }
+  let n = 0, skip = false;
+  const box = el.closest('.intro');
+  if (box) box.addEventListener('click', () => { skip = true; }); // click to skip the crawl
+  (function tick() {
+    if (skip) { render(full); return; }
+    render((n += 1));
+    if (n < full) setTimeout(tick, 14);
+  })();
 }
 
 // Show the touch dash button only while a grid-surge is available.

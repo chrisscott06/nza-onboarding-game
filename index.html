@@ -72,9 +72,10 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      gap: 22px;
-      padding: 24px;
+      justify-content: flex-start;
+      gap: 18px;
+      padding: 40px 24px 56px;
+      overflow-y: auto;
       background: radial-gradient(120% 120% at 50% 0%, #16203a 0%, #0b1220 72%);
       z-index: 10;
     }
@@ -83,6 +84,70 @@
       height: 64px;
       opacity: 0.95;
       margin-bottom: 2px;
+    }
+
+    /* ---- 16-bit game intro ---- */
+    #menu .intro {
+      max-width: 560px;
+      width: 100%;
+      background: rgba(11, 18, 32, 0.6);
+      border: 2px solid var(--teal);
+      box-shadow: inset 0 0 0 4px #0b1220, 0 0 0 1px rgba(45, 212, 191, 0.25);
+      border-radius: 8px;
+      padding: 18px 20px;
+    }
+    #menu .intro-text {
+      margin: 0;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--cream);
+      min-height: 5.1em; /* reserve room so the typewriter doesn't reflow */
+      white-space: pre-wrap;
+    }
+    #menu .intro-text .hi { color: var(--teal); }
+    #menu .intro-text .bad { color: var(--coral); }
+    #menu .intro-text .cursor { color: var(--teal); animation: blink 1s steps(1) infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    #menu .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px 22px;
+      justify-content: center;
+      align-items: flex-start;
+      max-width: 600px;
+    }
+    #menu .legend-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      width: 92px;
+      text-align: center;
+    }
+    #menu .legend-item img,
+    #menu .legend-item .glyph {
+      width: 34px; height: 34px;
+      image-rendering: pixelated;
+      display: grid; place-items: center;
+      font-size: 26px;
+    }
+    #menu .legend-item .tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    #menu .legend-item .tag.good { color: #34d399; background: rgba(52, 211, 153, 0.14); }
+    #menu .legend-item .tag.bad { color: var(--coral); background: rgba(251, 113, 133, 0.14); }
+    #menu .legend-item .tag.pow { color: var(--teal); background: rgba(45, 212, 191, 0.14); }
+    #menu .legend-item .tag.goal { color: var(--cream); background: rgba(245, 241, 230, 0.12); }
+    #menu .legend-item .ll {
+      font-family: var(--font-ui);
+      font-size: 11px;
+      opacity: 0.6;
     }
     #menu h1 {
       margin: 0;
@@ -241,6 +306,7 @@
 
     @media (prefers-reduced-motion: reduce) {
       .level-card { transition: none; }
+      #menu .intro-text .cursor { animation: none; }
     }
   </style>
 </head>
@@ -264,11 +330,40 @@
     </div>
   </div>
 
-  <!-- Home screen: the level picker. Populated from data/levels.json. -->
+  <!-- Home screen: the narrative intro + level picker. -->
   <div id="menu">
     <img class="brand-mark" src="public/nza-logo.svg" alt="" />
-    <h1>NZA <span class="accent">Onboarding Game</span></h1>
-    <p class="tagline">Pick a level</p>
+    <h1>NZA <span class="accent">Net Zero Hero</span></h1>
+    <p class="tagline">Run · Jump · Decarbonise</p>
+
+    <div class="intro">
+      <p class="intro-text" id="intro-text"></p>
+    </div>
+
+    <div class="legend" aria-label="How to play">
+      <div class="legend-item">
+        <img src="public/sprites/solar-panel.svg" alt="" />
+        <span class="tag good">COLLECT</span>
+        <span class="ll">renewables</span>
+      </div>
+      <div class="legend-item">
+        <img src="public/sprites/gas-boiler.svg" alt="" />
+        <span class="tag bad">AVOID</span>
+        <span class="ll">fossil fuels</span>
+      </div>
+      <div class="legend-item">
+        <img src="public/sprites/heat-pump.svg" alt="" />
+        <span class="tag pow">POWER-UP</span>
+        <span class="ll">heat pump</span>
+      </div>
+      <div class="legend-item">
+        <span class="glyph">🚩</span>
+        <span class="tag goal">REACH</span>
+        <span class="ll">the goal</span>
+      </div>
+    </div>
+
+    <p class="tagline" style="margin-top:6px">Pick a level</p>
     <div id="level-list">Loading levels…</div>
     <div class="footer">Net Zero Advisory</div>
   </div>
