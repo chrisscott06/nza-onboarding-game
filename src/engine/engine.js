@@ -117,6 +117,7 @@ const Engine = (() => {
       shownTips: new Set(), // tips that have already fired (once each)
       paused: false,    // a cutscene/dialogue beat is on screen
       beats: (spec.beats || []).map((b) => ({ ...b, fired: false })),
+      darkness: 0, targetDarkness: 0, // atmosphere: scene dims when the foil arrives
       particles: [],   // transient visual bits (death burst, confetti)
       projectiles: [], // emitter bolts in flight
     };
@@ -147,6 +148,7 @@ const Engine = (() => {
       if (!hit) continue;
       b.fired = true;
       world.paused = true;
+      if (b.setMood) world.targetDarkness = b.setMood === 'dark' ? 0.5 : 0; // atmosphere shift
       if (onBeat) onBeat(b);
       return;
     }
@@ -773,6 +775,13 @@ const Engine = (() => {
     drawParticles();
 
     ctx.restore();
+
+    // atmosphere: ease the dimming toward its target, tint the whole scene cold
+    world.darkness += (world.targetDarkness - world.darkness) * 0.06;
+    if (world.darkness > 0.01) {
+      ctx.fillStyle = `rgba(12,16,32,${world.darkness})`;
+      ctx.fillRect(0, 0, logicalW, logicalH);
+    }
 
     drawHUD(); // screen-space, not affected by the camera
 

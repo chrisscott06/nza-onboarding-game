@@ -32,25 +32,32 @@
   ],
   "beats": [
     { "trigger": "start", "lines": [
-      { "who": "You", "text": "Nobody's doing anything about the climate. Fine. I'll start." },
-      { "who": "You", "text": "...I've no idea what I'm doing. There's a four-part plan. Step one: the grid's filthy. Let's fix that." }
+      { "who": "Ed Megawatt", "text": "Right — you must be the volunteer! We decarbonise this grid by 2030, and I cannot do it alone. Grab every solar panel and wind turbine you can find!" },
+      { "who": "Ed Megawatt", "text": "Offshore wind: 41% capacity factor. Beats solar — that's why it's up high. Real numbers." },
+      { "who": "You", "text": "Real numbers. I feel slightly less useless." },
+      { "who": "Ed Megawatt", "text": "(a turbine blade sweeps him clean off-screen) WORTH ITwwww—" }
     ] },
-    { "trigger": { "x": 720 }, "lines": [
-      { "who": "Minister Milirenew", "text": "Brilliant! A volunteer! I can't be everywhere — you take the grid. Grab every bit of clean energy you can!" },
-      { "who": "Minister Milirenew", "text": "Wind beats solar — 41% capacity factor offshore. That's why it sits up high. Real numbers win this." },
-      { "who": "You", "text": "Real numbers. Suddenly I feel less useless." }
+    { "trigger": { "x": 1500 }, "setMood": "dark", "lines": [
+      { "who": "Mr Net Stupid Zero", "text": "It'll NEVER work! I'll slap levies on your precious clean leccy — and dig up FRESH North Sea oil!" },
+      { "who": "Mr Net Stupid Zero", "text": "The wind doesn't even blow at night! Give UP!" },
+      { "who": "You", "text": "...that's literally what storage is for, mate." }
     ] },
-    { "trigger": { "x": 1820 }, "lines": [
-      { "who": "Mr Net Stupid Zero", "text": "It'll NEVER work! Too expensive! The wind doesn't even blow at night! Give up!" },
-      { "who": "You", "text": "That's what storage is for, mate." }
+    { "trigger": { "x": 2300 }, "setMood": "bright", "lines": [
+      { "who": "Ed Megawatt", "text": "Don't listen to him! Make clean power the cheapest power, and his oil's worthless. Watch." },
+      { "who": "You", "text": "So we don't beat him with rage. We beat him with economics." },
+      { "who": "Ed Megawatt", "text": "Now you're getting it. Onwards!" }
     ] },
-    { "trigger": { "x": 3180 }, "lines": [
-      { "who": "Oil Baron", "text": "Ah, the little hero. You can't switch ME off. I AM the grid." },
+    { "trigger": { "x": 3000 }, "lines": [
+      { "who": "PABLO", "text": "Running the numbers... optimising... optimal route found." },
+      { "who": "You", "text": "Whatever you are, I like you." }
+    ] },
+    { "trigger": { "x": 3350 }, "lines": [
+      { "who": "Oil Baron", "text": "The little hero. You cannot switch ME off. I AM the grid." },
       { "who": "You", "text": "Not for much longer." }
     ] },
-    { "trigger": { "x": 3500 }, "lines": [
-      { "who": "Oil Baron", "text": "This isn't over! Three more parts to your little plan — and I'll be waiting!" },
-      { "who": "Minister Milirenew", "text": "Pillar one: DONE. The grid's clean. Adaptation next. Onwards, hero!" }
+    { "trigger": { "x": 3520 }, "lines": [
+      { "who": "Oil Baron", "text": "This isn't OVER! Three more parts to your little plan — and I'll be WAITING!" },
+      { "who": "Ed Megawatt", "text": "Pillar one: DONE. Grid's clean. Adaptation next. Onwards, hero!" }
     ] }
   ],
   "actors": [
