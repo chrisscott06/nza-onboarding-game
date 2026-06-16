@@ -164,6 +164,7 @@ const Engine = (() => {
       p.onGround = false;
       p.coyote = 0;
       p.jumpBufferT = 0;
+      sfx('jump');
     }
 
     // tick down timers
@@ -221,6 +222,7 @@ const Engine = (() => {
       world.surgeReady = false;
       const p = world.player;
       p.vx = p.facing * TUNING.maxRunSpeed * SURGE_SPEED_MULT; // instant dash kick
+      sfx('surge');
     }
   }
 
@@ -245,27 +247,33 @@ const Engine = (() => {
           if (s) s.capacity = Math.min(s.max, s.capacity + 1);
           o.collected = true;
           world.score += o.points || 0;
+          sfx('collect-low');
         } else if (s) {
           // renewable on a storage-meter level: only banks if there's room
           if (s.fill < s.capacity) {
             s.fill += 1;
             world.score += o.points || 0; // banked
             o.collected = true;
+            sfx('bank');
           } else {
             o.collected = true;     // curtailment: storage full → energy wasted
             world.curtailT = 1.6;   // brief on-screen warning, no points
+            sfx('curtail');
           }
         } else {
           // no storage mechanic on this level: score normally
           o.collected = true;
           world.score += o.points || 0;
+          sfx(soundKey(o));
         }
       } else if (o.type === 'powerup') {
         o.collected = true;
         if (o.effect === 'shield-one-hit') {
           p.shield = true; // insulation: fabric first
+          sfx('shield');
         } else {
           p.powerT = POWER_DURATION; // supercharge (heat pump)
+          sfx('powerup');
         }
       } else if (o.type === 'hazard') {
         if (o.effect === 'drain-storage') {
@@ -273,6 +281,7 @@ const Engine = (() => {
           if (s && o.drainCD <= 0 && s.fill > 0) {
             s.fill -= 1;
             o.drainCD = GREMLIN_DRAIN_CD;
+            sfx('drain');
           }
           continue;
         }
@@ -280,6 +289,7 @@ const Engine = (() => {
         if (p.shield) {
           p.shield = false;   // insulation absorbs the hit
           p.invulnT = SHIELD_INVULN;
+          sfx('shield');
           continue;
         }
         startDeath();
@@ -340,6 +350,7 @@ const Engine = (() => {
     p.vy = -780;          // the death "hop"
     world.freezeT = 0.1;  // hit-stop on impact
     spawnBurst(p.x + p.w / 2, p.y + p.h / 2, ['#fb7185', '#fbbf24', '#f5f1e6'], 16);
+    sfx('lose');
   }
 
   function updateDeath(dt) {
@@ -399,6 +410,8 @@ const Engine = (() => {
     world.won = true;
     world.winT = 0;
     if (!reduceMotion) spawnConfetti(40);
+    if (typeof Sound !== 'undefined') Sound.stopMusic();
+    sfx('win');
     if (onWin) onWin(world.score); // the page shows the celebration overlay
   }
 
@@ -790,6 +803,14 @@ const Engine = (() => {
   }
   function clamp(v, lo, hi) {
     return v < lo ? lo : v > hi ? hi : v;
+  }
+  // Fire a sound effect if the sound system is loaded.
+  function sfx(name) {
+    if (typeof Sound !== 'undefined') Sound.play(name);
+  }
+  // Map an object's sound path (e.g. "audio/collect-bright.mp3") to a synth key.
+  function soundKey(o) {
+    return o.sound ? o.sound.replace(/^.*\//, '').replace(/\.\w+$/, '') : 'collect-soft';
   }
 
   return { start, get world() { return world; }, get camera() { return camera; } };

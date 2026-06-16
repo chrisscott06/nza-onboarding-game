@@ -171,6 +171,18 @@ verified pieces:
   the "substation-flip win/level-complete" that was deferred (the dirty→clean
   **sky transform** is still the only outstanding bit of that bundle item).
 
+## Sound (WebAudio synth)
+
+- `src/audio.js` — all sound generated in code (no files): retro SFX for jump,
+  collect, bank, curtail, surge, power-up, shield, drain, death, win, and UI
+  clicks, plus a light looping chiptune backing track. A 🔊/🔇 toggle (top-right,
+  persisted in localStorage) and the no-autoplay rule respected (audio unlocks
+  on first interaction). Engine fires the SFX on events; game.js starts the
+  music + wires the toggle. Verified loading/playing without errors in-browser
+  (audible quality is for a human to confirm on a device with sound).
+- Also hardened the index.html script loader to retry transient load failures
+  (one failed fetch no longer blanks the game).
+
 ## Polish pass (look & feel)
 
 - **Logo:** the real thick NZA mark (`public/nza-logo.svg`, from

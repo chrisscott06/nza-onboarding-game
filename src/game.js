@@ -23,8 +23,9 @@
   const menuBtn = document.getElementById('menu-btn');
   const listEl = document.getElementById('level-list');
 
-  menuBtn.addEventListener('click', () => location.reload()); // back to picker
+  menuBtn.addEventListener('click', () => { Sound.play('click'); location.reload(); }); // back to picker
   setupTouch();
+  setupSound();
 
   try {
     const manifest = await fetchJSON('data/levels.json');
@@ -59,7 +60,7 @@ function renderPicker(listEl, cards, onPick) {
     btn.innerHTML =
       `<div class="name">${escapeHTML(meta.name || name)}</div>` +
       `<div class="meta"><span class="swatch"></span>${escapeHTML(meta.author || '—')} · ${escapeHTML(meta.theme || '')}</div>`;
-    btn.addEventListener('click', () => onPick(name));
+    btn.addEventListener('click', () => { Sound.play('click'); onPick(name); });
     listEl.appendChild(btn);
   }
 }
@@ -79,6 +80,7 @@ async function startLevel(canvas, menu, levelName) {
     menu.style.display = 'none';
     document.body.classList.add('playing');
     Engine.start(canvas, spec, { onWin: showWin });
+    Sound.startMusic(); // backing track (silent until unmuted / after a gesture)
     watchSurge(); // toggles the touch dash button when a grid-surge is ready
   } catch (err) {
     showFatal(err);
@@ -184,10 +186,24 @@ function showWin(score) {
   }
 
   const base = location.pathname;
-  document.getElementById('win-menu').onclick = () => { location.href = base; };
+  document.getElementById('win-menu').onclick = () => { Sound.play('click'); location.href = base; };
   document.getElementById('win-again').onclick = () => {
+    Sound.play('click');
     location.href = base + '?level=' + encodeURIComponent(currentLevel || '');
   };
+}
+
+// Sound toggle button + unlock audio on the first user gesture.
+function setupSound() {
+  const btn = document.getElementById('sound-btn');
+  if (btn) {
+    const sync = () => { btn.textContent = Sound.isMuted() ? '🔇' : '🔊'; };
+    sync();
+    btn.addEventListener('click', () => { Sound.toggleMute(); Sound.play('click'); sync(); });
+  }
+  const unlock = () => Sound.unlock();
+  window.addEventListener('pointerdown', unlock, { once: true });
+  window.addEventListener('keydown', unlock, { once: true });
 }
 
 // Show the touch dash button only while a grid-surge is available.

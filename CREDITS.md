@@ -59,5 +59,11 @@ commercial use, embedding allowed):
 
 ## Audio
 
-None yet. If added: royalty-free SFX only (Freesound / OpenGameArt / Pixabay),
-each logged here with source URL + licence.
+All sound is **generated in code** at runtime (`src/audio.js`) using the Web
+Audio API — retro chiptune SFX and a light backing loop. Nothing is sampled or
+downloaded, so there are no third-party audio assets or licences to track. This
+is the AUDIO-GUIDE's "Route 2 — generate custom retro sounds", done
+programmatically. Original to this repo.
+
+(If anyone later swaps in CC0 sound files per `audio/AUDIO-GUIDE.md`, log each
+one here with its source URL + licence.)
