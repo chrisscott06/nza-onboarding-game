@@ -35,8 +35,14 @@
       names.map(async (name) => ({ name, meta: await fetchJSON(`levels/${name}/meta.json`) }))
     );
 
-    renderPicker(listEl, cards, (name) => startLevel(canvas, menu, name));
-    typeIntro();
+    // "Play again" reloads with ?level=<name> so it jumps straight back in.
+    const autoLevel = new URLSearchParams(location.search).get('level');
+    if (autoLevel && names.includes(autoLevel)) {
+      startLevel(canvas, menu, autoLevel);
+    } else {
+      renderPicker(listEl, cards, (name) => startLevel(canvas, menu, name));
+      typeIntro();
+    }
   } catch (err) {
     listEl.textContent = 'Could not load levels — see console';
     console.error('[NZA] Level list failed:', err);
@@ -58,7 +64,10 @@ function renderPicker(listEl, cards, onPick) {
   }
 }
 
+let currentLevel = null;
+
 async function startLevel(canvas, menu, levelName) {
+  currentLevel = levelName;
   const levelDir = `levels/${levelName}`;
   try {
     const [meta, level, objectTable] = await Promise.all([
@@ -69,7 +78,7 @@ async function startLevel(canvas, menu, levelName) {
     const spec = buildSpec(level, objectTable, meta);
     menu.style.display = 'none';
     document.body.classList.add('playing');
-    Engine.start(canvas, spec);
+    Engine.start(canvas, spec, { onWin: showWin });
     watchSurge(); // toggles the touch dash button when a grid-surge is ready
   } catch (err) {
     showFatal(err);
@@ -152,6 +161,33 @@ function typeIntro() {
     render((n += 1));
     if (n < full) setTimeout(tick, 14);
   })();
+}
+
+// Reached the goal: show the celebration overlay, tally the score, offer
+// "play again" (same level) or back to the landing page.
+function showWin(score) {
+  const el = document.getElementById('win');
+  const val = document.getElementById('win-score');
+  if (!el || !val) return;
+  el.hidden = false;
+
+  const reduce = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) {
+    val.textContent = score;
+  } else {
+    const dur = 900, t0 = performance.now();
+    (function tick(now) {
+      const k = Math.min(1, (now - t0) / dur);
+      val.textContent = Math.round(score * k);
+      if (k < 1) requestAnimationFrame(tick);
+    })(t0);
+  }
+
+  const base = location.pathname;
+  document.getElementById('win-menu').onclick = () => { location.href = base; };
+  document.getElementById('win-again').onclick = () => {
+    location.href = base + '?level=' + encodeURIComponent(currentLevel || '');
+  };
 }
 
 // Show the touch dash button only while a grid-surge is available.

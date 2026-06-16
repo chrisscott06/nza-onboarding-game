@@ -46,6 +46,7 @@ const Engine = (() => {
   let accumulator = 0;
   let lastTime = null;
   let running = false;
+  let onWin = null; // callback fired once when the player reaches the goal
 
   // ---- World setup -----------------------------------------------------
   function load(spec) {
@@ -84,8 +85,10 @@ const Engine = (() => {
       surgeT: 0,
       surgeReady: false,
       curtailT: 0,
+      won: false,      // reached the goal
+      winT: 0,         // time since winning (drives the confetti shower)
       freezeT: 0,      // hit-stop timer
-      particles: [],   // transient visual bits (death burst, etc.)
+      particles: [],   // transient visual bits (death burst, confetti)
     };
     if (world.mechanic && world.mechanic.type === 'storage-meter') {
       world.storage = {
@@ -125,9 +128,15 @@ const Engine = (() => {
     const p = world.player;
     const t = TUNING;
 
-    // Hit-stop and the death animation take over the simulation.
+    // Hit-stop, death, and the win celebration each take over the simulation.
     if (world.freezeT > 0) { world.freezeT = Math.max(0, world.freezeT - dt); updateParticles(dt); return; }
     if (p.dying) { updateDeath(dt); return; }
+    if (world.won) {
+      world.winT += dt;
+      if (!reduceMotion && world.winT < 3 && world.particles.length < 220) spawnConfetti(2);
+      updateParticles(dt);
+      return;
+    }
 
     // --- horizontal intent ---
     const dir = (Input.held.right ? 1 : 0) - (Input.held.left ? 1 : 0);
@@ -188,6 +197,9 @@ const Engine = (() => {
 
     // --- hazards / collectibles ---
     handleObjects();
+
+    // --- reached the goal? celebrate ---
+    if (world.goal && !world.won && aabb(p, goalBox(world.goal))) triggerWin();
 
     // --- fell off the bottom: that's a death, restart the run ---
     if (p.y > b.y + b.h + 200) resetRun();
@@ -307,6 +319,7 @@ const Engine = (() => {
     p.dying = false; p.deathT = 0;
     world.score = 0;
     world.surgeT = 0; world.surgeReady = false; world.curtailT = 0;
+    world.won = false; world.winT = 0;
     world.freezeT = 0; world.particles = [];
     if (world.storage) {
       world.storage.capacity = world.mechanic.startSegments || 0;
@@ -374,6 +387,36 @@ const Engine = (() => {
       ctx.fillRect(q.x - q.size / 2, q.y - q.size / 2, q.size, q.size);
     }
     ctx.globalAlpha = 1;
+  }
+
+  // ---- Win (reach the goal) --------------------------------------------
+  function goalBox(g) {
+    return { x: g.x - 16, y: g.y - 10, w: 60, h: 90 };
+  }
+
+  function triggerWin() {
+    if (world.won) return;
+    world.won = true;
+    world.winT = 0;
+    if (!reduceMotion) spawnConfetti(40);
+    if (onWin) onWin(world.score); // the page shows the celebration overlay
+  }
+
+  function spawnConfetti(count) {
+    const left = camera.x, W = canvas.width;
+    const colors = ['#2dd4bf', '#c084fc', '#fbbf24', '#34d399', '#f5f1e6', '#fb7185'];
+    for (let i = 0; i < count; i++) {
+      const life = 1.8 + Math.random() * 0.8;
+      world.particles.push({
+        x: left + Math.random() * W,
+        y: -10 - Math.random() * 40,
+        vx: (Math.random() - 0.5) * 60,
+        vy: 50 + Math.random() * 110,
+        life, max: life,
+        color: colors[(Math.random() * colors.length) | 0],
+        size: 4 + Math.random() * 5,
+      });
+    }
   }
 
   // ---- Camera ----------------------------------------------------------
@@ -729,15 +772,16 @@ const Engine = (() => {
     requestAnimationFrame(frame);
   }
 
-  function start(canvasEl, spec) {
+  function start(canvasEl, spec, opts) {
     canvas = canvasEl;
     ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
+    onWin = (opts && opts.onWin) || null;
     load(spec);
-    running = true;
     lastTime = null;
     accumulator = 0;
-    requestAnimationFrame(frame);
+    // guard against starting a second animation loop on replay
+    if (!running) { running = true; requestAnimationFrame(frame); }
   }
 
   // ---- helpers ---------------------------------------------------------
