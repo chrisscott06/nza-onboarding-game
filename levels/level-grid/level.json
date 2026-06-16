@@ -34,6 +34,23 @@
     { "trigger": "start", "lines": [
       { "who": "You", "text": "Nobody's doing anything about the climate. Fine. I'll start." },
       { "who": "You", "text": "...I've no idea what I'm doing. There's a four-part plan. Step one: the grid's filthy. Let's fix that." }
+    ] },
+    { "trigger": { "x": 720 }, "lines": [
+      { "who": "Minister Milirenew", "text": "Brilliant! A volunteer! I can't be everywhere — you take the grid. Grab every bit of clean energy you can!" },
+      { "who": "Minister Milirenew", "text": "Wind beats solar — 41% capacity factor offshore. That's why it sits up high. Real numbers win this." },
+      { "who": "You", "text": "Real numbers. Suddenly I feel less useless." }
+    ] },
+    { "trigger": { "x": 1820 }, "lines": [
+      { "who": "Mr Net Stupid Zero", "text": "It'll NEVER work! Too expensive! The wind doesn't even blow at night! Give up!" },
+      { "who": "You", "text": "That's what storage is for, mate." }
+    ] },
+    { "trigger": { "x": 3180 }, "lines": [
+      { "who": "Oil Baron", "text": "Ah, the little hero. You can't switch ME off. I AM the grid." },
+      { "who": "You", "text": "Not for much longer." }
+    ] },
+    { "trigger": { "x": 3500 }, "lines": [
+      { "who": "Oil Baron", "text": "This isn't over! Three more parts to your little plan — and I'll be waiting!" },
+      { "who": "Minister Milirenew", "text": "Pillar one: DONE. The grid's clean. Adaptation next. Onwards, hero!" }
     ] }
   ],
   "actors": [

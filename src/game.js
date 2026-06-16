@@ -220,13 +220,13 @@ function setupBoot() {
   window.addEventListener('keydown', dismiss, { once: true });
 }
 
-// A simple coloured-avatar portrait per speaker (real art lands in Story 2).
+// Caricature portrait per speaker (emoji avatars — a stance, never a real person).
 function portraitFor(who) {
   const map = {
-    'You': { c: '#2dd4bf', g: '☺' },
-    'Minister Milirenew': { c: '#fbbf24', g: 'M' },
-    'Mr Net Stupid Zero': { c: '#fb7185', g: '!' },
-    'Oil Baron': { c: '#1f2937', g: '$' },
+    'You': { c: '#2dd4bf', g: '🙂' },
+    'Minister Milirenew': { c: '#fbbf24', g: '🦺' }, // hi-vis-over-a-suit grid champion
+    'Mr Net Stupid Zero': { c: '#fb7185', g: '😡' }, // the red-faced excuse
+    'Oil Baron': { c: '#111827', g: '🎩' },          // top-hatted fossil tycoon
   };
   return map[who] || { c: '#94a3b8', g: (who || '?').charAt(0) };
 }
