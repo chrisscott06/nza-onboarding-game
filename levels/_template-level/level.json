@@ -17,7 +17,17 @@
     { "objectId": "solar-panel", "x": 400, "y": 430 },
     { "objectId": "gas-boiler", "x": 1000, "y": 430 }
   ],
-  "_doc_placements": "Where hazards / collectibles / power-ups sit. objectId MUST match an id in data/objects.json (e.g. gas-boiler, ice-car, oil-slick, solar-panel, wind-turbine, heat-pump). x,y is the top-left in pixels — to rest an object on a platform, set y = (platform top y) - 40.",
+  "_doc_placements": "Where hazards / collectibles / power-ups sit. objectId MUST match an id in data/objects.json (gas-boiler, ice-car, oil-slick, ccgt, peaker, standby-gremlin = hazards; solar-panel, wind-turbine, battery-cell = collectibles; heat-pump, insulation = power-ups). x,y is the top-left in pixels — to rest an object on a platform, set y = (platform top y) - 40.",
+
+  "actors": [
+    { "type": "mover", "x": 600, "y": 430, "w": 96, "h": 16, "axis": "x", "distance": 150, "speed": 70 },
+    { "type": "block", "x": 500, "y": 330, "w": 40, "h": 40, "drop": "solar-panel" },
+    { "type": "enemy", "x": 1100, "y": 440, "w": 34, "h": 30, "range": 200, "speed": 80, "points": 50 },
+    { "type": "emitter", "x": 1400, "y": 426, "w": 22, "h": 44, "dir": -1, "interval": 1.6, "speed": 220 },
+    { "type": "spring", "x": 300, "y": 454, "w": 40, "h": 16, "power": 1300 },
+    { "type": "crumble", "x": 800, "y": 470, "w": 90, "h": 16 }
+  ],
+  "_doc_actors": "Optional moving/active things. DELETE the ones you don't use. Each is placed by data alone — no code. Types: 'mover' = moving platform (axis x|y, distance px, speed px/s) the player rides; 'block' = breakable box, bash from below to shatter, optional drop=<objectId> pops out; 'enemy' = patroller (range px, speed, points), stomp from above to defeat, side-touch kills; 'emitter' = fires lethal bolts (dir -1 left/+1 right, interval s, speed; optional range px = only fire when player near); 'spring' = bounce pad (power = launch speed); 'crumble' = platform that breaks shortly after you land. All x,y are top-left pixels.",
 
   "goal": { "x": 2330, "y": 410 },
   "_doc_goal": "The finish-flag position (top-left, pixels). Put it at the far end of your level."

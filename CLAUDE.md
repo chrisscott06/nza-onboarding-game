@@ -158,6 +158,26 @@ A `level.json` may add two optional blocks (see `levels/level-grid/`):
 - `world` — `startState`/`endState` + sky colours for a level that visibly
   transforms (e.g. dirty → clean). (Rendering of the transform is a later piece.)
 
+### Optional: `actors` — the moving/active toolbox
+
+A `level.json` may add an `actors` array of moving or interactive things. Like
+placements, they're **pure data — no engine code to use them.** All x,y are
+top-left pixels. Delete the ones you don't need.
+
+| `type` | What it does | Key fields |
+|---|---|---|
+| `mover` | Moving platform the player rides | `axis` `"x"`/`"y"`, `distance` (px), `speed` (px/s), `w`, `h` |
+| `block` | Breakable box — bash from below to shatter | optional `drop` = an `objectId` to pop out |
+| `enemy` | Patroller; stomp from above defeats it, side-touch kills | `range` (px), `speed`, `points` |
+| `emitter` | Fires lethal bolts | `dir` `-1`/`+1`, `interval` (s), `speed`; optional `range` (only fire when player within) |
+| `spring` | Bounce pad — launches the player high | `power` (launch speed, ~1300) |
+| `crumble` | Platform that breaks shortly after you land | `w`, `h` |
+
+Example: `{ "type": "mover", "x": 600, "y": 430, "w": 96, "h": 16, "axis": "x", "distance": 150, "speed": 70 }`.
+See `levels/_template-level/level.json` (documented stubs) and `levels/level-grid/`
+(all six in use). Follow the **teach → practise → challenge** pattern: introduce a
+mechanic somewhere safe before putting it over a death pit.
+
 ---
 
 ## 4. How to add a new level (the core task)
