@@ -24,14 +24,21 @@ The **foil is "Mr Net Stupid Zero"** (not "bloody") — corrected from the v1 dr
 
 ## 1. What this brief adds (the story layer)
 
-- **Part 1 — Reusable dialogue/cutscene system.** Action pauses, a character
-  portrait + lines appear (cheeky voice), advance on tap/key, control resumes.
-  Data-driven (beats defined in level data), so every world can use it. Respect
-  reduced-motion; skippable.
-- **Part 2 — World 1 narrative beats + cast.** Wire the five §4.3 beats (opening,
-  meet Milirenew, Mr Net Stupid Zero heckle, Oil Baron, win) triggered at level
-  positions/events. Simple portrait art for Minister Milirenew, **Mr Net Stupid
-  Zero**, the Oil Baron (original caricatures of a *stance*, never a real person).
+- **Part 1 — Reusable dialogue/cutscene system.** [BUILT] Action pauses, a
+  character portrait + lines appear, advance on tap/key, control resumes. Data
+  driven; reduced-motion safe; skippable.
+- **Part 1b — Staged cutscenes (v1.1 §4.3).** Upgrade the system from a dialogue
+  box to *theatre*: the speaker **walks into frame**, dialogue plays, then a
+  **funny exit** animation, then resume. [feel-dependent — check in]
+- **Part 2 — World 1 beats + cast.** [BUILT, names updated] The six §4.3 beats
+  wired into level-grid. Cast: **Ed Megawatt** (goodie, renamed from Milirenew),
+  **Mr Net Stupid Zero** (foil), **PABLO** (helper — secret path), **The Oil
+  Baron** (boss). Caricature portraits (a stance, never a real person).
+- **Part 2b — PABLO's secret path.** PABLO opens a hidden route to the boss
+  (a wall breaks / a light bridge appears).
+- **Part 2c — Atmosphere system (v1.1 §4.5).** Palette/light shift on a beat
+  trigger: dark & grimy when Mr Net Stupid Zero arrives (Beat 2), re-brighten
+  when Ed Megawatt counters (Beat 3). Reusable per world.
 - **Part 3 — World map.** A home → map screen: 4 nodes, World 1 open, Worlds 2–4
   locked ("coming soon"). Picks up the existing level picker.
 - **Part 4 — Character-choice foundation.** Pick-your-hero screen (Student
@@ -42,8 +49,9 @@ The **foil is "Mr Net Stupid Zero"** (not "bloody") — corrected from the v1 dr
   (a ride/power-up: boosted speed, ICE cars become harmless while riding).
 - **Part 7 — Flavour hazards + recycling.** Background plane/trucks (supply-chain
   dodge-and-learn) and an optional recycling-bin collectible for bonus points.
-- **Part 8 — The Oil Baron boss.** A simple boss finale: flip electrify-switches
-  (or stomp phases) until the gas plant goes green; then BEAT 5 win + "scarpers".
+- **Part 8 — The Oil Baron boss (v1.1 §4.3 Beat 5).** Your banked collectibles
+  are **ammo** — fire clean-energy bolts at the Baron, dodge his oil-gunk + falling
+  levies; enough hits flips the gas plant green → a heat pump, then BEAT 6 win.
 - **Part 9 — Reshape `level-grid`** to the §4.2 teaching curve (open → ally →
   storage → transport/EV → heckler → gauntlet → boss → win).
 - **Part 10 — Deploy & verify on a phone** (Chris's real-device gate).
