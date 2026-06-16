@@ -320,6 +320,35 @@
       body.playing #hint { display: none; }
     }
 
+    /* ---- Cutscene / dialogue box ---- */
+    #cutscene {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+      display: flex; justify-content: center;
+      padding: 0 16px 18px; cursor: pointer;
+    }
+    #cutscene[hidden] { display: none; }
+    .cs-box {
+      display: flex; gap: 14px; align-items: flex-start;
+      width: 100%; max-width: 720px;
+      background: rgba(11, 18, 32, 0.94);
+      border: 2px solid var(--teal);
+      box-shadow: inset 0 0 0 4px #0b1220;
+      border-radius: 10px; padding: 14px 16px;
+    }
+    .cs-portrait {
+      flex: 0 0 56px; width: 56px; height: 56px; border-radius: 8px;
+      display: grid; place-items: center;
+      font-family: var(--font-display); font-size: 30px; color: #0b1220;
+      background: var(--p, var(--teal));
+    }
+    .cs-body { flex: 1; min-width: 0; }
+    .cs-name {
+      font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--teal); margin-bottom: 5px;
+    }
+    .cs-text { font-family: var(--font-ui); font-size: 15px; line-height: 1.45; color: var(--cream); }
+    .cs-hint { margin-top: 8px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; opacity: 0.45; }
+
     /* ---- Boot screen (PRESS START) ---- */
     #boot {
       position: fixed; inset: 0; z-index: 30;
@@ -466,6 +495,18 @@
     <p class="tagline" style="margin-top:6px">Pick a level</p>
     <div id="level-list">Loading levels…</div>
     <div class="footer">Net Zero Advisory</div>
+  </div>
+
+  <!-- Cutscene / dialogue box (shown when a narrative beat triggers). -->
+  <div id="cutscene" hidden>
+    <div class="cs-box">
+      <div class="cs-portrait" id="cs-portrait"></div>
+      <div class="cs-body">
+        <div class="cs-name" id="cs-name"></div>
+        <div class="cs-text" id="cs-text"></div>
+        <div class="cs-hint">▸ tap / any key</div>
+      </div>
+    </div>
   </div>
 
   <!-- Win / celebration overlay (shown when you reach the goal). -->

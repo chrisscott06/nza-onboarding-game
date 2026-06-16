@@ -55,6 +55,7 @@ const Engine = (() => {
   let lastTime = null;
   let running = false;
   let onWin = null; // callback fired once when the player reaches the goal
+  let onBeat = null; // callback fired when a narrative beat triggers (pauses play)
 
   // ---- World setup -----------------------------------------------------
   function load(spec) {
@@ -114,6 +115,8 @@ const Engine = (() => {
       shake: 0,        // screen-shake magnitude (decays)
       tip: '', tipT: 0, // on-screen caption (narrative + data one-liners)
       shownTips: new Set(), // tips that have already fired (once each)
+      paused: false,    // a cutscene/dialogue beat is on screen
+      beats: (spec.beats || []).map((b) => ({ ...b, fired: false })),
       particles: [],   // transient visual bits (death burst, confetti)
       projectiles: [], // emitter bolts in flight
     };
@@ -130,6 +133,23 @@ const Engine = (() => {
     Face.setFace(spec.meta && spec.meta.faceAsset);
     camera = { x: 0, y: 0 };
     if (spec.meta && spec.meta.intro) showTip(spec.meta.intro, 5);
+  }
+
+  // ---- Narrative beats / cutscenes -------------------------------------
+  // Fire a beat when its trigger is met: 'start' (first frame), {x:N} (player
+  // passes x), or 'goal' (handled on win). Pauses play and calls onBeat().
+  function checkBeats() {
+    for (const b of world.beats) {
+      if (b.fired) continue;
+      let hit = false;
+      if (b.trigger === 'start') hit = true;
+      else if (b.trigger && b.trigger.x != null) hit = world.player.x >= b.trigger.x;
+      if (!hit) continue;
+      b.fired = true;
+      world.paused = true;
+      if (onBeat) onBeat(b);
+      return;
+    }
   }
 
   // ---- On-screen captions (narrative + data one-liners) ----------------
@@ -178,6 +198,11 @@ const Engine = (() => {
       updateParticles(dt);
       return;
     }
+
+    // a dialogue beat freezes play until it's dismissed
+    if (world.paused) return;
+    checkBeats();
+    if (world.paused) return; // a beat just triggered
 
     // move platforms first, and carry the player if they're riding one
     updateActors(dt);
@@ -558,7 +583,7 @@ const Engine = (() => {
     p.powerT = 0; p.shield = false; p.invulnT = 0;
     p.dying = false; p.deathT = 0;
     p.stretch = 0; p.wasOnGround = false;
-    world.score = 0; world.shake = 0; world.tipT = 0;
+    world.score = 0; world.shake = 0; world.tipT = 0; world.paused = false;
     world.surgeT = 0; world.surgeReady = false; world.curtailT = 0;
     world.won = false; world.winT = 0;
     world.freezeT = 0; world.particles = [];
@@ -1263,6 +1288,7 @@ const Engine = (() => {
     ctx = buffer.getContext('2d');
     ctx.imageSmoothingEnabled = false;
     onWin = (opts && opts.onWin) || null;
+    onBeat = (opts && opts.onBeat) || null;
     load(spec);
     lastTime = null;
     accumulator = 0;
@@ -1295,5 +1321,10 @@ const Engine = (() => {
     return o.sound ? o.sound.replace(/^.*\//, '').replace(/\.\w+$/, '') : 'collect-soft';
   }
 
-  return { start, get world() { return world; }, get camera() { return camera; } };
+  return {
+    start,
+    resume() { if (world) world.paused = false; }, // dismiss a dialogue beat
+    get world() { return world; },
+    get camera() { return camera; },
+  };
 })();
