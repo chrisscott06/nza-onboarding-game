@@ -159,6 +159,19 @@ verified pieces:
   playback wired, no files fetched yet).
 - Displaying each object's `realValue` in-game (the data is carried).
 
+## Polish pass (look & feel)
+
+- **Logo:** the real thick NZA mark (`public/nza-logo.svg`, from
+  `public/logos/`) on the menu and as the in-game watermark.
+- **Mario-style death:** hitting a lethal hazard now plays a hit-stop → hop →
+  tumble → particle burst → fall off-screen, then restarts the run (instead of
+  an instant reset). Invincibility and the insulation shield still pre-empt it.
+- **Backgrounds & textures:** procedural parallax — starfield, drifting clouds,
+  an accent horizon glow, rolling hills with wind-turbine silhouettes — plus
+  textured platforms (gradient + panel seams + an accent-tinted top cap). All
+  original canvas art, camera-driven/deterministic (reduced-motion safe), and
+  themed per level via its `accentColor`. Verified in-browser.
+
 ## Next (after the foundation, per BRIEF §11 — not this session)
 
 - The onboarding app (branded landing + live GitHub checklist).
