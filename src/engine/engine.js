@@ -73,6 +73,8 @@ const Engine = (() => {
         dying: false, // playing the death animation
         deathT: 0,    // time into the death animation
         ridingActor: null, // moving platform the player is standing on
+        stretch: 0,   // squash-and-stretch (+ tall on jump, - wide on land)
+        wasOnGround: false,
       },
       platforms: spec.platforms.map((p) => ({ ...p })),
       // moving platforms / dynamic things (Part: reusable mechanics)
@@ -105,6 +107,7 @@ const Engine = (() => {
       won: false,      // reached the goal
       winT: 0,         // time since winning (drives the confetti shower)
       freezeT: 0,      // hit-stop timer
+      shake: 0,        // screen-shake magnitude (decays)
       particles: [],   // transient visual bits (death burst, confetti)
       projectiles: [], // emitter bolts in flight
     };
@@ -185,6 +188,7 @@ const Engine = (() => {
       p.onGround = false;
       p.coyote = 0;
       p.jumpBufferT = 0;
+      if (!reduceMotion) p.stretch = 0.22; // stretch up on the leap
       sfx('jump');
     }
 
@@ -209,8 +213,16 @@ const Engine = (() => {
     p.onGround = false;
     p.x += p.vx * dt;
     resolveAxis('x');
+    const impactVy = p.vy; // fall speed at the moment of landing
     p.y += p.vy * dt;
     resolveAxis('y');
+
+    // squash on a real landing; ease stretch back to neutral
+    if (!reduceMotion && p.onGround && !p.wasOnGround && impactVy > 250) {
+      p.stretch = -Math.min(0.32, impactVy / 2800);
+    }
+    p.wasOnGround = p.onGround;
+    p.stretch += (0 - p.stretch) * Math.min(1, dt * 14);
 
     // --- keep inside the level bounds horizontally ---
     const b = world.bounds;
@@ -260,9 +272,11 @@ const Engine = (() => {
   function handleObjects() {
     const p = world.player;
     const s = world.storage;
+    const hb = hurtBox();
     for (const o of world.objects) {
       if (o.collected) continue;
-      if (!aabb(p, o)) continue;
+      // hazards use the forgiving inset box; pickups use the full body
+      if (!aabb(o.type === 'hazard' ? hb : p, o)) continue;
 
       if (o.type === 'collectible') {
         if (o.effect === 'grow-storage') {
@@ -470,7 +484,7 @@ const Engine = (() => {
       const q = ps[i];
       q.x += q.vx * dt;
       if (q.x < b.x - 60 || q.x > b.x + b.w + 60) { ps.splice(i, 1); continue; }
-      if (!aabb(p, q)) continue;
+      if (!aabb(hurtBox(), q)) continue;
       ps.splice(i, 1);
       if (invincible()) continue;
       if (p.shield) { p.shield = false; p.invulnT = SHIELD_INVULN; sfx('shield'); continue; }
@@ -492,8 +506,9 @@ const Engine = (() => {
         world.score += e.points || 0;
         p.vy = -STOMP_BOUNCE;
         spawnBurst(e.x + e.w / 2, e.y + e.h / 2, ['#fbbf24', '#f5f1e6', '#9ca3af'], 10);
+        addShake(4);
         sfx('break');
-      } else if (!invincible()) {
+      } else if (!invincible() && aabb(hurtBox(), e)) { // forgiving lethal box
         if (p.shield) { p.shield = false; p.invulnT = SHIELD_INVULN; sfx('shield'); continue; }
         startDeath();
         return;
@@ -510,7 +525,8 @@ const Engine = (() => {
     p.onGround = false; p.coyote = 0; p.jumpBufferT = 0;
     p.powerT = 0; p.shield = false; p.invulnT = 0;
     p.dying = false; p.deathT = 0;
-    world.score = 0;
+    p.stretch = 0; p.wasOnGround = false;
+    world.score = 0; world.shake = 0;
     world.surgeT = 0; world.surgeReady = false; world.curtailT = 0;
     world.won = false; world.winT = 0;
     world.freezeT = 0; world.particles = [];
@@ -541,6 +557,7 @@ const Engine = (() => {
     p.vy = -780;          // the death "hop"
     world.freezeT = 0.1;  // hit-stop on impact
     spawnBurst(p.x + p.w / 2, p.y + p.h / 2, ['#fb7185', '#fbbf24', '#f5f1e6'], 16);
+    addShake(11);
     sfx('lose');
   }
 
@@ -642,8 +659,12 @@ const Engine = (() => {
     // simple parallax sky bands so motion reads clearly
     drawBackground();
 
+    if (world.shake > 0.2) world.shake *= 0.86; else world.shake = 0;
+    const sk = world.shake;
+    const ox = sk ? (Math.random() - 0.5) * sk : 0;
+    const oy = sk ? (Math.random() - 0.5) * sk : 0;
     ctx.save();
-    ctx.translate(-Math.round(camera.x), -Math.round(camera.y));
+    ctx.translate(-Math.round(camera.x) + ox, -Math.round(camera.y) + oy);
 
     for (const plat of world.platforms) drawPlatform(plat);
     for (const a of world.actors) drawActor(a);
@@ -987,9 +1008,22 @@ const Engine = (() => {
     let color = world.accent;
     if (world.surgeT > 0) color = '#a5f3fc';      // surging: bright cyan
     else if (p.powerT > 0) color = '#7ef9e6';     // heat-pump: bright teal
-    Face.drawCharacter(ctx, p, color);
 
-    if (p.shield) drawShield(p);
+    const drawBody = () => {
+      Face.drawCharacter(ctx, p, color);
+      if (p.shield) drawShield(p);
+    };
+    if (p.stretch && !reduceMotion) {
+      // squash-and-stretch, scaled about the feet
+      const sy = 1 + p.stretch, sx = 1 - p.stretch * 0.5;
+      const cx = p.x + p.w / 2, feet = p.y + p.h;
+      ctx.save();
+      ctx.translate(cx, feet); ctx.scale(sx, sy); ctx.translate(-cx, -feet);
+      drawBody();
+      ctx.restore();
+    } else {
+      drawBody();
+    }
   }
 
   function drawSurgeTrail(p) {
@@ -1135,6 +1169,15 @@ const Engine = (() => {
   // Fire a sound effect if the sound system is loaded.
   function sfx(name) {
     if (typeof Sound !== 'undefined') Sound.play(name);
+  }
+  // Forgiving hit-box for LETHAL contacts (inset from the visible body) so the
+  // player never dies on a sprite corner. Pickups use the full body (generous).
+  function hurtBox() {
+    const p = world.player;
+    return { x: p.x + 6, y: p.y + 4, w: p.w - 12, h: p.h - 8 };
+  }
+  function addShake(mag) {
+    if (!reduceMotion) world.shake = Math.max(world.shake, mag);
   }
   // Map an object's sound path (e.g. "audio/collect-bright.mp3") to a synth key.
   function soundKey(o) {
