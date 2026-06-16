@@ -35,6 +35,7 @@ const Engine = (() => {
   const SURGE_SPEED_MULT = 1.9; // grid-surge dash speed multiplier
   const SHIELD_INVULN = 0.9; // brief invulnerability after insulation absorbs a hit
   const GREMLIN_DRAIN_CD = 0.7; // seconds between storage drains from one gremlin
+  const STOMP_BOUNCE = 540; // upward hop after stomping an enemy
 
   // Respect the user's motion preference for the power-up pulse.
   const reduceMotion =
@@ -72,7 +73,7 @@ const Engine = (() => {
       platforms: spec.platforms.map((p) => ({ ...p })),
       // moving platforms / dynamic things (Part: reusable mechanics)
       actors: (spec.actors || []).map((a) => ({
-        dir: 1, off: 0, dx: 0, dy: 0, broken: false,
+        dir: 1, off: 0, dx: 0, dy: 0, broken: false, dead: false,
         x0: a.x, y0: a.y, w: a.w || 80, h: a.h || 16,
         distance: a.distance != null ? a.distance : 120,
         speed: a.speed || 60,
@@ -208,8 +209,9 @@ const Engine = (() => {
     if (p.x < b.x) { p.x = b.x; p.vx = 0; }
     if (p.x + p.w > b.x + b.w) { p.x = b.x + b.w - p.w; p.vx = 0; }
 
-    // --- hazards / collectibles ---
+    // --- hazards / collectibles / enemies ---
     handleObjects();
+    handleEnemies();
 
     // --- reached the goal? celebrate ---
     if (world.goal && !world.won && aabb(p, goalBox(world.goal))) triggerWin();
@@ -373,18 +375,48 @@ const Engine = (() => {
   // Move moving platforms along their path and carry the rider with them.
   function updateActors(dt) {
     for (const a of world.actors) {
-      if (a.type !== 'mover') continue;
-      const px = a.x, py = a.y;
-      a.off += a.dir * a.speed * dt;
-      if (a.off >= a.distance) { a.off = a.distance; a.dir = -1; }
-      else if (a.off <= 0) { a.off = 0; a.dir = 1; }
-      if (a.axis === 'y') a.y = a.y0 + a.off;
-      else a.x = a.x0 + a.off;
-      a.dx = a.x - px;
-      a.dy = a.y - py;
+      if (a.type === 'mover') {
+        const px = a.x, py = a.y;
+        a.off += a.dir * a.speed * dt;
+        if (a.off >= a.distance) { a.off = a.distance; a.dir = -1; }
+        else if (a.off <= 0) { a.off = 0; a.dir = 1; }
+        if (a.axis === 'y') a.y = a.y0 + a.off;
+        else a.x = a.x0 + a.off;
+        a.dx = a.x - px;
+        a.dy = a.y - py;
+      } else if (a.type === 'enemy' && !a.dead) {
+        const rng = a.range != null ? a.range : 120;
+        a.off += a.dir * a.speed * dt;
+        if (a.off >= rng) { a.off = rng; a.dir = -1; }
+        else if (a.off <= 0) { a.off = 0; a.dir = 1; }
+        a.x = a.x0 + a.off;
+        a.facing = a.dir;
+      }
     }
     const p = world.player;
     if (p.ridingActor) { p.x += p.ridingActor.dx || 0; p.y += p.ridingActor.dy || 0; }
+  }
+
+  // Player vs patrolling enemies: a stomp from above defeats them (bounce +
+  // points); any other contact is lethal (unless powered / shielded).
+  function handleEnemies() {
+    const p = world.player;
+    for (const e of world.actors) {
+      if (e.type !== 'enemy' || e.dead) continue;
+      if (!aabb(p, e)) continue;
+      const stomping = p.vy > 0 && (p.y + p.h) <= e.y + e.h * 0.6; // forgiving stomp
+      if (stomping) {
+        e.dead = true;
+        world.score += e.points || 0;
+        p.vy = -STOMP_BOUNCE;
+        spawnBurst(e.x + e.w / 2, e.y + e.h / 2, ['#fbbf24', '#f5f1e6', '#9ca3af'], 10);
+        sfx('break');
+      } else if (!invincible()) {
+        if (p.shield) { p.shield = false; p.invulnT = SHIELD_INVULN; sfx('shield'); continue; }
+        startDeath();
+        return;
+      }
+    }
   }
 
   // Restart the whole run: player back to start, score zeroed, collectibles
@@ -401,7 +433,7 @@ const Engine = (() => {
     world.won = false; world.winT = 0;
     world.freezeT = 0; world.particles = [];
     p.ridingActor = null;
-    for (const a of world.actors) { a.off = 0; a.dir = 1; a.x = a.x0; a.y = a.y0; a.dx = 0; a.dy = 0; a.broken = false; }
+    for (const a of world.actors) { a.off = 0; a.dir = 1; a.x = a.x0; a.y = a.y0; a.dx = 0; a.dy = 0; a.broken = false; a.dead = false; }
     if (world.storage) {
       world.storage.capacity = world.mechanic.startSegments || 0;
       world.storage.fill = 0;
@@ -690,9 +722,32 @@ const Engine = (() => {
   }
 
   function drawActor(a) {
-    if (a.broken) return;
+    if (a.broken || a.dead) return;
     if (a.type === 'mover') return drawMover(a);
     if (a.type === 'block') return drawBlock(a);
+    if (a.type === 'enemy') return drawEnemy(a);
+  }
+
+  // A patrolling soot critter: charcoal body, angry eyes (facing its direction),
+  // little feet. Chunky and readable.
+  function drawEnemy(a) {
+    const f = a.facing >= 0 ? 1 : -1;
+    ctx.fillStyle = '#374151';
+    ctx.fillRect(a.x, a.y + 4, a.w, a.h - 4);
+    ctx.beginPath();
+    ctx.arc(a.x + a.w / 2, a.y + 6, a.w / 2, Math.PI, 0); // rounded top
+    ctx.fill();
+    ctx.fillStyle = '#0b1220'; // feet
+    ctx.fillRect(a.x + 3, a.y + a.h - 3, 7, 3);
+    ctx.fillRect(a.x + a.w - 10, a.y + a.h - 3, 7, 3);
+    // eyes
+    const ey = a.y + a.h * 0.42;
+    ctx.fillStyle = '#fde68a';
+    ctx.fillRect(a.x + a.w / 2 - 9 + (f > 0 ? 4 : 0), ey, 6, 6);
+    ctx.fillRect(a.x + a.w / 2 + 3 + (f > 0 ? 4 : 0), ey, 6, 6);
+    ctx.fillStyle = '#7f1d1d';
+    ctx.fillRect(a.x + a.w / 2 - 7 + (f > 0 ? 4 : 0), ey + 2, 3, 3);
+    ctx.fillRect(a.x + a.w / 2 + 5 + (f > 0 ? 4 : 0), ey + 2, 3, 3);
   }
 
   // A moving platform: a metal slab with a centre seam and direction ticks so
