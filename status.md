@@ -159,6 +159,18 @@ verified pieces:
   playback wired, no files fetched yet).
 - Displaying each object's `realValue` in-game (the data is carried).
 
+## Narrative & win (next-version asks)
+
+- **Landing-page intro:** the home screen is now a 16-bit game intro — NZA mark,
+  "NZA Net Zero Hero" title, a typed-out narrative crawl (reduced-motion safe,
+  click to skip), and a how-to-play legend (collect renewables / avoid fossil
+  fuels / heat-pump power-up / reach the goal) built from the real sprites.
+- **Finish-line win:** reaching the goal triggers a celebration — confetti
+  shower + an overlay that tallies the score (count-up), with "Play again"
+  (reloads `?level=<name>`) and "Menu" (back to the landing page). This delivers
+  the "substation-flip win/level-complete" that was deferred (the dirty→clean
+  **sky transform** is still the only outstanding bit of that bundle item).
+
 ## Polish pass (look & feel)
 
 - **Logo:** the real thick NZA mark (`public/nza-logo.svg`, from
