@@ -212,6 +212,21 @@ the original Part H real-device acceptance). Optional future: the full authentic
 340×192 tile re-author (deliberately deferred — see
 `docs/briefs/active/net-zero-hero-engine-extension.md`).
 
+## Story layer — World 1 (foundation built; see story brief)
+
+Per `docs/net-zero-hero-story-bible.md` (foil = **Mr Net Stupid Zero**):
+- **Reusable cutscene/dialogue system** — `beats` in `level.json` (trigger
+  `start` / `{x}`); engine pauses, a 16-bit dialogue box (portrait + speaker +
+  line) advances on tap/key, then resumes. `Engine.resume()`.
+- **World 1 beats + cast** wired into `level-grid`: opening, Minister Milirenew,
+  Mr Net Stupid Zero, the Oil Baron, and the win line. Caricature emoji
+  portraits (🙂 🦺 😡 🎩).
+- **World map** on the landing — four pillars, World 1 open, 2–4 locked.
+
+**Deferred (the feel-dependent batch — Chris to playtest first):** the EV-ride
+gag, the Oil Baron boss *fight*, and the dirty→clean world transform. Plus the
+character-choice screen + flavour hazards (per the story brief).
+
 ## Sound (WebAudio synth)
 
 - `src/audio.js` — all sound generated in code (no files): retro SFX for jump,
