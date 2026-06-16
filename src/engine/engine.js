@@ -407,28 +407,157 @@ const Engine = (() => {
     drawHUD(); // screen-space, not affected by the camera
   }
 
+  // Parallax background: sky, stars, an accent horizon glow, two rolling hill
+  // layers (the far one carries wind-turbine silhouettes), and drifting clouds.
+  // Everything is camera-driven and deterministic (no per-frame randomness, so
+  // no flicker and nothing auto-animates — reduced-motion safe). Themed by the
+  // level's accent colour.
   function drawBackground() {
-    const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    g.addColorStop(0, '#16203a');
-    g.addColorStop(1, '#0b1220');
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const W = canvas.width, H = canvas.height, cx = camera.x;
+    const accent = world.accent || '#2dd4bf';
 
-    // NZA logo watermark, subtly, behind the play area (screen-space)
+    const sky = ctx.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, '#0e1830');
+    sky.addColorStop(0.6, '#0b1324');
+    sky.addColorStop(1, '#0a0f1c');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, W, H);
+
+    drawStars(W, H, cx);
+
+    // NZA logo watermark, subtly, behind the play area
     if (logo.ready) {
-      const size = Math.min(canvas.width, canvas.height) * 0.66;
+      const size = Math.min(W, H) * 0.62;
       ctx.save();
-      ctx.globalAlpha = 0.05;
-      ctx.drawImage(logo.img, (canvas.width - size) / 2, (canvas.height - size) / 2, size, size);
+      ctx.globalAlpha = 0.04;
+      ctx.drawImage(logo.img, (W - size) / 2, (H - size) / 2, size, size);
       ctx.restore();
+    }
+
+    drawClouds(W, H, cx);
+
+    // accent horizon glow low on the screen
+    const glow = ctx.createLinearGradient(0, H * 0.5, 0, H);
+    glow.addColorStop(0, 'rgba(0,0,0,0)');
+    glow.addColorStop(1, hexA(accent, 0.1));
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, H * 0.5, W, H * 0.5);
+
+    drawHills(W, H, cx, 0.22, H * 0.66, 26, '#101a30', null, false);
+    drawHills(W, H, cx, 0.42, H * 0.78, 40, '#0d1526', accent, true);
+  }
+
+  function hillY(wx, baseY, amp) {
+    return baseY - amp * Math.sin(wx * 0.0016) - amp * 0.5 * Math.sin(wx * 0.0041 + 1.3);
+  }
+
+  function drawHills(W, H, cx, factor, baseY, amp, color, tint, withTurbines) {
+    const off = cx * factor;
+    const step = 22;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(0, H);
+    for (let sx = 0; sx <= W; sx += step) ctx.lineTo(sx, hillY(sx + off, baseY, amp));
+    ctx.lineTo(W, H);
+    ctx.closePath();
+    ctx.fill();
+    if (tint) {
+      ctx.strokeStyle = hexA(tint, 0.16);
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let sx = 0; sx <= W; sx += step) {
+        const y = hillY(sx + off, baseY, amp);
+        sx === 0 ? ctx.moveTo(sx, y) : ctx.lineTo(sx, y);
+      }
+      ctx.stroke();
+    }
+    if (withTurbines) {
+      const spacing = 540;
+      const start = Math.floor(off / spacing) * spacing;
+      for (let wx = start; wx < off + W + spacing; wx += spacing) {
+        drawTurbine(wx - off, hillY(wx, baseY, amp), tint);
+      }
     }
   }
 
+  function drawTurbine(x, baseY, accent) {
+    const hubY = baseY - 48;
+    ctx.strokeStyle = hexA(accent || '#2dd4bf', 0.3);
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(x, baseY); ctx.lineTo(x, hubY); ctx.stroke();
+    ctx.save();
+    ctx.translate(x, hubY);
+    for (let i = 0; i < 3; i++) {
+      ctx.rotate((Math.PI * 2) / 3);
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -24); ctx.stroke();
+    }
+    ctx.restore();
+    ctx.fillStyle = hexA(accent || '#2dd4bf', 0.5);
+    ctx.beginPath(); ctx.arc(x, hubY, 2.5, 0, Math.PI * 2); ctx.fill();
+  }
+
+  function drawStars(W, H, cx) {
+    const off = (cx * 0.1) % 240;
+    ctx.fillStyle = 'rgba(245,241,230,0.32)';
+    const band = Math.floor(H * 0.5);
+    for (let i = 0; i < 70; i++) {
+      let bx = ((i * 137) % (W + 240)) - off;
+      if (bx < 0) bx += W + 240;
+      const by = (i * 83) % band;
+      const r = i % 6 === 0 ? 1.6 : 1;
+      ctx.fillRect(bx, by, r, r);
+    }
+  }
+
+  function drawClouds(W, H, cx) {
+    const off = (cx * 0.3) % 620;
+    ctx.fillStyle = 'rgba(150,170,205,0.05)';
+    for (let i = -1; i < Math.ceil(W / 620) + 1; i++) {
+      const bx = i * 620 + 140 - off;
+      const by = 50 + (((i + 4) % 3) * 46);
+      cloudPuff(bx, by);
+    }
+  }
+
+  function cloudPuff(x, y) {
+    ctx.beginPath();
+    ctx.ellipse(x, y, 60, 20, 0, 0, Math.PI * 2);
+    ctx.ellipse(x + 44, y + 6, 40, 16, 0, 0, Math.PI * 2);
+    ctx.ellipse(x - 40, y + 8, 34, 13, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function hexA(hex, a) {
+    const h = hex.replace('#', '');
+    const n = h.length === 3 ? h.split('').map((c) => c + c).join('') : h;
+    const r = parseInt(n.slice(0, 2), 16) || 0;
+    const g = parseInt(n.slice(2, 4), 16) || 0;
+    const b = parseInt(n.slice(4, 6), 16) || 0;
+    return `rgba(${r},${g},${b},${a})`;
+  }
+
+  // Textured platform: gradient body, panel seams, and a top cap tinted with the
+  // level's accent colour so each level reads a little differently.
   function drawPlatform(plat) {
-    ctx.fillStyle = '#33415c';
+    const g = ctx.createLinearGradient(0, plat.y, 0, plat.y + plat.h);
+    g.addColorStop(0, '#3a4a66');
+    g.addColorStop(1, '#28344c');
+    ctx.fillStyle = g;
     ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
-    ctx.fillStyle = '#475569';
-    ctx.fillRect(plat.x, plat.y, plat.w, 6); // top lip
+
+    ctx.strokeStyle = 'rgba(11,18,32,0.35)';
+    ctx.lineWidth = 1;
+    for (let sx = plat.x + 40; sx < plat.x + plat.w; sx += 40) {
+      ctx.beginPath();
+      ctx.moveTo(sx + 0.5, plat.y + 7);
+      ctx.lineTo(sx + 0.5, plat.y + plat.h);
+      ctx.stroke();
+    }
+
+    ctx.fillStyle = hexA(world.accent || '#2dd4bf', 0.85); // accent top cap
+    ctx.fillRect(plat.x, plat.y, plat.w, 4);
+    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    ctx.fillRect(plat.x, plat.y + 4, plat.w, 2);
   }
 
   // Draw an object from its sprite (path comes from data/objects.json). If the
