@@ -64,6 +64,8 @@ const Engine = (() => {
         powerT: 0,    // seconds of heat-pump power-up remaining
         shield: false, // insulation: absorbs one hazard hit
         invulnT: 0,   // brief grace after a shield break
+        dying: false, // playing the death animation
+        deathT: 0,    // time into the death animation
       },
       platforms: spec.platforms.map((p) => ({ ...p })),
       // hazards + collectibles. Sensible default size if a placement omits w/h.
@@ -82,6 +84,8 @@ const Engine = (() => {
       surgeT: 0,
       surgeReady: false,
       curtailT: 0,
+      freezeT: 0,      // hit-stop timer
+      particles: [],   // transient visual bits (death burst, etc.)
     };
     if (world.mechanic && world.mechanic.type === 'storage-meter') {
       world.storage = {
@@ -120,6 +124,10 @@ const Engine = (() => {
   function update(dt) {
     const p = world.player;
     const t = TUNING;
+
+    // Hit-stop and the death animation take over the simulation.
+    if (world.freezeT > 0) { world.freezeT = Math.max(0, world.freezeT - dt); updateParticles(dt); return; }
+    if (p.dying) { updateDeath(dt); return; }
 
     // --- horizontal intent ---
     const dir = (Input.held.right ? 1 : 0) - (Input.held.left ? 1 : 0);
@@ -262,8 +270,8 @@ const Engine = (() => {
           p.invulnT = SHIELD_INVULN;
           continue;
         }
-        resetRun();
-        return; // player has been moved; stop checking this frame
+        startDeath();
+        return; // the death sequence takes over
       }
     }
   }
@@ -296,13 +304,76 @@ const Engine = (() => {
     p.vx = 0; p.vy = 0;
     p.onGround = false; p.coyote = 0; p.jumpBufferT = 0;
     p.powerT = 0; p.shield = false; p.invulnT = 0;
+    p.dying = false; p.deathT = 0;
     world.score = 0;
     world.surgeT = 0; world.surgeReady = false; world.curtailT = 0;
+    world.freezeT = 0; world.particles = [];
     if (world.storage) {
       world.storage.capacity = world.mechanic.startSegments || 0;
       world.storage.fill = 0;
     }
     for (const o of world.objects) { o.collected = false; o.drainCD = 0; }
+  }
+
+  // ---- Death (Mario-style) ---------------------------------------------
+  // A brief hit-stop for impact, then the player pops up, tumbles, and falls
+  // off the bottom of the screen before the run restarts.
+  function startDeath() {
+    const p = world.player;
+    if (p.dying) return;
+    p.dying = true;
+    p.deathT = 0;
+    p.vx = 0;
+    p.vy = -780;          // the death "hop"
+    world.freezeT = 0.1;  // hit-stop on impact
+    spawnBurst(p.x + p.w / 2, p.y + p.h / 2, ['#fb7185', '#fbbf24', '#f5f1e6'], 16);
+  }
+
+  function updateDeath(dt) {
+    const p = world.player;
+    p.deathT += dt;
+    p.vy = Math.min(p.vy + TUNING.fallGravity * dt, TUNING.maxFallSpeed);
+    p.y += p.vy * dt; // falls straight through everything
+    updateParticles(dt);
+    if (p.y > world.bounds.y + world.bounds.h + 300 || p.deathT > 1.9) resetRun();
+  }
+
+  // ---- Particles (death burst, pickups) --------------------------------
+  function spawnBurst(x, y, colors, n) {
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const sp = 80 + Math.random() * 240;
+      const life = 0.5 + Math.random() * 0.5;
+      world.particles.push({
+        x, y,
+        vx: Math.cos(a) * sp,
+        vy: Math.sin(a) * sp - 140,
+        life, max: life,
+        color: colors[(Math.random() * colors.length) | 0],
+        size: 3 + Math.random() * 4,
+      });
+    }
+  }
+
+  function updateParticles(dt) {
+    const ps = world.particles;
+    for (let i = ps.length - 1; i >= 0; i--) {
+      const q = ps[i];
+      q.life -= dt;
+      if (q.life <= 0) { ps.splice(i, 1); continue; }
+      q.vy += 900 * dt; // gravity
+      q.x += q.vx * dt;
+      q.y += q.vy * dt;
+    }
+  }
+
+  function drawParticles() {
+    for (const q of world.particles) {
+      ctx.globalAlpha = Math.max(0, q.life / q.max);
+      ctx.fillStyle = q.color;
+      ctx.fillRect(q.x - q.size / 2, q.y - q.size / 2, q.size, q.size);
+    }
+    ctx.globalAlpha = 1;
   }
 
   // ---- Camera ----------------------------------------------------------
@@ -329,6 +400,7 @@ const Engine = (() => {
     drawGoal(world.goal);
     for (const o of world.objects) if (!o.collected) drawObject(o);
     drawPlayer(world.player);
+    drawParticles();
 
     ctx.restore();
 
@@ -393,6 +465,18 @@ const Engine = (() => {
   }
 
   function drawPlayer(p) {
+    // Dying: tumble (rotate) and tint hurt, no aura/shield.
+    if (p.dying) {
+      const cx = p.x + p.w / 2, cy = p.y + p.h / 2;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(p.deathT * 6);
+      ctx.translate(-cx, -cy);
+      Face.drawCharacter(ctx, p, '#fb7185');
+      ctx.restore();
+      return;
+    }
+
     if (world.surgeT > 0) drawSurgeTrail(p);
     else if (p.powerT > 0) drawPowerAura(p);
 
