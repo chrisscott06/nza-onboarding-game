@@ -187,8 +187,30 @@ adds them by JSON alone — no engine edits to use). Each verified in-browser:
 - **Springs** (`spring`) — launch the player high; **collapsing platforms**
   (`crumble`) — shake then break shortly after you land.
 
-**Next:** Part 6 (retro framing / boot screen — flagged decision), then Parts
-7–10 (game-feel polish, narrative + realValue, toolbox docs, deploy).
+### Retro framing, feel & docs (brief Parts 6–10)
+
+- **Part 6 — retro look:** a PRESS START boot screen (NZA mark + "Net Zero Hero")
+  and a chunky-pixel render pass (engine draws to a half-res buffer, upscaled
+  nearest-neighbour). Kept the proven physics/levels (chose verifiable polish
+  over a blind 340×192 re-author — that remains an option in the brief).
+- **Part 7 — game feel:** forgiving inset hurt-box (no dying on a corner),
+  squash-and-stretch on jump/land, screen-shake on death/stomp. Reduced-motion
+  safe.
+- **Part 8 — narrative + data:** a caption system — level intro card, mechanic
+  one-liners on first encounter, and each object's real figure on collection
+  (e.g. "Solar panel: 11% UK solar capacity factor" — the disguised data lesson).
+- **Part 9 — toolbox docs:** the `actors` mechanics documented in CLAUDE.md +
+  `_template-level`. **Cold-agent gate passed** — a fresh agent built
+  `level-frostbite` ("Frostbite Manor") using all six mechanics from the docs
+  alone; it loads & plays. Kept as a fifth demo level.
+- **Part 10 — deploy readiness:** all new mechanics are touch-playable + retro +
+  responsive on mobile (verified in a 375px viewport); `vercel.json` + README
+  deploy steps already in place.
+
+**Open gate (Chris):** deploy to Vercel and play it on a real phone (Part 10 /
+the original Part H real-device acceptance). Optional future: the full authentic
+340×192 tile re-author (deliberately deferred — see
+`docs/briefs/active/net-zero-hero-engine-extension.md`).
 
 ## Sound (WebAudio synth)
 
