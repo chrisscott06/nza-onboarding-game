@@ -32,7 +32,8 @@
   ],
   "actors": [
     { "type": "mover", "x": 610, "y": 344, "w": 96, "h": 16, "axis": "x", "distance": 150, "speed": 70 },
-    { "type": "mover", "x": 1230, "y": 300, "w": 84, "h": 16, "axis": "y", "distance": 90, "speed": 55 }
+    { "type": "mover", "x": 1230, "y": 300, "w": 84, "h": 16, "axis": "y", "distance": 90, "speed": 55 },
+    { "type": "block", "x": 1480, "y": 250, "w": 40, "h": 40, "drop": "solar-panel" }
   ],
   "placements": [
     { "objectId": "solar-panel",    "x": 250,  "y": 320 },

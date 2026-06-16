@@ -115,13 +115,20 @@ function buildSpec(level, objectTable, meta) {
     h: p.h != null ? p.h : 28,
   }));
 
+  // Resolve an actor's `drop` (a breakable block's prize) against the object table.
+  const actors = (level.actors || []).map((a) => {
+    const def = a.drop && byId[a.drop];
+    if (!def) return a;
+    return { ...a, dropDef: { id: def.id, type: def.type, sprite: def.sprite, points: def.points || 0 } };
+  });
+
   return {
     meta,
     startPosition: level.startPosition,
     bounds: level.bounds,
     platforms,
     objects,
-    actors: level.actors || [], // moving platforms etc. (Part: reusable mechanics)
+    actors, // moving platforms, breakable blocks etc. (Part: reusable mechanics)
     goal: level.goal || null,
     mechanic: level.mechanic || null, // drives level-specific mechanics (Part: storage-meter)
     world: level.world || null,

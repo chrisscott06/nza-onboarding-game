@@ -72,7 +72,7 @@ const Engine = (() => {
       platforms: spec.platforms.map((p) => ({ ...p })),
       // moving platforms / dynamic things (Part: reusable mechanics)
       actors: (spec.actors || []).map((a) => ({
-        dir: 1, off: 0, dx: 0, dy: 0,
+        dir: 1, off: 0, dx: 0, dy: 0, broken: false,
         x0: a.x, y0: a.y, w: a.w || 80, h: a.h || 16,
         distance: a.distance != null ? a.distance : 120,
         speed: a.speed || 60,
@@ -314,7 +314,11 @@ const Engine = (() => {
     const p = world.player;
     if (axis === 'y') p.ridingActor = null;
     for (const plat of world.platforms) resolveSolid(p, plat, axis, null);
-    for (const a of world.actors) if (a.type === 'mover') resolveSolid(p, a, axis, a);
+    for (const a of world.actors) {
+      if (a.broken) continue;
+      if (a.type === 'mover') resolveSolid(p, a, axis, a);
+      else if (a.type === 'block') resolveBlock(p, a, axis);
+    }
   }
 
   // Resolve the player against one solid (a static platform or a moving one).
@@ -333,6 +337,36 @@ const Engine = (() => {
         p.y = plat.y + plat.h;
       }
       p.vy = 0;
+    }
+  }
+
+  // Breakable block: solid, but a bash from below shatters it (and may drop a
+  // collectible). Stand on top / bump the sides = solid.
+  function resolveBlock(p, b, axis) {
+    if (!aabb(p, b)) return;
+    if (axis === 'y') {
+      if (p.vy < 0) { breakBlock(b); p.vy = 0; return; } // bashed from below — bonk!
+      if (p.vy > 0) { p.y = b.y - p.h; p.onGround = true; } // stand on top
+      else return;
+      p.vy = 0;
+    } else {
+      if (p.vx > 0) p.x = b.x - p.w;
+      else if (p.vx < 0) p.x = b.x + b.w;
+      p.vx = 0;
+    }
+  }
+
+  function breakBlock(b) {
+    if (b.broken) return;
+    b.broken = true;
+    spawnBurst(b.x + b.w / 2, b.y + b.h / 2, ['#94a3b8', '#cbd5e1', '#64748b'], 12);
+    sfx('break');
+    if (b.dropDef) {
+      loadSprite(b.dropDef.sprite);
+      world.objects.push({
+        ...b.dropDef, x: b.x + b.w / 2 - 20, y: b.y - 44,
+        w: 40, h: 40, collected: false, drainCD: 0, spawned: true,
+      });
     }
   }
 
@@ -367,11 +401,12 @@ const Engine = (() => {
     world.won = false; world.winT = 0;
     world.freezeT = 0; world.particles = [];
     p.ridingActor = null;
-    for (const a of world.actors) { a.off = 0; a.dir = 1; a.x = a.x0; a.y = a.y0; a.dx = 0; a.dy = 0; }
+    for (const a of world.actors) { a.off = 0; a.dir = 1; a.x = a.x0; a.y = a.y0; a.dx = 0; a.dy = 0; a.broken = false; }
     if (world.storage) {
       world.storage.capacity = world.mechanic.startSegments || 0;
       world.storage.fill = 0;
     }
+    world.objects = world.objects.filter((o) => !o.spawned); // drop block-spawned items
     for (const o of world.objects) { o.collected = false; o.drainCD = 0; }
   }
 
@@ -654,10 +689,15 @@ const Engine = (() => {
     ctx.fillRect(plat.x, plat.y + 4, plat.w, 2);
   }
 
+  function drawActor(a) {
+    if (a.broken) return;
+    if (a.type === 'mover') return drawMover(a);
+    if (a.type === 'block') return drawBlock(a);
+  }
+
   // A moving platform: a metal slab with a centre seam and direction ticks so
   // it reads as "this one moves".
-  function drawActor(a) {
-    if (a.type !== 'mover') return;
+  function drawMover(a) {
     const g = ctx.createLinearGradient(0, a.y, 0, a.y + a.h);
     g.addColorStop(0, '#5b6b86');
     g.addColorStop(1, '#3a4763');
@@ -667,6 +707,25 @@ const Engine = (() => {
     ctx.fillRect(a.x, a.y, a.w, 3);
     ctx.fillStyle = 'rgba(11,18,32,0.5)';
     for (let i = 1; i < 3; i++) ctx.fillRect(a.x + (a.w * i) / 3, a.y + 4, 2, a.h - 5);
+  }
+
+  // A breakable block: a crate with rivets; a "?" if it holds a drop.
+  function drawBlock(a) {
+    ctx.fillStyle = '#a16207';
+    ctx.fillRect(a.x, a.y, a.w, a.h);
+    ctx.fillStyle = '#ca8a04';
+    ctx.fillRect(a.x + 2, a.y + 2, a.w - 4, a.h - 4);
+    ctx.fillStyle = '#713f12';
+    const r = 3;
+    [[a.x + 5, a.y + 5], [a.x + a.w - 8, a.y + 5], [a.x + 5, a.y + a.h - 8], [a.x + a.w - 8, a.y + a.h - 8]]
+      .forEach(([rx, ry]) => ctx.fillRect(rx, ry, r, r));
+    if (a.dropDef) {
+      ctx.fillStyle = '#fde68a';
+      ctx.font = `bold ${Math.floor(a.h * 0.6)}px "IBM Plex Mono", monospace`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('?', a.x + a.w / 2, a.y + a.h / 2 + 1);
+      ctx.textAlign = 'left';
+    }
   }
 
   // Draw an object from its sprite (path comes from data/objects.json). If the

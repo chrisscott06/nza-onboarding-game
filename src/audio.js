@@ -86,6 +86,7 @@ const Sound = (() => {
     powerup:          () => arp([523, 659, 784, 1047], 'square', 0.08, 0.22),
     shield:           () => tone({ type: 'sine', f0: 480, f1: 720, dur: 0.26, gain: 0.2 }),
     drain:            () => tone({ type: 'sawtooth', f0: 440, f1: 120, dur: 0.2, gain: 0.18 }),
+    break:            () => { noise(0.09, 0.2); tone({ type: 'square', f0: 200, f1: 90, dur: 0.1, gain: 0.18 }); },
     lose:             () => { noise(0.13, 0.22); arp([330, 233, 165], 'square', 0.1, 0.2); },
     win:              () => arp([523, 659, 784, 1047, 1319], 'square', 0.11, 0.25),
     click:            () => tone({ type: 'square', f0: 600, f1: 600, dur: 0.04, gain: 0.15 }),
