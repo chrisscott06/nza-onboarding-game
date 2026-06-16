@@ -218,13 +218,16 @@ Per `docs/net-zero-hero-story-bible.md` (foil = **Mr Net Stupid Zero**):
 - **Reusable cutscene/dialogue system** — `beats` in `level.json` (trigger
   `start` / `{x}`); engine pauses, a 16-bit dialogue box (portrait + speaker +
   line) advances on tap/key, then resumes. `Engine.resume()`.
-- **World 1 beats + cast** wired into `level-grid`: opening, Minister Milirenew,
-  Mr Net Stupid Zero, the Oil Baron, and the win line. Caricature emoji
-  portraits (🙂 🦺 😡 🎩).
+- **World 1 beats + cast** (v1.1) wired into `level-grid`: opening (Ed Megawatt),
+  Mr Net Stupid Zero's villainy, Ed's market counter, **PABLO**, the Oil Baron
+  taunt, the win. Caricature emoji portraits (🙂 🦺 😡 🤖 🎩).
+- **Atmosphere system** — a beat's `setMood` dims/brightens the scene: dark when
+  Mr Net Stupid Zero arrives, re-bright when Ed Megawatt counters.
 - **World map** on the landing — four pillars, World 1 open, 2–4 locked.
 
-**Deferred (the feel-dependent batch — Chris to playtest first):** the EV-ride
-gag, the Oil Baron boss *fight*, and the dirty→clean world transform. Plus the
+**Deferred (the feel-dependent batch — Chris to playtest first):** the staged
+walk-in / funny-exit cutscene *animation*, PABLO's secret-path *mechanic*, the
+EV-ride gag, and the **Oil Baron boss fight** (collectibles-as-ammo). Plus the
 character-choice screen + flavour hazards (per the story brief).
 
 ## Sound (WebAudio synth)
