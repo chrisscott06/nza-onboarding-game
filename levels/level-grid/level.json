@@ -30,6 +30,10 @@
     { "x": 3000, "y": 320, "w": 300,  "h": 24 },
     { "x": 3400, "y": 300, "w": 400,  "h": 240 }
   ],
+  "actors": [
+    { "type": "mover", "x": 610, "y": 344, "w": 96, "h": 16, "axis": "x", "distance": 150, "speed": 70 },
+    { "type": "mover", "x": 1230, "y": 300, "w": 84, "h": 16, "axis": "y", "distance": 90, "speed": 55 }
+  ],
   "placements": [
     { "objectId": "solar-panel",    "x": 250,  "y": 320 },
     { "objectId": "solar-panel",    "x": 420,  "y": 320 },

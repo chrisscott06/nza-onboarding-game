@@ -67,8 +67,17 @@ const Engine = (() => {
         invulnT: 0,   // brief grace after a shield break
         dying: false, // playing the death animation
         deathT: 0,    // time into the death animation
+        ridingActor: null, // moving platform the player is standing on
       },
       platforms: spec.platforms.map((p) => ({ ...p })),
+      // moving platforms / dynamic things (Part: reusable mechanics)
+      actors: (spec.actors || []).map((a) => ({
+        dir: 1, off: 0, dx: 0, dy: 0,
+        x0: a.x, y0: a.y, w: a.w || 80, h: a.h || 16,
+        distance: a.distance != null ? a.distance : 120,
+        speed: a.speed || 60,
+        ...a,
+      })),
       // hazards + collectibles. Sensible default size if a placement omits w/h.
       objects: (spec.objects || []).map((o) => ({
         w: 40, h: 40, points: 0, collected: false, drainCD: 0, ...o,
@@ -137,6 +146,9 @@ const Engine = (() => {
       updateParticles(dt);
       return;
     }
+
+    // move platforms first, and carry the player if they're riding one
+    updateActors(dt);
 
     // --- horizontal intent ---
     const dir = (Input.held.right ? 1 : 0) - (Input.held.left ? 1 : 0);
@@ -300,22 +312,45 @@ const Engine = (() => {
 
   function resolveAxis(axis) {
     const p = world.player;
-    for (const plat of world.platforms) {
-      if (!aabb(p, plat)) continue;
-      if (axis === 'x') {
-        if (p.vx > 0) p.x = plat.x - p.w;
-        else if (p.vx < 0) p.x = plat.x + plat.w;
-        p.vx = 0;
-      } else {
-        if (p.vy > 0) {
-          p.y = plat.y - p.h;
-          p.onGround = true;
-        } else if (p.vy < 0) {
-          p.y = plat.y + plat.h;
-        }
-        p.vy = 0;
+    if (axis === 'y') p.ridingActor = null;
+    for (const plat of world.platforms) resolveSolid(p, plat, axis, null);
+    for (const a of world.actors) if (a.type === 'mover') resolveSolid(p, a, axis, a);
+  }
+
+  // Resolve the player against one solid (a static platform or a moving one).
+  function resolveSolid(p, plat, axis, rider) {
+    if (!aabb(p, plat)) return;
+    if (axis === 'x') {
+      if (p.vx > 0) p.x = plat.x - p.w;
+      else if (p.vx < 0) p.x = plat.x + plat.w;
+      p.vx = 0;
+    } else {
+      if (p.vy > 0) {
+        p.y = plat.y - p.h;
+        p.onGround = true;
+        if (rider) p.ridingActor = rider; // remember the platform we're standing on
+      } else if (p.vy < 0) {
+        p.y = plat.y + plat.h;
       }
+      p.vy = 0;
     }
+  }
+
+  // Move moving platforms along their path and carry the rider with them.
+  function updateActors(dt) {
+    for (const a of world.actors) {
+      if (a.type !== 'mover') continue;
+      const px = a.x, py = a.y;
+      a.off += a.dir * a.speed * dt;
+      if (a.off >= a.distance) { a.off = a.distance; a.dir = -1; }
+      else if (a.off <= 0) { a.off = 0; a.dir = 1; }
+      if (a.axis === 'y') a.y = a.y0 + a.off;
+      else a.x = a.x0 + a.off;
+      a.dx = a.x - px;
+      a.dy = a.y - py;
+    }
+    const p = world.player;
+    if (p.ridingActor) { p.x += p.ridingActor.dx || 0; p.y += p.ridingActor.dy || 0; }
   }
 
   // Restart the whole run: player back to start, score zeroed, collectibles
@@ -331,6 +366,8 @@ const Engine = (() => {
     world.surgeT = 0; world.surgeReady = false; world.curtailT = 0;
     world.won = false; world.winT = 0;
     world.freezeT = 0; world.particles = [];
+    p.ridingActor = null;
+    for (const a of world.actors) { a.off = 0; a.dir = 1; a.x = a.x0; a.y = a.y0; a.dx = 0; a.dy = 0; }
     if (world.storage) {
       world.storage.capacity = world.mechanic.startSegments || 0;
       world.storage.fill = 0;
@@ -453,6 +490,7 @@ const Engine = (() => {
     ctx.translate(-Math.round(camera.x), -Math.round(camera.y));
 
     for (const plat of world.platforms) drawPlatform(plat);
+    for (const a of world.actors) drawActor(a);
     drawGoal(world.goal);
     for (const o of world.objects) if (!o.collected) drawObject(o);
     drawPlayer(world.player);
@@ -614,6 +652,21 @@ const Engine = (() => {
     ctx.fillRect(plat.x, plat.y, plat.w, 4);
     ctx.fillStyle = 'rgba(255,255,255,0.06)';
     ctx.fillRect(plat.x, plat.y + 4, plat.w, 2);
+  }
+
+  // A moving platform: a metal slab with a centre seam and direction ticks so
+  // it reads as "this one moves".
+  function drawActor(a) {
+    if (a.type !== 'mover') return;
+    const g = ctx.createLinearGradient(0, a.y, 0, a.y + a.h);
+    g.addColorStop(0, '#5b6b86');
+    g.addColorStop(1, '#3a4763');
+    ctx.fillStyle = g;
+    ctx.fillRect(a.x, a.y, a.w, a.h);
+    ctx.fillStyle = hexA(world.accent || '#2dd4bf', 0.9);
+    ctx.fillRect(a.x, a.y, a.w, 3);
+    ctx.fillStyle = 'rgba(11,18,32,0.5)';
+    for (let i = 1; i < 3; i++) ctx.fillRect(a.x + (a.w * i) / 3, a.y + 4, 2, a.h - 5);
   }
 
   // Draw an object from its sprite (path comes from data/objects.json). If the

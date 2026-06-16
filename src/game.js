@@ -121,6 +121,7 @@ function buildSpec(level, objectTable, meta) {
     bounds: level.bounds,
     platforms,
     objects,
+    actors: level.actors || [], // moving platforms etc. (Part: reusable mechanics)
     goal: level.goal || null,
     mechanic: level.mechanic || null, // drives level-specific mechanics (Part: storage-meter)
     world: level.world || null,
