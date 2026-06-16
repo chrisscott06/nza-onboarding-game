@@ -73,7 +73,9 @@ const Engine = (() => {
       platforms: spec.platforms.map((p) => ({ ...p })),
       // moving platforms / dynamic things (Part: reusable mechanics)
       actors: (spec.actors || []).map((a) => ({
-        dir: 1, off: 0, dx: 0, dy: 0, broken: false, dead: false,
+        dir: a.dir != null ? a.dir : 1, dir0: a.dir != null ? a.dir : 1,
+        off: 0, dx: 0, dy: 0, broken: false, dead: false,
+        fireT: a.interval != null ? a.interval : 2,
         x0: a.x, y0: a.y, w: a.w || 80, h: a.h || 16,
         distance: a.distance != null ? a.distance : 120,
         speed: a.speed || 60,
@@ -99,6 +101,7 @@ const Engine = (() => {
       winT: 0,         // time since winning (drives the confetti shower)
       freezeT: 0,      // hit-stop timer
       particles: [],   // transient visual bits (death burst, confetti)
+      projectiles: [], // emitter bolts in flight
     };
     if (world.mechanic && world.mechanic.type === 'storage-meter') {
       world.storage = {
@@ -209,9 +212,10 @@ const Engine = (() => {
     if (p.x < b.x) { p.x = b.x; p.vx = 0; }
     if (p.x + p.w > b.x + b.w) { p.x = b.x + b.w - p.w; p.vx = 0; }
 
-    // --- hazards / collectibles / enemies ---
+    // --- hazards / collectibles / enemies / projectiles ---
     handleObjects();
     handleEnemies();
+    updateProjectiles(dt);
 
     // --- reached the goal? celebrate ---
     if (world.goal && !world.won && aabb(p, goalBox(world.goal))) triggerWin();
@@ -391,10 +395,44 @@ const Engine = (() => {
         else if (a.off <= 0) { a.off = 0; a.dir = 1; }
         a.x = a.x0 + a.off;
         a.facing = a.dir;
+      } else if (a.type === 'emitter') {
+        a.fireT -= dt;
+        if (a.fireT <= 0) {
+          a.fireT = a.interval || 2;
+          const inRange = a.range == null || Math.abs(world.player.x - a.x) <= a.range;
+          if (inRange) fireProjectile(a);
+        }
       }
     }
     const p = world.player;
     if (p.ridingActor) { p.x += p.ridingActor.dx || 0; p.y += p.ridingActor.dy || 0; }
+  }
+
+  // Emitter fires a bolt in its facing direction.
+  function fireProjectile(a) {
+    const dir = a.dir || -1;
+    world.projectiles.push({
+      x: dir > 0 ? a.x + a.w : a.x - 14,
+      y: a.y + a.h / 2 - 7,
+      w: 14, h: 14,
+      vx: dir * (a.speed || 220),
+    });
+  }
+
+  // Move bolts, cull off-screen, and kill the player on contact.
+  function updateProjectiles(dt) {
+    const p = world.player, b = world.bounds, ps = world.projectiles;
+    for (let i = ps.length - 1; i >= 0; i--) {
+      const q = ps[i];
+      q.x += q.vx * dt;
+      if (q.x < b.x - 60 || q.x > b.x + b.w + 60) { ps.splice(i, 1); continue; }
+      if (!aabb(p, q)) continue;
+      ps.splice(i, 1);
+      if (invincible()) continue;
+      if (p.shield) { p.shield = false; p.invulnT = SHIELD_INVULN; sfx('shield'); continue; }
+      startDeath();
+      return;
+    }
   }
 
   // Player vs patrolling enemies: a stomp from above defeats them (bounce +
@@ -433,7 +471,11 @@ const Engine = (() => {
     world.won = false; world.winT = 0;
     world.freezeT = 0; world.particles = [];
     p.ridingActor = null;
-    for (const a of world.actors) { a.off = 0; a.dir = 1; a.x = a.x0; a.y = a.y0; a.dx = 0; a.dy = 0; a.broken = false; a.dead = false; }
+    world.projectiles = [];
+    for (const a of world.actors) {
+      a.off = 0; a.dir = a.dir0; a.x = a.x0; a.y = a.y0; a.dx = 0; a.dy = 0;
+      a.broken = false; a.dead = false; a.fireT = a.interval != null ? a.interval : 2;
+    }
     if (world.storage) {
       world.storage.capacity = world.mechanic.startSegments || 0;
       world.storage.fill = 0;
@@ -560,6 +602,7 @@ const Engine = (() => {
     for (const a of world.actors) drawActor(a);
     drawGoal(world.goal);
     for (const o of world.objects) if (!o.collected) drawObject(o);
+    drawProjectiles();
     drawPlayer(world.player);
     drawParticles();
 
@@ -726,6 +769,28 @@ const Engine = (() => {
     if (a.type === 'mover') return drawMover(a);
     if (a.type === 'block') return drawBlock(a);
     if (a.type === 'enemy') return drawEnemy(a);
+    if (a.type === 'emitter') return drawEmitter(a);
+  }
+
+  // A smokestack that puffs CO2 bolts from its mouth.
+  function drawEmitter(a) {
+    ctx.fillStyle = '#475569';
+    ctx.fillRect(a.x, a.y, a.w, a.h);
+    ctx.fillStyle = '#334155';
+    ctx.fillRect(a.x, a.y, a.w, 5);
+    ctx.fillStyle = '#1f2937';
+    const dir = a.dir || -1;
+    ctx.fillRect(dir > 0 ? a.x + a.w - 4 : a.x, a.y + a.h / 2 - 6, 4, 12);
+  }
+
+  function drawProjectiles() {
+    for (const q of world.projectiles) {
+      const cx = q.x + q.w / 2, cy = q.y + q.h / 2;
+      ctx.fillStyle = 'rgba(75,85,99,0.4)';
+      ctx.beginPath(); ctx.arc(cx + (q.vx > 0 ? -6 : 6), cy, q.w * 0.42, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#4b5563';
+      ctx.beginPath(); ctx.arc(cx, cy, q.w / 2, 0, Math.PI * 2); ctx.fill();
+    }
   }
 
   // A patrolling soot critter: charcoal body, angry eyes (facing its direction),
