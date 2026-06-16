@@ -2,7 +2,6 @@
   "name": "Power Up the Grid",
   "author": "NZA",
   "theme": "the grid — clean vs gas",
-  "intro": "The lights are on, but gas keeps them there. Grab the clean stuff!",
   "faceAsset": "levels/level-grid/assets/face-grid.svg",
   "accentColor": "#3FA9C4"
 }

@@ -27,6 +27,17 @@
   setupTouch();
   setupSound();
 
+  // Advance the in-world staged cutscenes on tap / any key.
+  const advanceCutscene = () => {
+    const w = Engine.world;
+    if (w && w.cutscene && w.cutscene.phase === 'talk') { Sound.play('click'); Engine.cutsceneAdvance(); }
+  };
+  canvas.addEventListener('click', advanceCutscene);
+  window.addEventListener('keydown', (e) => {
+    const w = Engine.world;
+    if (w && w.cutscene) { e.preventDefault(); advanceCutscene(); }
+  }, true);
+
   try {
     const manifest = await fetchJSON('data/levels.json');
     const names = manifest.levels || [];
@@ -89,7 +100,7 @@ async function startLevel(canvas, menu, levelName) {
     const spec = buildSpec(level, objectTable, meta);
     menu.style.display = 'none';
     document.body.classList.add('playing');
-    Engine.start(canvas, spec, { onWin: showWin, onBeat: showCutscene });
+    Engine.start(canvas, spec, { onWin: showWin });
     Sound.startMusic(); // backing track (silent until unmuted / after a gesture)
     watchSurge(); // toggles the touch dash button when a grid-surge is ready
   } catch (err) {
@@ -228,52 +239,8 @@ function setupBoot() {
   window.addEventListener('keydown', dismiss, { once: true });
 }
 
-// Caricature portrait per speaker (emoji avatars — a stance, never a real person).
-function portraitFor(who) {
-  const map = {
-    'You': { c: '#2dd4bf', g: '🙂' },
-    'Ed Megawatt': { c: '#fbbf24', g: '🦺' },        // hi-vis-over-a-suit grid champion
-    'Mr Net Stupid Zero': { c: '#fb7185', g: '😡' }, // the red-faced excuse
-    'PABLO': { c: '#f5f1e6', g: '🤖', img: 'public/logos/pablo-logo.svg' }, // real PABLO logo
-    'Oil Baron': { c: '#111827', g: '🎩' },          // top-hatted fossil tycoon
-  };
-  return map[who] || { c: '#94a3b8', g: (who || '?').charAt(0) };
-}
-
-// Show a dialogue beat: pause is already set by the engine; we walk the lines
-// on tap/key and call Engine.resume() when done.
-function showCutscene(beat) {
-  const el = document.getElementById('cutscene');
-  const nameEl = document.getElementById('cs-name');
-  const textEl = document.getElementById('cs-text');
-  const portraitEl = document.getElementById('cs-portrait');
-  if (!el || !beat.lines || !beat.lines.length) { Engine.resume(); return; }
-
-  let i = 0;
-  const render = () => {
-    const line = beat.lines[i];
-    const p = portraitFor(line.who);
-    nameEl.textContent = line.who || '';
-    textEl.textContent = line.text || '';
-    portraitEl.style.setProperty('--p', p.c);
-    if (p.img) portraitEl.innerHTML = '<img alt="" src="' + p.img + '">';
-    else portraitEl.textContent = p.g;
-  };
-  const end = () => {
-    el.hidden = true;
-    el.removeEventListener('click', onClick);
-    window.removeEventListener('keydown', onKey, true);
-    Engine.resume();
-  };
-  const advance = () => { Sound.play('click'); i += 1; (i >= beat.lines.length) ? end() : render(); };
-  const onClick = () => advance();
-  const onKey = (e) => { if (e.repeat) return; e.preventDefault(); advance(); };
-
-  el.addEventListener('click', onClick);
-  window.addEventListener('keydown', onKey, true); // capture, so it beats game input
-  el.hidden = false;
-  render();
-}
+// (Cutscenes are now staged in-world by the engine — characters walk in, talk
+// via speech bubbles, and walk off. game.js only forwards the advance input.)
 
 // Sound toggle button + unlock audio on the first user gesture.
 function setupSound() {

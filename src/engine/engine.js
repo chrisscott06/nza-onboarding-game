@@ -116,6 +116,7 @@ const Engine = (() => {
       tip: '', tipT: 0, // on-screen caption (narrative + data one-liners)
       shownTips: new Set(), // tips that have already fired (once each)
       paused: false,    // a cutscene/dialogue beat is on screen
+      cutscene: null,   // active staged cutscene { beat, lines, idx, actor, npc, phase, t }
       beats: (spec.beats || []).map((b) => ({ ...b, fired: false })),
       darkness: 0, targetDarkness: 0, // atmosphere: scene dims when the foil arrives
       particles: [],   // transient visual bits (death burst, confetti)
@@ -147,11 +148,124 @@ const Engine = (() => {
       else if (b.trigger && b.trigger.x != null) hit = world.player.x >= b.trigger.x;
       if (!hit) continue;
       b.fired = true;
-      world.paused = true;
-      if (b.setMood) world.targetDarkness = b.setMood === 'dark' ? 0.5 : 0; // atmosphere shift
-      if (onBeat) onBeat(b);
+      startCutscene(b);
       return;
     }
+  }
+
+  // Begin a staged cutscene: the speaking character walks in from off-screen.
+  function startCutscene(beat) {
+    const p = world.player;
+    const actor = beat.actor || (beat.lines.find((l) => l.who !== 'You') || {}).who || 'You';
+    const camRight = camera.x + logicalW;
+    world.paused = true;
+    world.cutscene = {
+      beat, lines: beat.lines, idx: 0, actor, phase: 'enter', t: 0,
+      npc: {
+        w: 34, h: 46,
+        x: camRight + 30,             // walk in from the right edge
+        y: p.y,                       // same baseline as the player
+        targetX: p.x + 78,            // stop just to the player's right
+        facing: -1,
+      },
+    };
+  }
+
+  function updateCutscene(dt) {
+    const cs = world.cutscene;
+    cs.t += dt;
+    const n = cs.npc;
+    if (cs.phase === 'enter') {
+      const dir = (n.targetX < n.x) ? -1 : 1;
+      n.x += dir * 460 * dt; // brisk walk-in
+      if ((dir < 0 && n.x <= n.targetX) || (dir > 0 && n.x >= n.targetX)) {
+        n.x = n.targetX;
+        cs.phase = 'talk';
+        if (cs.beat.setMood) world.targetDarkness = cs.beat.setMood === 'dark' ? 0.5 : 0; // shift as they speak
+      }
+    } else if (cs.phase === 'exit') {
+      n.x += n.facing * 320 * dt; // zoom off-screen
+      if (n.x + n.w < camera.x - 20 || n.x > camera.x + logicalW + 20) {
+        world.cutscene = null;
+        world.paused = false;
+      }
+    }
+    // 'talk' waits for cutsceneAdvance()
+  }
+
+  function cutsceneAdvance() {
+    const cs = world.cutscene;
+    if (!cs || cs.phase !== 'talk') return;
+    cs.idx += 1;
+    if (cs.idx >= cs.lines.length) {
+      cs.phase = 'exit';
+      cs.npc.facing = -1; // continue off the left
+    }
+  }
+
+  // ---- Cutscene rendering (world space) --------------------------------
+  function drawCutscene() {
+    const cs = world.cutscene, n = cs.npc;
+    drawNpc(cs);
+    if (cs.phase === 'talk') {
+      const line = cs.lines[cs.idx];
+      if (line.who !== 'You') drawBubble(line.text, n.x + n.w / 2, n.y);
+      else { const p = world.player; drawBubble(line.text, p.x + p.w / 2, p.y); }
+    }
+  }
+
+  function drawNpc(cs) {
+    const n = cs.npc;
+    const bob = cs.phase === 'talk' ? 0 : Math.sin(cs.t * 16) * 2;
+    const x = n.x, y = n.y + bob;
+    if (cs.actor === 'PABLO') {
+      const w = 78, h = 39, fy = y + Math.sin(cs.t * 3) * 3;
+      if (pablo.ready) ctx.drawImage(pablo.img, x - (w - n.w) / 2, fy, w, h);
+      return;
+    }
+    const cast = CAST[cs.actor] || { c: '#94a3b8', g: '?' };
+    const bw = n.w * 0.74, bh = n.h * 0.5;
+    const bx = x + (n.w - bw) / 2, by = y + n.h - bh;
+    ctx.fillStyle = cast.c;
+    ctx.fillRect(bx, by, bw, bh);
+    ctx.fillStyle = '#0b1220';
+    ctx.fillRect(bx + 2, y + n.h - 3, 6, 3);
+    ctx.fillRect(bx + bw - 8, y + n.h - 3, 6, 3);
+    ctx.font = '26px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(cast.g, x + n.w / 2, y + n.h * 0.34);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+  }
+
+  function drawBubble(text, cx, anchorTopY) {
+    ctx.font = '600 14px "IBM Plex Mono", ui-monospace, monospace';
+    const maxW = 250, lh = 18, padX = 10, padY = 8;
+    const words = String(text).split(' ');
+    const lines = [];
+    let cur = '';
+    for (const w of words) {
+      const test = cur ? cur + ' ' + w : w;
+      if (ctx.measureText(test).width > maxW && cur) { lines.push(cur); cur = w; } else cur = test;
+    }
+    if (cur) lines.push(cur);
+    const tw = Math.max.apply(null, lines.map((l) => ctx.measureText(l).width));
+    const bw = Math.min(maxW, tw) + padX * 2;
+    const bh = lines.length * lh + padY * 2;
+    const bx = clamp(cx - bw / 2, camera.x + 4, camera.x + logicalW - bw - 4);
+    const by = Math.max(4, anchorTopY - bh - 12);
+    ctx.fillStyle = '#f5f1e6';
+    ctx.fillRect(bx, by, bw, bh);
+    ctx.fillStyle = 'rgba(45,212,191,0.9)';
+    ctx.fillRect(bx, by, bw, 3);
+    ctx.beginPath(); // tail toward the speaker
+    ctx.moveTo(cx - 8, by + bh - 1); ctx.lineTo(cx + 8, by + bh - 1); ctx.lineTo(cx, by + bh + 9);
+    ctx.closePath(); ctx.fillStyle = '#f5f1e6'; ctx.fill();
+    ctx.fillStyle = '#0b1220';
+    ctx.textBaseline = 'top';
+    lines.forEach((l, i) => ctx.fillText(l, bx + padX, by + padY + i * lh));
+    ctx.textBaseline = 'alphabetic';
   }
 
   // ---- On-screen captions (narrative + data one-liners) ----------------
@@ -186,6 +300,17 @@ const Engine = (() => {
   logo.img.onload = () => { logo.ready = true; };
   logo.img.src = 'public/nza-logo.svg';
 
+  // Cutscene cast: in-world character look (body colour + emoji "face").
+  const CAST = {
+    'Ed Megawatt':        { c: '#fbbf24', g: '🦺' },
+    'Mr Net Stupid Zero': { c: '#fb7185', g: '😡' },
+    'Oil Baron':          { c: '#111827', g: '🎩' },
+    'You':                { c: '#2dd4bf', g: '🙂' },
+  };
+  const pablo = { img: new Image(), ready: false }; // PABLO shows as its logo
+  pablo.img.onload = () => { pablo.ready = true; };
+  pablo.img.src = 'public/logos/pablo-logo.svg';
+
   // ---- Physics ---------------------------------------------------------
   function update(dt) {
     const p = world.player;
@@ -201,10 +326,10 @@ const Engine = (() => {
       return;
     }
 
-    // a dialogue beat freezes play until it's dismissed
-    if (world.paused) return;
+    // a staged cutscene takes over: characters walk in, talk, walk off
+    if (world.cutscene) { updateCutscene(dt); return; }
     checkBeats();
-    if (world.paused) return; // a beat just triggered
+    if (world.cutscene) return; // a beat just started a cutscene
 
     // move platforms first, and carry the player if they're riding one
     updateActors(dt);
@@ -585,7 +710,7 @@ const Engine = (() => {
     p.powerT = 0; p.shield = false; p.invulnT = 0;
     p.dying = false; p.deathT = 0;
     p.stretch = 0; p.wasOnGround = false;
-    world.score = 0; world.shake = 0; world.tipT = 0; world.paused = false;
+    world.score = 0; world.shake = 0; world.tipT = 0; world.paused = false; world.cutscene = null;
     world.surgeT = 0; world.surgeReady = false; world.curtailT = 0;
     world.won = false; world.winT = 0;
     world.freezeT = 0; world.particles = [];
@@ -773,6 +898,7 @@ const Engine = (() => {
     drawProjectiles();
     drawPlayer(world.player);
     drawParticles();
+    if (world.cutscene) drawCutscene();
 
     ctx.restore();
 
@@ -1241,6 +1367,14 @@ const Engine = (() => {
       ctx.fillText('INSULATED — ONE HIT', 22, y);
     }
 
+    if (world.cutscene && world.cutscene.phase === 'talk') {
+      ctx.fillStyle = 'rgba(245,241,230,0.55)';
+      ctx.font = '600 12px "IBM Plex Mono", ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('▸ tap / any key', logicalW / 2, logicalH - 22);
+      ctx.textAlign = 'left';
+    }
+
     drawTip();
   }
 
@@ -1332,7 +1466,7 @@ const Engine = (() => {
 
   return {
     start,
-    resume() { if (world) world.paused = false; }, // dismiss a dialogue beat
+    cutsceneAdvance, // advance the active staged cutscene
     get world() { return world; },
     get camera() { return camera; },
   };
