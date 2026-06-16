@@ -35,7 +35,9 @@
     { "type": "mover", "x": 1230, "y": 300, "w": 84, "h": 16, "axis": "y", "distance": 90, "speed": 55 },
     { "type": "block", "x": 1480, "y": 250, "w": 40, "h": 40, "drop": "solar-panel" },
     { "type": "enemy", "x": 1360, "y": 330, "w": 34, "h": 30, "range": 220, "speed": 80, "points": 50 },
-    { "type": "emitter", "x": 2840, "y": 316, "w": 22, "h": 44, "dir": -1, "interval": 1.6, "speed": 220 }
+    { "type": "emitter", "x": 2840, "y": 316, "w": 22, "h": 44, "dir": -1, "interval": 1.6, "speed": 220 },
+    { "type": "spring", "x": 440, "y": 344, "w": 40, "h": 16, "power": 1300 },
+    { "type": "crumble", "x": 930, "y": 352, "w": 90, "h": 16 }
   ],
   "placements": [
     { "objectId": "solar-panel",    "x": 250,  "y": 320 },

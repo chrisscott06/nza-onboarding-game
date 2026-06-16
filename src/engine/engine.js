@@ -36,6 +36,7 @@ const Engine = (() => {
   const SHIELD_INVULN = 0.9; // brief invulnerability after insulation absorbs a hit
   const GREMLIN_DRAIN_CD = 0.7; // seconds between storage drains from one gremlin
   const STOMP_BOUNCE = 540; // upward hop after stomping an enemy
+  const CRUMBLE_FUSE = 0.5; // seconds a collapsing platform lasts after you land
 
   // Respect the user's motion preference for the power-up pulse.
   const reduceMotion =
@@ -75,6 +76,7 @@ const Engine = (() => {
       actors: (spec.actors || []).map((a) => ({
         dir: a.dir != null ? a.dir : 1, dir0: a.dir != null ? a.dir : 1,
         off: 0, dx: 0, dy: 0, broken: false, dead: false,
+        triggered: false, fuse: 0, squash: 0,
         fireT: a.interval != null ? a.interval : 2,
         x0: a.x, y0: a.y, w: a.w || 80, h: a.h || 16,
         distance: a.distance != null ? a.distance : 120,
@@ -324,6 +326,36 @@ const Engine = (() => {
       if (a.broken) continue;
       if (a.type === 'mover') resolveSolid(p, a, axis, a);
       else if (a.type === 'block') resolveBlock(p, a, axis);
+      else if (a.type === 'spring') resolveSpring(p, a, axis);
+      else if (a.type === 'crumble') resolveCrumble(p, a, axis);
+    }
+  }
+
+  // Bounce pad: landing on top launches the player higher than a normal jump.
+  function resolveSpring(p, s, axis) {
+    if (!aabb(p, s)) return;
+    if (axis === 'y') {
+      if (p.vy > 0) { p.y = s.y - p.h; p.vy = -(s.power || 1300); s.squash = 0.18; sfx('spring'); }
+      else if (p.vy < 0) { p.y = s.y + s.h; p.vy = 0; }
+    } else {
+      if (p.vx > 0) p.x = s.x - p.w; else if (p.vx < 0) p.x = s.x + s.w;
+      p.vx = 0;
+    }
+  }
+
+  // Collapsing platform: solid, but starts a fuse the moment you land; when it
+  // runs out the platform breaks and you fall.
+  function resolveCrumble(p, c, axis) {
+    if (!aabb(p, c)) return;
+    if (axis === 'y') {
+      if (p.vy > 0) {
+        p.y = c.y - p.h; p.onGround = true;
+        if (!c.triggered) { c.triggered = true; c.fuse = CRUMBLE_FUSE; }
+      } else if (p.vy < 0) { p.y = c.y + c.h; }
+      p.vy = 0;
+    } else {
+      if (p.vx > 0) p.x = c.x - p.w; else if (p.vx < 0) p.x = c.x + c.w;
+      p.vx = 0;
     }
   }
 
@@ -402,6 +434,15 @@ const Engine = (() => {
           const inRange = a.range == null || Math.abs(world.player.x - a.x) <= a.range;
           if (inRange) fireProjectile(a);
         }
+      } else if (a.type === 'spring') {
+        if (a.squash > 0) a.squash = Math.max(0, a.squash - dt);
+      } else if (a.type === 'crumble' && a.triggered && !a.broken) {
+        a.fuse -= dt;
+        if (a.fuse <= 0) {
+          a.broken = true;
+          spawnBurst(a.x + a.w / 2, a.y + a.h / 2, ['#5b4636', '#64748b', '#334155'], 10);
+          sfx('break');
+        }
       }
     }
     const p = world.player;
@@ -475,6 +516,7 @@ const Engine = (() => {
     for (const a of world.actors) {
       a.off = 0; a.dir = a.dir0; a.x = a.x0; a.y = a.y0; a.dx = 0; a.dy = 0;
       a.broken = false; a.dead = false; a.fireT = a.interval != null ? a.interval : 2;
+      a.triggered = false; a.fuse = 0; a.squash = 0;
     }
     if (world.storage) {
       world.storage.capacity = world.mechanic.startSegments || 0;
@@ -770,6 +812,42 @@ const Engine = (() => {
     if (a.type === 'block') return drawBlock(a);
     if (a.type === 'enemy') return drawEnemy(a);
     if (a.type === 'emitter') return drawEmitter(a);
+    if (a.type === 'spring') return drawSpring(a);
+    if (a.type === 'crumble') return drawCrumble(a);
+  }
+
+  // Bounce pad: a coil under an accent cap; compresses when it fires.
+  function drawSpring(a) {
+    const sq = a.squash > 0 ? 0.5 : 1;
+    const h = a.h * sq;
+    const top = a.y + (a.h - h);
+    ctx.strokeStyle = '#94a3b8';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let i = 0; i <= 3; i++) {
+      const yy = top + h * (i / 3);
+      ctx.moveTo(a.x + 4, yy);
+      ctx.lineTo(a.x + a.w - 4, yy);
+    }
+    ctx.stroke();
+    ctx.fillStyle = hexA(world.accent || '#2dd4bf', 0.95);
+    ctx.fillRect(a.x, top - 5, a.w, 5);
+  }
+
+  // Collapsing platform: earthy slab with cracks; shakes once the fuse is lit.
+  function drawCrumble(a) {
+    const shake = a.triggered ? Math.sin(a.fuse * 50) * 1.5 : 0;
+    const x = a.x + shake;
+    ctx.fillStyle = '#5b4636';
+    ctx.fillRect(x, a.y, a.w, a.h);
+    ctx.fillStyle = '#3f3026';
+    ctx.fillRect(x, a.y + a.h - 4, a.w, 4);
+    ctx.strokeStyle = 'rgba(11,18,32,0.6)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x + a.w * 0.3, a.y); ctx.lineTo(x + a.w * 0.4, a.y + a.h);
+    ctx.moveTo(x + a.w * 0.7, a.y); ctx.lineTo(x + a.w * 0.6, a.y + a.h);
+    ctx.stroke();
   }
 
   // A smokestack that puffs CO2 bolts from its mouth.
