@@ -1,0 +1,40 @@
+{
+  "_comment": "Frostbite Manor — a freezing draughty house. Teach -> practise -> challenge: a safe spring near the start, a ride-the-mover gap, a crumble ledge, a patrolling ice-car, a bash-block that drops a battery cell, then an icicle emitter over a pit guarding the heat pump and the exit. Player is 34x46; objects 40x40; positions are top-left. Objects rest at (platform top y - 40), the goal at (platform top y - 46).",
+
+  "startPosition": { "x": 60, "y": 200 },
+
+  "bounds": { "x": 0, "y": 0, "w": 3200, "h": 540 },
+
+  "platforms": [
+    { "x": 0,    "y": 470, "w": 520,  "h": 70 },
+    { "x": 760,  "y": 470, "w": 360,  "h": 70 },
+    { "x": 1320, "y": 410, "w": 220,  "h": 24 },
+    { "x": 1700, "y": 470, "w": 420,  "h": 70 },
+    { "x": 2300, "y": 470, "w": 220,  "h": 70 },
+    { "x": 2760, "y": 470, "w": 440,  "h": 70 }
+  ],
+  "_note_pit_1": "gap 520->760 crossed by the mover; gap 1540->1700 crossed by jumping off the crumble ledge; gap 2520->2760 crossed past the emitter.",
+
+  "placements": [
+    { "objectId": "solar-panel",     "x": 200,  "y": 430 },
+    { "objectId": "oil-slick",       "x": 360,  "y": 430 },
+    { "objectId": "wind-turbine",    "x": 1390, "y": 370 },
+    { "objectId": "standby-gremlin", "x": 1800, "y": 430 },
+    { "objectId": "insulation",      "x": 1980, "y": 430 },
+    { "objectId": "battery-cell",    "x": 2360, "y": 430 },
+    { "objectId": "heat-pump",       "x": 2900, "y": 430 },
+    { "objectId": "solar-panel",     "x": 3060, "y": 430 }
+  ],
+
+  "actors": [
+    { "type": "spring",  "x": 420,  "y": 454, "w": 40, "h": 16, "power": 1300 },
+    { "type": "mover",   "x": 560,  "y": 450, "w": 110, "h": 16, "axis": "x", "distance": 170, "speed": 70 },
+    { "type": "crumble", "x": 1540, "y": 470, "w": 100, "h": 16 },
+    { "type": "enemy",   "x": 1760, "y": 440, "w": 34, "h": 30, "range": 300, "speed": 90, "points": 50 },
+    { "type": "block",   "x": 2380, "y": 320, "w": 40, "h": 40, "drop": "battery-cell" },
+    { "type": "emitter", "x": 2680, "y": 426, "w": 22, "h": 44, "dir": -1, "interval": 1.6, "speed": 240, "range": 360 }
+  ],
+  "_note_enemy": "the enemy is an ice-car patroller in spirit; stomp from above to defeat, side-touch kills.",
+
+  "goal": { "x": 3140, "y": 424 }
+}

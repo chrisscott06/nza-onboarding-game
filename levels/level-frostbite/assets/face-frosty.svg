@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges">
+  <!-- Placeholder pixel face for Frostbite Manor: a frosty, blue-tinged face
+       with a chunky woolly hat. Swap in a real pixel face later. -->
+  <rect x="3" y="5" width="10" height="9" fill="#dceefb"/>
+  <rect x="2" y="2" width="12" height="4" fill="#2563eb"/>
+  <rect x="6" y="1" width="4" height="2" fill="#60a5fa"/>
+  <rect x="2" y="5" width="2" height="3" fill="#dceefb"/>
+  <rect x="12" y="5" width="2" height="3" fill="#dceefb"/>
+  <rect x="5" y="8" width="2" height="2" fill="#1f2937"/>
+  <rect x="9" y="8" width="2" height="2" fill="#1f2937"/>
+  <rect x="6" y="12" width="4" height="1" fill="#3b82f6"/>
+</svg>

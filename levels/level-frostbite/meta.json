@@ -1,0 +1,7 @@
+{
+  "name": "Frostbite Manor",
+  "author": "Claude",
+  "theme": "a freezing draughty old house — leaky pipes, standby gremlins lurking in the walls, and a heat pump waiting at the end to thaw the whole place out",
+  "faceAsset": "levels/level-frostbite/assets/face-frosty.svg",
+  "accentColor": "#38bdf8"
+}
