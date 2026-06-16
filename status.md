@@ -171,6 +171,25 @@ verified pieces:
   the "substation-flip win/level-complete" that was deferred (the dirty→clean
   **sky transform** is still the only outstanding bit of that bundle item).
 
+## Net Zero Hero — reusable mechanics roster (GDD §5; brief Parts 1–5 done)
+
+All added to the level contract as data-driven `actors` in `level.json` (a level
+adds them by JSON alone — no engine edits to use). Each verified in-browser:
+
+- **Moving platforms** (`mover`) — horizontal/vertical, path `distance` + `speed`;
+  the player rides them.
+- **Breakable blocks** (`block`) — bash from below to shatter; optional `drop`
+  pops out a collectible.
+- **Patrolling enemies** (`enemy`) — patrol a range; stomp to defeat (bounce +
+  points), side/below contact kills.
+- **Projectile hazards** (`emitter`) — fire lethal bolts on `interval` (optional
+  proximity `range`); bolts cull off-screen.
+- **Springs** (`spring`) — launch the player high; **collapsing platforms**
+  (`crumble`) — shake then break shortly after you land.
+
+**Next:** Part 6 (retro framing / boot screen — flagged decision), then Parts
+7–10 (game-feel polish, narrative + realValue, toolbox docs, deploy).
+
 ## Sound (WebAudio synth)
 
 - `src/audio.js` — all sound generated in code (no files): retro SFX for jump,
