@@ -228,7 +228,11 @@ Per `docs/net-zero-hero-story-bible.md` (foil = **Mr Net Stupid Zero**):
   line) advances on tap/key, then resumes. `Engine.resume()`.
 - **World 1 beats + cast** (v1.1) wired into `level-grid`: opening (Ed Megawatt),
   Mr Net Stupid Zero's villainy, Ed's market counter, **PABLO**, the Oil Baron
-  taunt, the win. Caricature emoji portraits (🙂 🦺 😡 🤖 🎩).
+  taunt, the win. **Drawn pixel faces with character** (`drawCastFace`): Ed in a
+  hi-vis hard hat with a grin; the Oil Baron with a top hat, gold monocle + chain
+  and a curled handlebar moustache (red-eyed as the boss); Mr Net Stupid Zero
+  flushed and mid-rant; the hero. PABLO still shows as its logo. (Replaced the
+  earlier emoji stand-ins, where Ed's "face" was a 🦺 vest and the Baron's a 🎩 hat.)
 - **Atmosphere system** — a beat's `setMood` dims/brightens the scene: dark when
   Mr Net Stupid Zero arrives, re-bright when Ed Megawatt counters.
 - **World map** on the landing — four pillars, World 1 open, 2–4 locked.

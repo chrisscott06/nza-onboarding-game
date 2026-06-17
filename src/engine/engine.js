@@ -265,12 +265,90 @@ const Engine = (() => {
     ctx.fillStyle = '#0b1220';
     ctx.fillRect(bx + 2, y + n.h - 3, 6, 3);
     ctx.fillRect(bx + bw - 8, y + n.h - 3, 6, 3);
-    ctx.font = '26px serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(cast.g, x + n.w / 2, y + n.h * 0.34);
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'alphabetic';
+    // the head/face — a drawn pixel face with a bit of character. Big-head
+    // (chibi) proportions so the features read at cutscene size.
+    const hw = n.w * 1.24, hh = n.h * 0.8;
+    drawCastFace(cs.actor, x + (n.w - hw) / 2, y - n.h * 0.34, hw, hh, {});
+  }
+
+  // A characterful pixel face for a cast member, drawn into box (x,y,w,h). Shared
+  // by cutscene portraits and the boss. opts: { hit } washes it white (boss flash),
+  // { menace } gives the Oil Baron glowing red eyes. Coords are fractions of the
+  // box, so the same face scales from a tiny portrait to the big boss.
+  function drawCastFace(actor, x, y, w, h, opts) {
+    opts = opts || {};
+    const R = (fx, fy, fw, fh, col) => {
+      ctx.fillStyle = opts.hit ? '#f5f1e6' : col;
+      ctx.fillRect(Math.round(x + w * fx), Math.round(y + h * fy), Math.ceil(w * fw), Math.ceil(h * fh));
+    };
+
+    if (actor === 'Ed Megawatt') {
+      // friendly energy minister in a hi-vis hard hat
+      R(0.20, 0.34, 0.60, 0.56, '#e8b489');         // face
+      R(0.13, 0.50, 0.09, 0.18, '#dba273');         // ears
+      R(0.78, 0.50, 0.09, 0.18, '#dba273');
+      R(0.14, 0.22, 0.72, 0.14, '#f0a01a');         // hard-hat brim
+      R(0.24, 0.04, 0.52, 0.22, '#fbbf24');         // hard-hat dome
+      R(0.46, 0.04, 0.08, 0.20, '#f0a01a');         // hat ridge
+      R(0.30, 0.50, 0.10, 0.12, '#1f2433');         // eyes
+      R(0.60, 0.50, 0.10, 0.12, '#1f2433');
+      R(0.31, 0.51, 0.04, 0.04, '#f5f1e6');         // eye glints
+      R(0.61, 0.51, 0.04, 0.04, '#f5f1e6');
+      R(0.24, 0.64, 0.09, 0.07, '#f0a0a0');         // rosy cheeks
+      R(0.67, 0.64, 0.09, 0.07, '#f0a0a0');
+      R(0.34, 0.76, 0.32, 0.06, '#7a3b2a');         // big grin
+      R(0.40, 0.79, 0.20, 0.04, '#f5f1e6');         // teeth
+      return;
+    }
+
+    if (actor === 'Oil Baron') {
+      R(0.30, 0.02, 0.40, 0.26, '#0b0f1a');         // top-hat crown
+      R(0.30, 0.20, 0.40, 0.05, '#7a3b12');         // hat band
+      R(0.16, 0.26, 0.68, 0.08, '#0b0f1a');         // hat brim
+      R(0.24, 0.34, 0.52, 0.56, '#b9ad81');         // sallow face
+      R(0.20, 0.52, 0.06, 0.14, '#aa9e72');         // ears
+      R(0.74, 0.52, 0.06, 0.14, '#aa9e72');
+      R(0.30, 0.42, 0.15, 0.05, '#2a2417');         // angled angry brows
+      R(0.55, 0.42, 0.15, 0.05, '#2a2417');
+      const eye = opts.menace ? '#fb3b4d' : '#241f14';
+      R(0.33, 0.49, 0.08, 0.08, eye);               // beady eyes
+      R(0.59, 0.49, 0.08, 0.08, eye);
+      // monocle ring + chain over the right eye
+      ctx.strokeStyle = opts.hit ? '#f5f1e6' : '#d4af37';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(Math.round(x + w * 0.555), Math.round(y + h * 0.47), Math.ceil(w * 0.17), Math.ceil(h * 0.14));
+      R(0.63, 0.61, 0.02, 0.18, '#d4af37');         // chain
+      R(0.30, 0.72, 0.40, 0.05, '#1a160d');         // moustache bar
+      R(0.26, 0.67, 0.06, 0.06, '#1a160d');         // curled-up ends
+      R(0.68, 0.67, 0.06, 0.06, '#1a160d');
+      R(0.43, 0.81, 0.14, 0.04, '#5a3320');         // smug sneer
+      return;
+    }
+
+    if (actor === 'Mr Net Stupid Zero') {
+      // flustered naysayer: messy hair, flushed face, mid-rant
+      R(0.22, 0.30, 0.56, 0.60, '#e09784');         // flushed face
+      R(0.16, 0.16, 0.68, 0.18, '#3a3326');         // messy hair
+      R(0.20, 0.08, 0.16, 0.12, '#3a3326');         // tufts
+      R(0.44, 0.05, 0.16, 0.12, '#3a3326');
+      R(0.66, 0.10, 0.14, 0.12, '#3a3326');
+      R(0.27, 0.42, 0.16, 0.05, '#2a2218');         // angry V brows
+      R(0.57, 0.42, 0.16, 0.05, '#2a2218');
+      R(0.31, 0.49, 0.10, 0.10, '#1f2433');         // wide eyes
+      R(0.59, 0.49, 0.10, 0.10, '#1f2433');
+      R(0.40, 0.72, 0.20, 0.13, '#5a1f1f');         // shouting mouth
+      R(0.81, 0.33, 0.09, 0.11, '#7dd3fc');         // sweat drop
+      return;
+    }
+
+    // 'You' (and fallback): a determined hero
+    R(0.22, 0.32, 0.56, 0.58, '#e8b489');           // face
+    R(0.16, 0.14, 0.68, 0.18, '#6b4a2f');           // hair
+    R(0.18, 0.18, 0.10, 0.22, '#6b4a2f');           // sideburns
+    R(0.72, 0.18, 0.10, 0.22, '#6b4a2f');
+    R(0.30, 0.49, 0.10, 0.10, '#1f2433');           // eyes
+    R(0.60, 0.49, 0.10, 0.10, '#1f2433');
+    R(0.38, 0.73, 0.24, 0.05, '#7a3b2a');           // small confident smile
   }
 
   function drawBubble(text, cx, anchorTopY) {
@@ -334,12 +412,13 @@ const Engine = (() => {
   logo.img.onload = () => { logo.ready = true; };
   logo.img.src = 'public/nza-logo.svg';
 
-  // Cutscene cast: in-world character look (body colour + emoji "face").
+  // Cutscene cast: in-world character look (body/coat colour). Faces are drawn
+  // per character by drawCastFace().
   const CAST = {
-    'Ed Megawatt':        { c: '#fbbf24', g: '🦺' },
-    'Mr Net Stupid Zero': { c: '#fb7185', g: '😡' },
-    'Oil Baron':          { c: '#111827', g: '🎩' },
-    'You':                { c: '#2dd4bf', g: '🙂' },
+    'Ed Megawatt':        { c: '#fbbf24' },
+    'Mr Net Stupid Zero': { c: '#fb7185' },
+    'Oil Baron':          { c: '#111827' },
+    'You':                { c: '#2dd4bf' },
   };
   const pablo = { img: new Image(), ready: false }; // PABLO shows as its logo
   pablo.img.onload = () => { pablo.ready = true; };
@@ -1454,19 +1533,9 @@ const Engine = (() => {
     // oily lapels
     ctx.fillStyle = hit ? '#cbd5e1' : '#243b1c';
     ctx.fillRect(x + w * 0.42, y + 20, w * 0.16, h - 20);
-    // head
-    ctx.fillStyle = hit ? '#f5f1e6' : '#caa37a';
-    ctx.fillRect(x + w * 0.28, y, w * 0.44, 22);
-    // top hat
-    ctx.fillStyle = hit ? '#f5f1e6' : '#0b0f1a';
-    ctx.fillRect(x + w * 0.18, y - 6, w * 0.64, 6);   // brim
-    ctx.fillRect(x + w * 0.28, y - 26, w * 0.44, 22); // crown
-    // angry eyes
-    if (!boss.defeated) {
-      ctx.fillStyle = hit ? '#161b27' : '#fb7185';
-      ctx.fillRect(x + w * 0.34, y + 8, 5, 4);
-      ctx.fillRect(x + w * 0.56, y + 8, 5, 4);
-    }
+    // head + top hat + face (same Oil Baron face as the cutscene; red-eyed while
+    // he's fighting), sitting over the coat
+    drawCastFace('Oil Baron', x + w * 0.12, y - 30, w * 0.76, 58, { hit, menace: !boss.defeated });
     ctx.restore();
 
     // HP bar above him while the fight is on
