@@ -160,6 +160,7 @@ function buildSpec(level, objectTable, meta) {
     mechanic: level.mechanic || null, // drives level-specific mechanics (Part: storage-meter)
     world: level.world || null,
     hub: level.hub || false, // overworld map: walkable gates into each world
+    boss: level.boss || null, // end-of-world boss fight (the Oil Baron)
   };
 }
 
@@ -261,9 +262,12 @@ function setupSound() {
   window.addEventListener('keydown', unlock, { once: true });
 }
 
-// Show the touch dash button only while a grid-surge is available.
+// Show the touch dash (⚡) button when a grid-surge is available, OR during the
+// boss fight (where ⚡ fires banked clean energy at the Oil Baron).
 function watchSurge() {
-  const ready = !!(Engine.world && Engine.world.surgeReady);
+  const w = Engine.world;
+  const inFight = !!(w && w.boss && w.boss.engaged && !w.boss.defeated);
+  const ready = !!(w && (w.surgeReady || inFight));
   document.body.classList.toggle('surge-ready', ready);
   requestAnimationFrame(watchSurge);
 }

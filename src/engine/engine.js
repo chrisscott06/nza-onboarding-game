@@ -132,6 +132,21 @@ const Engine = (() => {
       hub: !!spec.hub,
       nearGate: null,  // the gate the player is currently standing in front of
       entering: false, // a gate was entered; ignore further input while it loads
+      // boss fight (BEAT 5): banked clean energy is ammo against the Oil Baron
+      boss: spec.boss ? {
+        name: spec.boss.name || 'The Oil Baron',
+        x: spec.boss.x, y: spec.boss.y, y0: spec.boss.y,
+        w: spec.boss.w || 90, h: spec.boss.h || 110,
+        maxHp: spec.boss.hp || 5, hp: spec.boss.hp || 5,
+        engageX: spec.boss.engageX != null ? spec.boss.engageX : spec.boss.x - 220,
+        fireInterval: spec.boss.fireInterval || 1.8,
+        boltSpeed: spec.boss.boltSpeed || 240,
+        moveRange: spec.boss.moveRange || 90,
+        moveSpeed: spec.boss.moveSpeed || 70,
+        engaged: false, defeated: false, defeatT: 0,
+        off: 0, dir: -1, fireT: spec.boss.fireInterval || 1.8, flash: 0,
+      } : null,
+      playerBolts: [], // the player's clean-energy shots at the boss
     };
     if (world.mechanic && world.mechanic.type === 'storage-meter') {
       world.storage = {
@@ -203,8 +218,10 @@ const Engine = (() => {
     } else if (cs.phase === 'exit') {
       n.x += n.facing * 320 * dt; // zoom off-screen
       if (n.x + n.w < camera.x - 20 || n.x > camera.x + logicalW + 20) {
+        const thenWin = cs.beat.thenWin;
         world.cutscene = null;
         world.paused = false;
+        if (thenWin) triggerWin(); // the boss-victory beat ends → celebrate
       }
     }
     // 'talk' waits for cutsceneAdvance()
@@ -390,8 +407,12 @@ const Engine = (() => {
     if (world.tipT > 0) world.tipT = Math.max(0, world.tipT - dt);
     for (const o of world.objects) if (o.drainCD > 0) o.drainCD -= dt;
 
-    // grid-surge: spend a full storage meter on a dash
-    updateSurge(dt, Input.consumeDashPress ? Input.consumeDashPress() : false);
+    // dash (⚡): grid-surge normally, but during the boss fight it FIRES banked
+    // clean energy at the Oil Baron instead of surging.
+    const dashPressed = Input.consumeDashPress ? Input.consumeDashPress() : false;
+    const fighting = world.boss && world.boss.engaged && !world.boss.defeated;
+    if (fighting && dashPressed) firePlayerBolt();
+    updateSurge(dt, fighting ? false : dashPressed);
 
     // variable jump height: cut the rise short if jump released early
     if (p.vy < 0 && !Input.isJumpHeld()) {
@@ -426,9 +447,11 @@ const Engine = (() => {
     handleObjects();
     handleEnemies();
     updateProjectiles(dt);
+    if (world.boss) { updateBoss(dt); updatePlayerBolts(dt); }
 
-    // --- reached the goal? celebrate ---
-    if (world.goal && !world.won && aabb(p, goalBox(world.goal))) triggerWin();
+    // --- reached the goal? celebrate (but a boss must be beaten first) ---
+    if (world.goal && !world.won && (!world.boss || world.boss.defeated) &&
+        aabb(p, goalBox(world.goal))) triggerWin();
 
     // --- fell off the bottom: costs a life; respawn at start (or game over) ---
     if (p.y > b.y + b.h + 200) {
@@ -446,7 +469,8 @@ const Engine = (() => {
     if (world.surgeT > 0) world.surgeT = Math.max(0, world.surgeT - dt);
     if (world.curtailT > 0) world.curtailT = Math.max(0, world.curtailT - dt);
     // "meter full" = every unlocked segment is holding energy
-    world.surgeReady = !!(s && s.capacity >= 1 && s.fill >= s.capacity && world.surgeT <= 0);
+    const inFight = world.boss && world.boss.engaged && !world.boss.defeated;
+    world.surgeReady = !inFight && !!(s && s.capacity >= 1 && s.fill >= s.capacity && world.surgeT <= 0);
     if (world.surgeReady) tipOnce('surge', 'Storage maxed — press DASH (Shift / ⚡) to surge the grid!');
     if (dashPressed && world.surgeReady) {
       const dur = (world.mechanic.surge && world.mechanic.surge.duration) || 4;
@@ -694,7 +718,8 @@ const Engine = (() => {
     for (let i = ps.length - 1; i >= 0; i--) {
       const q = ps[i];
       q.x += q.vx * dt;
-      if (q.x < b.x - 60 || q.x > b.x + b.w + 60) { ps.splice(i, 1); continue; }
+      q.y += (q.vy || 0) * dt;
+      if (q.x < b.x - 60 || q.x > b.x + b.w + 60 || q.y < -80 || q.y > b.y + b.h + 80) { ps.splice(i, 1); continue; }
       if (!aabb(hurtBox(), q)) continue;
       ps.splice(i, 1);
       if (invincible()) continue;
@@ -702,6 +727,87 @@ const Engine = (() => {
       hurt(q.x + q.w / 2);
       return;
     }
+  }
+
+  // ---- Boss fight (BEAT 5): the Oil Baron --------------------------------
+  // Banked clean energy is ammo. The dash button fires a clean-energy bolt that
+  // auto-aims at the Baron and costs one stored segment; enough hits defeat him.
+  // He hovers and lobs oil-gunk (lethal) at the player meanwhile.
+  function firePlayerBolt() {
+    const s = world.storage, p = world.player, boss = world.boss;
+    if (!s || s.fill <= 0) {
+      showTip('Out of clean energy! Collect + bank renewables, then fire (⚡).', 2.2);
+      sfx('curtail');
+      return;
+    }
+    s.fill -= 1;
+    const sx = p.x + p.w / 2, sy = p.y + p.h / 2;
+    const tx = boss.x + boss.w / 2, ty = boss.y + boss.h / 2;
+    const dx = tx - sx, dy = ty - sy, d = Math.hypot(dx, dy) || 1;
+    const spd = 480;
+    world.playerBolts.push({ x: sx - 7, y: sy - 9, w: 14, h: 18, vx: (dx / d) * spd, vy: (dy / d) * spd });
+    sfx('surge');
+  }
+
+  function updatePlayerBolts(dt) {
+    const b = world.bounds, boss = world.boss, list = world.playerBolts;
+    for (let i = list.length - 1; i >= 0; i--) {
+      const q = list[i];
+      q.x += q.vx * dt; q.y += q.vy * dt;
+      if (q.x < b.x - 80 || q.x > b.x + b.w + 80 || q.y < -120 || q.y > b.y + b.h + 120) { list.splice(i, 1); continue; }
+      if (boss && boss.engaged && !boss.defeated && aabb(q, boss)) {
+        list.splice(i, 1);
+        boss.hp -= 1;
+        boss.flash = 0.18;
+        spawnBurst(boss.x + boss.w / 2, boss.y + boss.h / 2, ['#2dd4bf', '#a5f3fc', '#f5f1e6'], 10);
+        addShake(4);
+        sfx('hit');
+        if (boss.hp <= 0) defeatBoss();
+      }
+    }
+  }
+
+  function updateBoss(dt) {
+    const boss = world.boss, p = world.player;
+    if (boss.flash > 0) boss.flash = Math.max(0, boss.flash - dt);
+    if (boss.defeated) { boss.defeatT += dt; boss.y += 24 * dt; return; } // sinks as he flees
+    if (!boss.engaged) {
+      // the fight begins once the player reaches the arena (after the taunt beat)
+      if (p.x >= boss.engageX && !world.cutscene) {
+        boss.engaged = true;
+        showTip('The Oil Baron! Fire banked clean energy — ⚡ / DASH. Dodge the gunk!', 3.4);
+      }
+      return;
+    }
+    // hover up and down
+    boss.off += boss.dir * boss.moveSpeed * dt;
+    if (boss.off >= boss.moveRange) { boss.off = boss.moveRange; boss.dir = -1; }
+    else if (boss.off <= -boss.moveRange) { boss.off = -boss.moveRange; boss.dir = 1; }
+    boss.y = boss.y0 + boss.off;
+    // lob oil-gunk at the player on an interval
+    boss.fireT -= dt;
+    if (boss.fireT <= 0) {
+      boss.fireT = boss.fireInterval;
+      const sx = boss.x + boss.w / 2, sy = boss.y + boss.h * 0.7;
+      const tx = p.x + p.w / 2, ty = p.y + p.h / 2;
+      const dx = tx - sx, dy = ty - sy, d = Math.hypot(dx, dy) || 1;
+      world.projectiles.push({ x: sx - 9, y: sy - 9, w: 18, h: 18, vx: (dx / d) * boss.boltSpeed, vy: (dy / d) * boss.boltSpeed, gunk: true });
+      sfx('drain');
+    }
+  }
+
+  function defeatBoss() {
+    const boss = world.boss;
+    boss.defeated = true; boss.defeatT = 0; boss.hp = 0;
+    world.projectiles.length = 0; world.playerBolts.length = 0; // clear the air
+    spawnBurst(boss.x + boss.w / 2, boss.y + boss.h / 2, ['#2dd4bf', '#fbbf24', '#f5f1e6', '#34d399'], 26);
+    addShake(8);
+    sfx('powerup');
+    world.greenTarget = 1; // the gas plant flips green
+    // play the victory beat (Baron flees + Ed's "Pillar one: DONE"), then win
+    const beat = world.beats.find((b) => b.trigger === 'boss-defeat' && !b.fired);
+    if (beat) { beat.fired = true; beat.thenWin = true; startCutscene(beat); }
+    else { showTip('The Oil Baron flees! Grid clean.', 2.4); triggerWin(); }
   }
 
   // Player vs patrolling enemies: a stomp from above defeats them (bounce +
@@ -959,7 +1065,9 @@ const Engine = (() => {
     for (const a of world.actors) drawActor(a);
     drawGoal(world.goal);
     for (const o of world.objects) if (!o.collected) drawObject(o);
+    if (world.boss) drawBoss();
     drawProjectiles();
+    drawPlayerBolts();
     drawPlayer(world.player);
     drawParticles();
     if (world.cutscene) drawCutscene();
@@ -1292,10 +1400,87 @@ const Engine = (() => {
   function drawProjectiles() {
     for (const q of world.projectiles) {
       const cx = q.x + q.w / 2, cy = q.y + q.h / 2;
+      if (q.gunk) {
+        // oily blob: dark green-black core with a slick sheen
+        ctx.fillStyle = 'rgba(20,30,16,0.45)';
+        ctx.beginPath(); ctx.arc(cx, cy + 3, q.w * 0.5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#1c2b12';
+        ctx.beginPath(); ctx.arc(cx, cy, q.w / 2, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(120,180,90,0.5)';
+        ctx.beginPath(); ctx.arc(cx - q.w * 0.15, cy - q.h * 0.15, q.w * 0.16, 0, Math.PI * 2); ctx.fill();
+        continue;
+      }
       ctx.fillStyle = 'rgba(75,85,99,0.4)';
       ctx.beginPath(); ctx.arc(cx + (q.vx > 0 ? -6 : 6), cy, q.w * 0.42, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#4b5563';
       ctx.beginPath(); ctx.arc(cx, cy, q.w / 2, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
+  // The player's clean-energy bolts: bright teal glowing pellets.
+  function drawPlayerBolts() {
+    for (const q of world.playerBolts) {
+      const cx = q.x + q.w / 2, cy = q.y + q.h / 2;
+      const gl = ctx.createRadialGradient(cx, cy, 1, cx, cy, q.w);
+      gl.addColorStop(0, 'rgba(165,243,252,0.95)');
+      gl.addColorStop(1, 'rgba(45,212,191,0)');
+      ctx.fillStyle = gl;
+      ctx.beginPath(); ctx.arc(cx, cy, q.w, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#f5f1e6';
+      ctx.beginPath(); ctx.arc(cx, cy, q.w * 0.32, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
+  // The Oil Baron: a top-hatted fossil tycoon hovering over the gas plant, with
+  // an HP bar. Flashes white when hit; fades out as he flees on defeat.
+  function drawBoss() {
+    const boss = world.boss;
+    if (boss.defeated && boss.defeatT > 1.3) return; // gone once he's fled
+    const x = boss.x, y = boss.y, w = boss.w, h = boss.h;
+    ctx.save();
+    if (boss.defeated) ctx.globalAlpha = Math.max(0, 1 - boss.defeatT / 1.3);
+    const hit = boss.flash > 0;
+    const dark = hit ? '#f5f1e6' : '#161b27';
+
+    // sooty exhaust haze behind him while engaged
+    if (boss.engaged && !boss.defeated && !reduceMotion) {
+      ctx.fillStyle = 'rgba(60,70,50,0.18)';
+      ctx.beginPath(); ctx.arc(x + w / 2, y + h * 0.3, w * 0.85, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // coat / body
+    ctx.fillStyle = dark;
+    ctx.fillRect(x, y + 18, w, h - 18);
+    // oily lapels
+    ctx.fillStyle = hit ? '#cbd5e1' : '#243b1c';
+    ctx.fillRect(x + w * 0.42, y + 20, w * 0.16, h - 20);
+    // head
+    ctx.fillStyle = hit ? '#f5f1e6' : '#caa37a';
+    ctx.fillRect(x + w * 0.28, y, w * 0.44, 22);
+    // top hat
+    ctx.fillStyle = hit ? '#f5f1e6' : '#0b0f1a';
+    ctx.fillRect(x + w * 0.18, y - 6, w * 0.64, 6);   // brim
+    ctx.fillRect(x + w * 0.28, y - 26, w * 0.44, 22); // crown
+    // angry eyes
+    if (!boss.defeated) {
+      ctx.fillStyle = hit ? '#161b27' : '#fb7185';
+      ctx.fillRect(x + w * 0.34, y + 8, 5, 4);
+      ctx.fillRect(x + w * 0.56, y + 8, 5, 4);
+    }
+    ctx.restore();
+
+    // HP bar above him while the fight is on
+    if (boss.engaged && !boss.defeated) {
+      const bw = w + 20, bx = x - 10, by = y - 42;
+      ctx.fillStyle = 'rgba(11,18,32,0.8)';
+      ctx.fillRect(bx, by, bw, 8);
+      ctx.fillStyle = '#fb7185';
+      ctx.fillRect(bx, by, bw * (boss.hp / boss.maxHp), 8);
+      ctx.fillStyle = '#f5f1e6';
+      ctx.textAlign = 'center';
+      ctx.font = '600 11px "IBM Plex Mono", ui-monospace, monospace';
+      ctx.fillText('THE OIL BARON', x + w / 2, by - 14);
+      ctx.textAlign = 'left';
     }
   }
 
@@ -1519,7 +1704,13 @@ const Engine = (() => {
       }
       y = by + seg + 8;
       ctx.font = '600 14px "IBM Plex Mono", ui-monospace, monospace';
-      if (world.curtailT > 0) {
+      const inFight = world.boss && world.boss.engaged && !world.boss.defeated;
+      if (inFight) {
+        // during the boss fight the meter is AMMO and DASH fires clean energy
+        if (s.fill > 0) { ctx.fillStyle = '#5eead4'; ctx.fillText('⚡ FIRE CLEAN ENERGY — DASH', 22, y); }
+        else { ctx.fillStyle = '#fb7185'; ctx.fillText('OUT OF AMMO — BANK RENEWABLES', 22, y); }
+        y += 22;
+      } else if (world.curtailT > 0) {
         ctx.fillStyle = '#fb7185'; ctx.fillText('STORAGE FULL — ENERGY WASTED', 22, y); y += 22;
       } else if (world.surgeT > 0) {
         ctx.fillStyle = '#a5f3fc'; ctx.fillText('⚡ SURGING', 22, y); y += 22;

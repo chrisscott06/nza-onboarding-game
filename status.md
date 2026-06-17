@@ -243,10 +243,24 @@ Per `docs/net-zero-hero-story-bible.md` (foil = **Mr Net Stupid Zero**):
   locked Gate 2 shows "🔒 Beat the Heat — coming soon" and stays in the hub; no
   console errors.
 
+- **Oil Baron boss fight (built + verified)** — BEAT 5, at the end of World 1.
+  Banked clean energy is the ammo: DASH (Shift / ⚡) fires an auto-aiming
+  clean-energy bolt that spends one stored segment; the Baron hovers over the
+  gas plant and lobs lethal oil-gunk. Four hits flip the grid green and play the
+  victory beat (Baron flees + Ed's "Pillar one: DONE"), which ends in the win.
+  Data-driven `boss` block in `level.json` + a `"trigger": "boss-defeat"` beat;
+  the goal is gated until he's beaten; the ⚡ touch button + HUD switch to a fire
+  prompt during the fight. Arena seeded with renewables + batteries so there's
+  always ammo. Verified in a browser: boss/HP-bar/hit-flash/bolts/gunk render;
+  a fired bolt hit the boss (HP 4→3); a kill snapped the world clean, played the
+  victory cutscene, and ended in the "Grid Decarbonised!" overlay; no console
+  errors. (Real-time feel to confirm on a phone — headless preview throttles the
+  loop, same caveat as the power-up.)
+
 **Deferred (the feel-dependent batch — Chris to playtest first):** the staged
 walk-in / funny-exit cutscene *animation*, PABLO's secret-path *mechanic*, the
-EV-ride gag, and the **Oil Baron boss fight** (collectibles-as-ammo). Plus the
-character-choice screen + flavour hazards (per the story brief).
+EV-ride gag. Plus the character-choice screen + flavour hazards (per the story
+brief).
 
 ## Sound (WebAudio synth)
 

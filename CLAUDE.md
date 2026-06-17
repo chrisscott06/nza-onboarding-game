@@ -160,6 +160,14 @@ A `level.json` may add two optional blocks (see `levels/level-grid/`):
   the sky starts smoggy/warm and greens as renewables are *banked* (curtailed /
   wasted energy doesn't count), then snaps fully clean on the win (the
   "substation flip"). Levels with no `world` block keep the plain night look.
+- `boss` — an end-of-world boss fight (the Oil Baron, in `level-grid`). Fields:
+  `x,y,w,h`, `hp`, `engageX` (the fight starts when the player passes this x),
+  `fireInterval`, `boltSpeed`, `moveRange`, `moveSpeed`. **Banked clean energy is
+  the ammo:** pressing DASH (Shift / ⚡) fires a clean-energy bolt that auto-aims
+  at the boss and spends one stored segment; he hovers and lobs lethal oil-gunk.
+  Enough hits flip the grid green and play the victory beat. Add a beat with
+  `"trigger": "boss-defeat"` (and the engine adds `thenWin`) for the flee/victory
+  cutscene that ends in the win. The goal can't be claimed until the boss is down.
 
 ### Optional: `actors` — the moving/active toolbox
 

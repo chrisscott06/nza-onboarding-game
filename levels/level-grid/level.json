@@ -4,6 +4,17 @@
   "startPosition": { "x": 50, "y": 280 },
   "bounds": { "x": 0, "y": 0, "w": 3900, "h": 540 },
   "goal": { "x": 3600, "y": 280, "type": "substation", "label": "Flip the substation" },
+  "boss": {
+    "_comment": "BEAT 5 — the Oil Baron. Banked clean energy is ammo: fire with ⚡/DASH (auto-aims). He hovers over the gas plant and lobs lethal oil-gunk. 4 clean hits defeats him; the victory beat (trigger 'boss-defeat') then plays and the grid flips clean. He engages once the player steps onto the arena (after his taunt at x=3350).",
+    "name": "The Oil Baron",
+    "x": 3500, "y": 150, "w": 90, "h": 110,
+    "hp": 4,
+    "engageX": 3410,
+    "fireInterval": 1.7,
+    "boltSpeed": 250,
+    "moveRange": 80,
+    "moveSpeed": 70
+  },
   "mechanic": {
     "type": "storage-meter",
     "startSegments": 0,
@@ -55,7 +66,7 @@
       { "who": "Oil Baron", "text": "The little hero. You cannot switch ME off. I AM the grid." },
       { "who": "You", "text": "Not for much longer." }
     ] },
-    { "trigger": { "x": 3520 }, "lines": [
+    { "trigger": "boss-defeat", "lines": [
       { "who": "Oil Baron", "text": "This isn't OVER! Three more parts to your little plan — and I'll be WAITING!" },
       { "who": "Ed Megawatt", "text": "Pillar one: DONE. Grid's clean. Adaptation next. Onwards, hero!" }
     ] }
@@ -84,6 +95,10 @@
     { "objectId": "standby-gremlin","x": 2800, "y": 320 },
     { "objectId": "heat-pump",      "x": 3050, "y": 280 },
     { "objectId": "solar-panel",    "x": 3250, "y": 280 },
-    { "objectId": "wind-turbine",   "x": 3450, "y": 260 }
+    { "objectId": "battery-cell",   "x": 3410, "y": 260 },
+    { "objectId": "wind-turbine",   "x": 3450, "y": 240 },
+    { "objectId": "solar-panel",    "x": 3680, "y": 260 },
+    { "objectId": "battery-cell",   "x": 3720, "y": 260 },
+    { "objectId": "wind-turbine",   "x": 3760, "y": 240 }
   ]
 }
