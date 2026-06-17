@@ -119,6 +119,12 @@ const Engine = (() => {
       cutscene: null,   // active staged cutscene { beat, lines, idx, actor, npc, phase, t }
       beats: (spec.beats || []).map((b) => ({ ...b, fired: false })),
       darkness: 0, targetDarkness: 0, // atmosphere: scene dims when the foil arrives
+      // dirty→clean world transform: the sky greens as renewables are banked,
+      // and snaps fully clean on the win (the "substation flip"). Only levels
+      // with a `world` block transform; everything else keeps the night look.
+      worldDef: spec.world || null,
+      green: 0, greenTarget: 0, // 0 = dirty/smoggy, 1 = clean/bright (eased in render)
+      cleanTotal: 0, cleanGot: 0, // renewables banked vs. total → drives the green
       particles: [],   // transient visual bits (death burst, confetti)
       projectiles: [], // emitter bolts in flight
     };
@@ -128,6 +134,12 @@ const Engine = (() => {
         fill: 0,                                      // segments currently holding clean energy
         max: world.mechanic.maxSegments || 8,
       };
+    }
+    if (world.worldDef) {
+      // total renewables to gather; start fully clean only if the level says so
+      world.cleanTotal = world.objects.filter((o) => o.type === 'collectible').length;
+      world.green = world.worldDef.startState === 'clean' ? 1 : 0;
+      world.greenTarget = world.green;
     }
     // preload any sprites the objects reference (rendered with a fallback)
     for (const o of world.objects) loadSprite(o.sprite);
@@ -462,6 +474,7 @@ const Engine = (() => {
           if (s) s.capacity = Math.min(s.max, s.capacity + 1);
           o.collected = true;
           world.score += o.points || 0;
+          bankedClean();
           sfx('collect-low');
           tipOnce('battery', 'Storage online — now clean energy banks instead of going to waste.');
         } else if (s) {
@@ -470,6 +483,7 @@ const Engine = (() => {
             s.fill += 1;
             world.score += o.points || 0; // banked
             o.collected = true;
+            bankedClean();
             sfx('bank');
             if (o.realValue) tipOnce('rv-' + o.id, realValueTip(o));
           } else {
@@ -482,6 +496,7 @@ const Engine = (() => {
           // no storage mechanic on this level: score normally
           o.collected = true;
           world.score += o.points || 0;
+          bankedClean();
           sfx(soundKey(o));
           if (o.realValue) tipOnce('rv-' + o.id, realValueTip(o));
         }
@@ -838,10 +853,20 @@ const Engine = (() => {
     return { x: g.x - 16, y: g.y - 10, w: 60, h: 90 };
   }
 
+  // A renewable was actually banked → nudge the world a step greener.
+  function bankedClean() {
+    if (!world.worldDef) return;
+    world.cleanGot += 1;
+    if (world.cleanTotal > 0) {
+      world.greenTarget = Math.max(world.greenTarget, Math.min(1, world.cleanGot / world.cleanTotal));
+    }
+  }
+
   function triggerWin() {
     if (world.won) return;
     world.won = true;
     world.winT = 0;
+    if (world.worldDef) world.greenTarget = 1; // the substation flip: snap fully clean
     if (!reduceMotion) spawnConfetti(40);
     if (typeof Sound !== 'undefined') Sound.stopMusic();
     sfx('win');
@@ -880,6 +905,9 @@ const Engine = (() => {
     // draw in logical coords; the transform maps them into the low-res buffer
     ctx.setTransform(RETRO_SCALE, 0, 0, RETRO_SCALE, 0, 0);
     ctx.clearRect(0, 0, logicalW, logicalH);
+
+    // ease the world toward its green target (smooth dirty→clean transition)
+    world.green += (world.greenTarget - world.green) * 0.05;
 
     // simple parallax sky bands so motion reads clearly
     drawBackground();
@@ -924,15 +952,24 @@ const Engine = (() => {
   function drawBackground() {
     const W = logicalW, H = logicalH, cx = camera.x;
     const accent = world.accent || '#2dd4bf';
+    // dirty→clean transform: world levels blend the whole sky by `green`
+    // (0 = smoggy/dirty, 1 = clean). Non-world levels sit at the clean night
+    // look (g = 1) so they're pixel-identical to before.
+    const wd = world.worldDef;
+    const g = wd ? world.green : 1;
+    const skyClean = (wd && wd.skyClean) || '#3FA9C4';
+    const skyDirty = (wd && wd.skyDirty) || '#C8743A';
 
+    // sky gradient — warm/murky when dirty, cool/clear when clean
     const sky = ctx.createLinearGradient(0, 0, 0, H);
-    sky.addColorStop(0, '#0e1830');
-    sky.addColorStop(0.6, '#0b1324');
-    sky.addColorStop(1, '#0a0f1c');
+    sky.addColorStop(0, wd ? mixHex('#241a16', '#0e1830', g) : '#0e1830');
+    sky.addColorStop(0.6, wd ? mixHex('#3a2616', '#0b1324', g) : '#0b1324');
+    sky.addColorStop(1, wd ? mixHex(skyDirty, mixHex(skyClean, '#0a0f1c', 0.45), g) : '#0a0f1c');
     ctx.fillStyle = sky;
     ctx.fillRect(0, 0, W, H);
 
-    drawStars(W, H, cx);
+    // stars: hazy/dim under smog, crisp once clean
+    drawStars(W, H, cx, wd ? 0.10 + 0.22 * g : 0.32);
 
     // NZA logo watermark, subtly, behind the play area
     if (logo.ready) {
@@ -945,15 +982,27 @@ const Engine = (() => {
 
     drawClouds(W, H, cx);
 
-    // accent horizon glow low on the screen
+    // a brown smog band hanging over the horizon that lifts as the grid cleans
+    if (wd && g < 0.98) {
+      const smog = ctx.createLinearGradient(0, H * 0.4, 0, H);
+      smog.addColorStop(0, 'rgba(0,0,0,0)');
+      smog.addColorStop(1, hexA(skyDirty, 0.34 * (1 - g)));
+      ctx.fillStyle = smog;
+      ctx.fillRect(0, H * 0.4, W, H * 0.6);
+    }
+
+    // horizon glow: smog-orange when dirty → accent/clean when bright
+    const glowColor = wd ? mixHex(skyDirty, accent, g) : accent;
     const glow = ctx.createLinearGradient(0, H * 0.5, 0, H);
     glow.addColorStop(0, 'rgba(0,0,0,0)');
-    glow.addColorStop(1, hexA(accent, 0.1));
+    glow.addColorStop(1, hexA(glowColor, wd ? 0.08 + 0.1 * g : 0.1));
     ctx.fillStyle = glow;
     ctx.fillRect(0, H * 0.5, W, H * 0.5);
 
-    drawHills(W, H, cx, 0.22, H * 0.66, 26, '#101a30', null, false);
-    drawHills(W, H, cx, 0.42, H * 0.78, 40, '#0d1526', accent, true);
+    const farHill = wd ? mixHex('#241a14', '#101a30', g) : '#101a30';
+    const nearHill = wd ? mixHex('#1d130d', '#0d1526', g) : '#0d1526';
+    drawHills(W, H, cx, 0.22, H * 0.66, 26, farHill, null, false);
+    drawHills(W, H, cx, 0.42, H * 0.78, 40, nearHill, accent, true);
   }
 
   function hillY(wx, baseY, amp) {
@@ -1005,9 +1054,9 @@ const Engine = (() => {
     ctx.beginPath(); ctx.arc(x, hubY, 2.5, 0, Math.PI * 2); ctx.fill();
   }
 
-  function drawStars(W, H, cx) {
+  function drawStars(W, H, cx, alpha) {
     const off = (cx * 0.1) % 240;
-    ctx.fillStyle = 'rgba(245,241,230,0.32)';
+    ctx.fillStyle = `rgba(245,241,230,${alpha == null ? 0.32 : alpha})`;
     const band = Math.floor(H * 0.5);
     for (let i = 0; i < 70; i++) {
       let bx = ((i * 137) % (W + 240)) - off;
@@ -1043,6 +1092,19 @@ const Engine = (() => {
     const g = parseInt(n.slice(2, 4), 16) || 0;
     const b = parseInt(n.slice(4, 6), 16) || 0;
     return `rgba(${r},${g},${b},${a})`;
+  }
+
+  // Linear blend between two hex colours → "#rrggbb". t=0 → a, t=1 → b.
+  function rgbOf(hex) {
+    const h = hex.replace('#', '');
+    const n = h.length === 3 ? h.split('').map((c) => c + c).join('') : h;
+    return [parseInt(n.slice(0, 2), 16) || 0, parseInt(n.slice(2, 4), 16) || 0, parseInt(n.slice(4, 6), 16) || 0];
+  }
+  function mixHex(a, b, t) {
+    const ca = rgbOf(a), cb = rgbOf(b);
+    const m = (i) => Math.round(ca[i] + (cb[i] - ca[i]) * t);
+    const hx = (v) => v.toString(16).padStart(2, '0');
+    return `#${hx(m(0))}${hx(m(1))}${hx(m(2))}`;
   }
 
   // Textured platform: gradient body, panel seams, and a top cap tinted with the

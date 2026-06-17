@@ -155,8 +155,11 @@ A `level.json` may add two optional blocks (see `levels/level-grid/`):
   *bank* (score) if there's room, else they're *curtailed* (wasted, with a
   warning); a full meter can be spent on a `grid-surge` dash (Shift / the ⚡ touch
   button). Levels without a `mechanic` just score collectibles normally.
-- `world` — `startState`/`endState` + sky colours for a level that visibly
-  transforms (e.g. dirty → clean). (Rendering of the transform is a later piece.)
+- `world` — `startState`/`endState` + `skyDirty`/`skyClean` hex colours for a
+  level that visibly transforms (e.g. dirty → clean). The engine renders this:
+  the sky starts smoggy/warm and greens as renewables are *banked* (curtailed /
+  wasted energy doesn't count), then snaps fully clean on the win (the
+  "substation flip"). Levels with no `world` block keep the plain night look.
 
 ### Optional: `actors` — the moving/active toolbox
 

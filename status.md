@@ -152,7 +152,6 @@ verified pieces:
   Storage meter + status drawn in the HUD. All behaviours verified in-browser.
 
 **Deferred from the bundle (not yet built — flagged for a follow-up):**
-- World dirty→clean sky transform + the substation-flip win/level-complete.
 - Peaker "darts when near" AI (currently a static hazard).
 - On-screen narrative strings (`narrative/story.md`) — intro/prompts/win-lose.
 - Audio: CC0 SFX per `audio/AUDIO-GUIDE.md` (sound paths are in the data; no
@@ -168,8 +167,17 @@ verified pieces:
 - **Finish-line win:** reaching the goal triggers a celebration — confetti
   shower + an overlay that tallies the score (count-up), with "Play again"
   (reloads `?level=<name>`) and "Menu" (back to the landing page). This delivers
-  the "substation-flip win/level-complete" that was deferred (the dirty→clean
-  **sky transform** is still the only outstanding bit of that bundle item).
+  the "substation-flip win/level-complete" that was deferred.
+- **Dirty→clean sky transform (built + verified):** levels with a `world` block
+  start smoggy (warm/murky sky, brown haze band over the horizon, dim stars) and
+  visibly green as renewables are *banked* — the sky cools to clear blue, the
+  smog lifts, stars sharpen, the horizon glow shifts from smog-orange to the
+  level accent. Curtailed (wasted) energy doesn't count; reaching the goal snaps
+  it fully clean (the substation flip). Driven by a `green` value eased toward
+  `cleanGot / cleanTotal`. Levels with no `world` block are unchanged (verified
+  `level-grid` dirty→clean both endpoints + a live bank stepping `greenTarget` to
+  1/9, and `level-chris` pixel-identical to the old night look; no console
+  errors). That closes the last outstanding bit of the Level 1 bundle.
 
 ## Net Zero Hero — reusable mechanics roster (GDD §5; brief Parts 1–5 done)
 
