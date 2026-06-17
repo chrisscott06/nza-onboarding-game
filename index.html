@@ -150,6 +150,19 @@
       opacity: 0.6;
     }
 
+    /* ---- Enter the 2D world map ---- */
+    #menu .enter-hub-btn {
+      font-family: var(--font-mono); font-size: 14px; letter-spacing: 0.06em;
+      text-transform: uppercase; color: #07221f; background: var(--teal);
+      border: none; border-radius: 12px; padding: 13px 26px; cursor: pointer;
+      font-weight: 700; margin: 2px 0 14px; box-shadow: 0 6px 18px rgba(45,212,191,0.28);
+      transition: transform 0.14s ease, box-shadow 0.14s ease;
+    }
+    #menu .enter-hub-btn:hover, #menu .enter-hub-btn:focus-visible {
+      transform: translateY(-2px); box-shadow: 0 9px 24px rgba(45,212,191,0.4); outline: none;
+    }
+    @media (prefers-reduced-motion: reduce) { #menu .enter-hub-btn { transition: none; } }
+
     /* ---- World map (the four pillars) ---- */
     #menu .worldmap {
       display: flex; flex-wrap: wrap; gap: 14px; justify-content: center;
@@ -521,6 +534,7 @@
     </div>
 
     <p class="tagline" style="margin-top:6px">Choose your world</p>
+    <button id="enter-hub" class="enter-hub-btn">▶ Explore the world map</button>
     <div class="worldmap" aria-label="World map">
       <button class="world open" data-level="level-grid">
         <span class="world-num">1</span>

@@ -232,6 +232,16 @@ Per `docs/net-zero-hero-story-bible.md` (foil = **Mr Net Stupid Zero**):
 - **Atmosphere system** — a beat's `setMood` dims/brightens the scene: dark when
   Mr Net Stupid Zero arrives, re-bright when Ed Megawatt counters.
 - **World map** on the landing — four pillars, World 1 open, 2–4 locked.
+- **2D explorable overworld hub (built + verified):** the landing's "▶ Explore
+  the world map" button drops into a walkable hub level (`levels/level-hub/`) —
+  no score/lives/hazards, a "Choose your world" HUD. You walk past four world
+  gates; Gate 1 (Power Up the Grid) is lit/enterable and JUMP loads `level-grid`,
+  Gates 2–4 are locked (dim + 🔒) and JUMP shows a "coming soon" message instead
+  of entering. Built data-driven: a new `gate` actor type + a `hub: true` flag +
+  an `onEnterGate` engine callback; adding/unlocking a world is JSON-only.
+  Verified in a browser (desktop + 375px mobile): hub renders; Gate 1 → World 1;
+  locked Gate 2 shows "🔒 Beat the Heat — coming soon" and stays in the hub; no
+  console errors.
 
 **Deferred (the feel-dependent batch — Chris to playtest first):** the staged
 walk-in / funny-exit cutscene *animation*, PABLO's secret-path *mechanic*, the

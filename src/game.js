@@ -66,10 +66,14 @@
 })();
 
 // Wire the open world-map nodes (locked ones are inert). World 1 → its level.
+// The "Explore the world map" button drops into the 2D overworld hub, where you
+// walk up to a gate and JUMP to enter it.
 function setupWorldMap(onPick) {
   document.querySelectorAll('.world.open[data-level]').forEach((el) => {
     el.addEventListener('click', () => { Sound.play('click'); onPick(el.dataset.level); });
   });
+  const hubBtn = document.getElementById('enter-hub');
+  if (hubBtn) hubBtn.addEventListener('click', () => { Sound.play('click'); onPick('level-hub'); });
 }
 
 function renderPicker(listEl, cards, onPick) {
@@ -100,7 +104,8 @@ async function startLevel(canvas, menu, levelName) {
     const spec = buildSpec(level, objectTable, meta);
     menu.style.display = 'none';
     document.body.classList.add('playing');
-    Engine.start(canvas, spec, { onWin: showWin });
+    // From the hub, entering a gate loads that world (the same code path).
+    Engine.start(canvas, spec, { onWin: showWin, onEnterGate: (lvl) => startLevel(canvas, menu, lvl) });
     Sound.startMusic(); // backing track (silent until unmuted / after a gesture)
     watchSurge(); // toggles the touch dash button when a grid-surge is ready
   } catch (err) {
@@ -154,6 +159,7 @@ function buildSpec(level, objectTable, meta) {
     beats: level.beats || [], // narrative/dialogue beats (Story layer)
     mechanic: level.mechanic || null, // drives level-specific mechanics (Part: storage-meter)
     world: level.world || null,
+    hub: level.hub || false, // overworld map: walkable gates into each world
   };
 }
 

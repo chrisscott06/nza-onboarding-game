@@ -175,11 +175,22 @@ top-left pixels. Delete the ones you don't need.
 | `emitter` | Fires lethal bolts | `dir` `-1`/`+1`, `interval` (s), `speed`; optional `range` (only fire when player within) |
 | `spring` | Bounce pad — launches the player high | `power` (launch speed, ~1300) |
 | `crumble` | Platform that breaks shortly after you land | `w`, `h` |
+| `gate` | Overworld portal into a world (hub levels only) | `world` (number), `name`, `pillar`, `level` (folder to enter), `accent`, `locked` (bool) |
 
 Example: `{ "type": "mover", "x": 600, "y": 430, "w": 96, "h": 16, "axis": "x", "distance": 150, "speed": 70 }`.
 See `levels/_template-level/level.json` (documented stubs) and `levels/level-grid/`
 (all six in use). Follow the **teach → practise → challenge** pattern: introduce a
 mechanic somewhere safe before putting it over a death pit.
+
+### Optional: the overworld hub (`hub: true`)
+
+A level with `"hub": true` is the **2D world map** — a walkable strip with no
+score, lives, or hazards. The player walks it and steps up to `gate` actors;
+standing in front of an unlocked gate and pressing **JUMP** enters its `level`.
+Locked gates (`"locked": true`, no `level`) show a "coming soon" message instead.
+The one built is `levels/level-hub/`: Gate 1 → `level-grid`, Gates 2–4 locked.
+The landing page's "▶ Explore the world map" button drops into it. Add or unlock
+a world by editing the gates in `level-hub/level.json` — data only.
 
 ---
 

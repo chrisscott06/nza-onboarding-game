@@ -56,6 +56,7 @@ const Engine = (() => {
   let running = false;
   let onWin = null; // callback fired once when the player reaches the goal
   let onBeat = null; // callback fired when a narrative beat triggers (pauses play)
+  let onEnterGate = null; // hub: fired when the player enters an unlocked world gate
 
   // ---- World setup -----------------------------------------------------
   function load(spec) {
@@ -127,6 +128,10 @@ const Engine = (() => {
       cleanTotal: 0, cleanGot: 0, // renewables banked vs. total → drives the green
       particles: [],   // transient visual bits (death burst, confetti)
       projectiles: [], // emitter bolts in flight
+      // overworld hub: a walkable map of world gates (no hazards / scoring)
+      hub: !!spec.hub,
+      nearGate: null,  // the gate the player is currently standing in front of
+      entering: false, // a gate was entered; ignore further input while it loads
     };
     if (world.mechanic && world.mechanic.type === 'storage-meter') {
       world.storage = {
@@ -363,7 +368,10 @@ const Engine = (() => {
     p.vx = clamp(p.vx, -maxRun, maxRun);
 
     // --- jump: coyote time + input buffering ---
-    if (Input.consumeJumpPress()) p.jumpBufferT = t.jumpBuffer;
+    const jumpPressed = Input.consumeJumpPress();
+    // overworld hub: standing at a gate + jump = enter that world (no hop)
+    if (world.hub && handleGate(jumpPressed)) return;
+    if (jumpPressed) p.jumpBufferT = t.jumpBuffer;
     p.jumpBufferT = Math.max(0, p.jumpBufferT - dt);
     p.coyote = p.onGround ? t.coyoteTime : Math.max(0, p.coyote - dt);
 
@@ -857,6 +865,30 @@ const Engine = (() => {
     return { x: g.x - 16, y: g.y - 10, w: 60, h: 90 };
   }
 
+  // Hub: find the gate the player is standing in front of; a jump enters an
+  // unlocked world (or nudges a locked one with a "coming soon" tip).
+  function handleGate(jumpPressed) {
+    if (world.entering) return true; // a world is loading — swallow input
+    const p = world.player;
+    const pcx = p.x + p.w / 2;
+    let near = null;
+    for (const a of world.actors) {
+      if (a.type !== 'gate') continue;
+      if (pcx >= a.x - 12 && pcx <= a.x + a.w + 12) { near = a; break; }
+    }
+    world.nearGate = near;
+    if (!near || !jumpPressed) return false;
+    if (near.locked || !near.level) {
+      showTip('🔒 ' + (near.name || ('World ' + near.world)) + ' — coming soon', 2.4);
+      sfx('curtail');
+      return true; // consume the press so the player doesn't hop on the spot
+    }
+    world.entering = true; // freeze input while the chosen world loads
+    sfx('powerup');
+    if (onEnterGate) onEnterGate(near.level);
+    return true;
+  }
+
   // A renewable was actually banked → nudge the world a step greener.
   function bankedClean() {
     if (!world.worldDef) return;
@@ -1143,6 +1175,73 @@ const Engine = (() => {
     if (a.type === 'emitter') return drawEmitter(a);
     if (a.type === 'spring') return drawSpring(a);
     if (a.type === 'crumble') return drawCrumble(a);
+    if (a.type === 'gate') return drawGate(a);
+  }
+
+  // Overworld gate: a portal/arch into a world. Unlocked = accent-glowing and
+  // inviting; locked = dim grey with a padlock. Shows the world number + name,
+  // and a "JUMP to enter" prompt when the player is standing in front of it.
+  function drawGate(a) {
+    const accent = a.accent || world.accent || '#2dd4bf';
+    const locked = a.locked || !a.level;
+    const col = locked ? '#64748b' : accent;
+    const x = a.x, y = a.y, w = a.w, h = a.h;
+    const isNear = world.nearGate === a;
+
+    // soft ground glow under an unlocked gate (and a brighter one when near)
+    if (!locked) {
+      const gl = ctx.createRadialGradient(x + w / 2, y + h, 4, x + w / 2, y + h, w);
+      gl.addColorStop(0, hexA(accent, isNear ? 0.5 : 0.28));
+      gl.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = gl;
+      ctx.fillRect(x - w, y, w * 3, h + 10);
+    }
+
+    // the portal interior
+    ctx.fillStyle = locked ? 'rgba(30,41,59,0.85)' : hexA(accent, 0.16);
+    ctx.fillRect(x, y, w, h);
+    // arch frame
+    ctx.strokeStyle = col;
+    ctx.lineWidth = locked ? 3 : 4;
+    ctx.strokeRect(x, y, w, h);
+    // inner keyline for the unlocked, lit look
+    if (!locked) {
+      ctx.strokeStyle = hexA('#f5f1e6', 0.5);
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(x + 6, y + 6, w - 12, h - 12);
+    }
+
+    // world number, big and centred
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.fillStyle = locked ? '#94a3b8' : '#f5f1e6';
+    ctx.font = '700 46px "DM Serif Display", Georgia, serif';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(String(a.world != null ? a.world : '?'), x + w / 2, y + h / 2 - 4);
+
+    // padlock for locked gates
+    if (locked) {
+      ctx.font = '600 22px "IBM Plex Mono", ui-monospace, monospace';
+      ctx.fillText('🔒', x + w / 2, y + h - 22);
+    }
+
+    // world name + pillar above the arch
+    ctx.fillStyle = locked ? '#94a3b8' : accent;
+    ctx.font = '600 15px "IBM Plex Mono", ui-monospace, monospace';
+    ctx.fillText((a.name || '').toUpperCase(), x + w / 2, y - 30);
+    if (a.pillar) {
+      ctx.fillStyle = 'rgba(203,213,225,0.7)';
+      ctx.font = '600 11px "IBM Plex Mono", ui-monospace, monospace';
+      ctx.fillText(a.pillar.toUpperCase(), x + w / 2, y - 12);
+    }
+
+    // "JUMP to enter" prompt when standing in front of an unlocked gate
+    if (isNear && !locked) {
+      ctx.fillStyle = hexA('#f5f1e6', 0.92);
+      ctx.font = '600 13px "IBM Plex Mono", ui-monospace, monospace';
+      ctx.fillText('▲ JUMP TO ENTER', x + w / 2, y + h + 18);
+    }
+    ctx.restore();
   }
 
   // Bounce pad: a coil under an accent cap; compresses when it fires.
@@ -1372,6 +1471,20 @@ const Engine = (() => {
   }
 
   function drawHUD() {
+    // Overworld hub: no score/lives/storage — just a title + how-to.
+    if (world.hub) {
+      ctx.textBaseline = 'top';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#f5f1e6';
+      ctx.font = '700 30px "DM Serif Display", Georgia, serif';
+      ctx.fillText('Choose your world', logicalW / 2, 20);
+      ctx.fillStyle = 'rgba(203,213,225,0.8)';
+      ctx.font = '600 13px "IBM Plex Mono", ui-monospace, monospace';
+      ctx.fillText('← → / A D  TO WALK  ·  STAND AT A GATE + JUMP TO ENTER', logicalW / 2, 58);
+      ctx.textAlign = 'left';
+      drawTip();
+      return;
+    }
     ctx.textBaseline = 'top';
     ctx.textAlign = 'left';
     ctx.fillStyle = '#f5f1e6'; // cream
@@ -1498,6 +1611,7 @@ const Engine = (() => {
     ctx.imageSmoothingEnabled = false;
     onWin = (opts && opts.onWin) || null;
     onBeat = (opts && opts.onBeat) || null;
+    onEnterGate = (opts && opts.onEnterGate) || null;
     load(spec);
     lastTime = null;
     accumulator = 0;
