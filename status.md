@@ -132,8 +132,20 @@ faces for the real assets when ready.
 
 ## Level 1 — "Power Up the Grid" (folded in from the level-1 bundle)
 
-The first real content level, built on the foundation contract. Done in three
-verified pieces:
+The first real content level, built on the foundation contract.
+
+**Expanded + paced (latest):** the level is now ~5,760px wide (was 3,900) with a
+full teaching curve — open/Ed → storage → transport + heckler (ICE car, CCGT,
+enemy, breakable block; world goes dark) → Ed counter (re-bright) → a
+spring/mover/crumble climb → PABLO → a supply-chain gauntlet (emitters, gremlins,
+peaker; surge dash) → the Oil Baron boss → win. 14 platforms, 32 objects, 11
+actors. **Every cutscene beat trigger sits mid-way on a wide flat ground platform
+(220–260px of flat footing either side)**, and the engine now defers `{x}` beats
+until the player is on the ground — so a chat never starts mid-jump or at a ledge.
+Verified in a browser (start, transport, gauntlet, arena sections render; beat
+zones confirmed on solid ground; no console errors).
+
+Original three verified pieces:
 
 - **Objects merged** into `data/objects.json` (still a bare array): kept the
   foundation hazards, enriched solar/wind/heat-pump (points, `realValue`,

@@ -1,15 +1,15 @@
 {
-  "_comment": "Level 1 — 'Power Up the Grid'. The signature mechanic is 'storage-meter' (see mechanic block): renewables only bank if storage has room; full storage + more renewables = curtailment (waste); a full meter can be spent on a grid-surge dash. Reaching the substation is the goal. Coordinates are illustrative — tune in-browser. Platforms use the repo's {x,y,w,h}; bounds added (the source bundle omitted it).",
+  "_comment": "Level 1 — 'Power Up the Grid'. Signature mechanic: storage-meter (renewables only bank if storage has room; full + more = curtailment; spend a full meter on a grid-surge dash). Teaching curve (story bible §4.2): open dirty -> meet Ed -> storage -> transport/hazards + heckler (dark) -> Ed counter (re-bright) -> PABLO -> supply-chain gauntlet (surge) -> Oil Baron boss -> win. NOTE: every cutscene beat trigger sits MID-WAY on a WIDE flat ground platform, so a chat never starts mid-jump or at a ledge edge (the engine also defers {x} beats until the player is grounded). Coordinates are pixels, top-left; tune in-browser. Object y = platform-top - 40; player rests at platform-top - 46.",
   "id": "level-grid",
   "startPosition": { "x": 50, "y": 280 },
-  "bounds": { "x": 0, "y": 0, "w": 3900, "h": 540 },
-  "goal": { "x": 3600, "y": 280, "type": "substation", "label": "Flip the substation" },
+  "bounds": { "x": 0, "y": 0, "w": 5760, "h": 540 },
+  "goal": { "x": 5400, "y": 260, "type": "substation", "label": "Flip the substation" },
   "boss": {
-    "_comment": "BEAT 5 — the Oil Baron. Banked clean energy is ammo: fire with ⚡/DASH (auto-aims). He hovers over the gas plant and lobs lethal oil-gunk. 4 clean hits defeats him; the victory beat (trigger 'boss-defeat') then plays and the grid flips clean. He engages once the player steps onto the arena (after his taunt at x=3350).",
+    "_comment": "BEAT 5 — the Oil Baron, over the gas plant in the arena. Banked clean energy is ammo: fire with the FIRE button / Shift (auto-aims). 4 hits flips the grid green and plays the victory beat (trigger 'boss-defeat'). Engages once the player steps onto the arena (after the taunt at x=4600).",
     "name": "The Oil Baron",
-    "x": 3500, "y": 150, "w": 90, "h": 110,
+    "x": 5240, "y": 150, "w": 90, "h": 110,
     "hp": 4,
-    "engageX": 3410,
+    "engageX": 5060,
     "fireInterval": 1.7,
     "boltSpeed": 250,
     "moveRange": 80,
@@ -28,18 +28,23 @@
     "transformOn": "substation-flip",
     "skyDirty": "#C8743A",
     "skyClean": "#3FA9C4",
-    "note": "world visibly brightens as renewables are collected; snaps fully clean on substation flip"
+    "note": "world visibly brightens as renewables are banked; snaps fully clean on the boss defeat / substation flip"
   },
   "platforms": [
-    { "x": 0,    "y": 360, "w": 600,  "h": 180 },
-    { "x": 700,  "y": 320, "w": 220,  "h": 24 },
-    { "x": 1000, "y": 260, "w": 180,  "h": 24 },
-    { "x": 1300, "y": 360, "w": 400,  "h": 180 },
-    { "x": 1800, "y": 300, "w": 200,  "h": 24 },
-    { "x": 2100, "y": 240, "w": 180,  "h": 24 },
-    { "x": 2400, "y": 360, "w": 500,  "h": 180 },
-    { "x": 3000, "y": 320, "w": 300,  "h": 24 },
-    { "x": 3400, "y": 300, "w": 400,  "h": 240 }
+    { "x": 0,    "y": 360, "w": 720, "h": 180 },
+    { "x": 540,  "y": 200, "w": 150, "h": 24 },
+    { "x": 820,  "y": 300, "w": 200, "h": 24 },
+    { "x": 1100, "y": 250, "w": 190, "h": 24 },
+    { "x": 1380, "y": 360, "w": 580, "h": 180 },
+    { "x": 2060, "y": 300, "w": 160, "h": 24 },
+    { "x": 2300, "y": 360, "w": 560, "h": 180 },
+    { "x": 2500, "y": 230, "w": 150, "h": 24 },
+    { "x": 2940, "y": 300, "w": 160, "h": 24 },
+    { "x": 3180, "y": 360, "w": 600, "h": 180 },
+    { "x": 3860, "y": 310, "w": 180, "h": 24 },
+    { "x": 4120, "y": 300, "w": 200, "h": 24 },
+    { "x": 4340, "y": 360, "w": 620, "h": 180 },
+    { "x": 5040, "y": 300, "w": 600, "h": 240 }
   ],
   "beats": [
     { "trigger": "start", "lines": [
@@ -48,21 +53,21 @@
       { "who": "You", "text": "Real numbers. I feel slightly less useless." },
       { "who": "Ed Megawatt", "text": "(a turbine blade sweeps him clean off-screen) WORTH ITwwww—" }
     ] },
-    { "trigger": { "x": 1500 }, "setMood": "dark", "lines": [
+    { "trigger": { "x": 1600 }, "setMood": "dark", "lines": [
       { "who": "Mr Net Stupid Zero", "text": "It'll NEVER work! I'll slap levies on your precious clean leccy — and dig up FRESH North Sea oil!" },
       { "who": "Mr Net Stupid Zero", "text": "The wind doesn't even blow at night! Give UP!" },
       { "who": "You", "text": "...that's literally what storage is for, mate." }
     ] },
-    { "trigger": { "x": 2300 }, "setMood": "bright", "lines": [
+    { "trigger": { "x": 2520 }, "setMood": "bright", "lines": [
       { "who": "Ed Megawatt", "text": "Don't listen to him! Make clean power the cheapest power, and his oil's worthless. Watch." },
       { "who": "You", "text": "So we don't beat him with rage. We beat him with economics." },
       { "who": "Ed Megawatt", "text": "Now you're getting it. Onwards!" }
     ] },
-    { "trigger": { "x": 3000 }, "lines": [
+    { "trigger": { "x": 3420 }, "lines": [
       { "who": "PABLO", "text": "Running the numbers... optimising... optimal route found." },
       { "who": "You", "text": "Whatever you are, I like you." }
     ] },
-    { "trigger": { "x": 3350 }, "lines": [
+    { "trigger": { "x": 4600 }, "lines": [
       { "who": "Oil Baron", "text": "The little hero. You cannot switch ME off. I AM the grid." },
       { "who": "You", "text": "Not for much longer." }
     ] },
@@ -72,33 +77,50 @@
     ] }
   ],
   "actors": [
-    { "type": "mover", "x": 610, "y": 344, "w": 96, "h": 16, "axis": "x", "distance": 150, "speed": 70 },
-    { "type": "mover", "x": 1230, "y": 300, "w": 84, "h": 16, "axis": "y", "distance": 90, "speed": 55 },
-    { "type": "block", "x": 1480, "y": 250, "w": 40, "h": 40, "drop": "solar-panel" },
-    { "type": "enemy", "x": 1360, "y": 330, "w": 34, "h": 30, "range": 220, "speed": 80, "points": 50 },
-    { "type": "emitter", "x": 2840, "y": 316, "w": 22, "h": 44, "dir": -1, "interval": 1.6, "speed": 220 },
-    { "type": "spring", "x": 440, "y": 344, "w": 40, "h": 16, "power": 1300 },
-    { "type": "crumble", "x": 930, "y": 352, "w": 90, "h": 16 }
+    { "type": "spring",  "x": 560,  "y": 344, "w": 40, "h": 16, "power": 1300 },
+    { "type": "mover",   "x": 740,  "y": 330, "w": 96, "h": 16, "axis": "x", "distance": 110, "speed": 70 },
+    { "type": "mover",   "x": 1300, "y": 300, "w": 84, "h": 16, "axis": "y", "distance": 90,  "speed": 55 },
+    { "type": "enemy",   "x": 1640, "y": 330, "w": 34, "h": 30, "range": 200, "speed": 80, "points": 50 },
+    { "type": "block",   "x": 1700, "y": 250, "w": 40, "h": 40, "drop": "solar-panel" },
+    { "type": "spring",  "x": 2380, "y": 344, "w": 40, "h": 16, "power": 1300 },
+    { "type": "crumble", "x": 2880, "y": 340, "w": 90, "h": 16 },
+    { "type": "mover",   "x": 3800, "y": 332, "w": 96, "h": 16, "axis": "x", "distance": 120, "speed": 75 },
+    { "type": "emitter", "x": 4220, "y": 256, "w": 22, "h": 44, "dir": -1, "interval": 1.6, "speed": 220, "range": 420 },
+    { "type": "emitter", "x": 4940, "y": 316, "w": 22, "h": 44, "dir": -1, "interval": 1.4, "speed": 240, "range": 520 },
+    { "type": "crumble", "x": 4980, "y": 352, "w": 90, "h": 16 }
   ],
   "placements": [
-    { "objectId": "solar-panel",    "x": 250,  "y": 320 },
-    { "objectId": "solar-panel",    "x": 420,  "y": 320 },
-    { "objectId": "battery-cell",   "x": 760,  "y": 280 },
-    { "objectId": "wind-turbine",   "x": 1060, "y": 220 },
-    { "objectId": "ccgt",           "x": 1400, "y": 320 },
-    { "objectId": "solar-panel",    "x": 1550, "y": 320 },
-    { "objectId": "battery-cell",   "x": 1850, "y": 260 },
-    { "objectId": "wind-turbine",   "x": 2160, "y": 200 },
-    { "objectId": "peaker",         "x": 2300, "y": 320 },
-    { "objectId": "standby-gremlin","x": 2500, "y": 320 },
-    { "objectId": "insulation",     "x": 2650, "y": 320 },
-    { "objectId": "standby-gremlin","x": 2800, "y": 320 },
-    { "objectId": "heat-pump",      "x": 3050, "y": 280 },
-    { "objectId": "solar-panel",    "x": 3250, "y": 280 },
-    { "objectId": "battery-cell",   "x": 3410, "y": 260 },
-    { "objectId": "wind-turbine",   "x": 3450, "y": 240 },
-    { "objectId": "solar-panel",    "x": 3680, "y": 260 },
-    { "objectId": "battery-cell",   "x": 3720, "y": 260 },
-    { "objectId": "wind-turbine",   "x": 3760, "y": 240 }
+    { "objectId": "solar-panel",    "x": 210,  "y": 320 },
+    { "objectId": "solar-panel",    "x": 380,  "y": 320 },
+    { "objectId": "battery-cell",   "x": 600,  "y": 320 },
+    { "objectId": "solar-panel",    "x": 600,  "y": 160 },
+    { "objectId": "solar-panel",    "x": 900,  "y": 260 },
+    { "objectId": "wind-turbine",   "x": 1180, "y": 210 },
+    { "objectId": "ice-car",        "x": 1450, "y": 320 },
+    { "objectId": "battery-cell",   "x": 1520, "y": 320 },
+    { "objectId": "ccgt",           "x": 1820, "y": 320 },
+    { "objectId": "solar-panel",    "x": 2120, "y": 260 },
+    { "objectId": "oil-slick",      "x": 2360, "y": 320 },
+    { "objectId": "battery-cell",   "x": 2700, "y": 320 },
+    { "objectId": "solar-panel",    "x": 2790, "y": 320 },
+    { "objectId": "wind-turbine",   "x": 2560, "y": 190 },
+    { "objectId": "solar-panel",    "x": 2990, "y": 260 },
+    { "objectId": "heat-pump",      "x": 3250, "y": 320 },
+    { "objectId": "standby-gremlin","x": 3320, "y": 320 },
+    { "objectId": "insulation",     "x": 3560, "y": 320 },
+    { "objectId": "standby-gremlin","x": 3680, "y": 320 },
+    { "objectId": "solar-panel",    "x": 3920, "y": 270 },
+    { "objectId": "wind-turbine",   "x": 4180, "y": 260 },
+    { "objectId": "battery-cell",   "x": 4380, "y": 320 },
+    { "objectId": "peaker",         "x": 4480, "y": 320 },
+    { "objectId": "insulation",     "x": 4560, "y": 320 },
+    { "objectId": "solar-panel",    "x": 4720, "y": 320 },
+    { "objectId": "standby-gremlin","x": 4820, "y": 320 },
+    { "objectId": "ccgt",           "x": 4900, "y": 320 },
+    { "objectId": "battery-cell",   "x": 5070, "y": 260 },
+    { "objectId": "solar-panel",    "x": 5120, "y": 260 },
+    { "objectId": "solar-panel",    "x": 5470, "y": 260 },
+    { "objectId": "battery-cell",   "x": 5520, "y": 260 },
+    { "objectId": "wind-turbine",   "x": 5570, "y": 260 }
   ]
 }
