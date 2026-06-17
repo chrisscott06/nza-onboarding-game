@@ -345,10 +345,19 @@
       background: rgba(165, 243, 252, 0.16);
       border-color: rgba(165, 243, 252, 0.6);
       color: #a5f3fc;
-      font-size: 26px;
-      display: none; /* shown only when a grid-surge is available */
+      font-size: 24px;
+      display: none; /* shown only when a grid-surge / fire is available */
+      flex-direction: column; gap: 0;
     }
-    body.surge-ready .tbtn.dash { display: grid; }
+    .tbtn.dash .lbl { font-size: 9px; letter-spacing: 0.1em; opacity: 0.9; margin-top: 1px; }
+    body.surge-ready .tbtn.dash { display: grid; place-items: center; animation: dash-ready 1s ease-in-out infinite; }
+    @keyframes dash-ready {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(165,243,252,0.0); }
+      50% { box-shadow: 0 0 16px 3px rgba(165,243,252,0.55); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      body.surge-ready .tbtn.dash { animation: none; box-shadow: 0 0 12px 2px rgba(165,243,252,0.4); }
+    }
     body.playing #touch { display: flex; }
     /* Hide on desktops with a real mouse + room for a keyboard. */
     @media (pointer: fine) and (min-width: 820px) {
@@ -486,7 +495,7 @@
 
   <button id="sound-btn" aria-label="Toggle sound">🔊</button>
   <button id="menu-btn" aria-label="Back to level menu">☰ Menu</button>
-  <div id="hint">← → move &nbsp;·&nbsp; space / ↑ jump</div>
+  <div id="hint">← → move &nbsp;·&nbsp; ↑ / space jump &nbsp;·&nbsp; shift ⚡ fire / dash &nbsp;·&nbsp; enter talk</div>
 
   <!-- On-screen touch controls (shown on touch devices / small screens). -->
   <div id="touch">
@@ -495,7 +504,7 @@
       <button class="tbtn" data-action="right" aria-label="Move right">►</button>
     </div>
     <div class="pad-right">
-      <button class="tbtn dash" data-action="dash" aria-label="Grid-surge dash">⚡</button>
+      <button class="tbtn dash" data-action="dash" aria-label="Grid-surge dash"><span class="ic">⚡</span><span class="lbl">DASH</span></button>
       <button class="tbtn jump" data-action="jump" aria-label="Jump">JUMP</button>
     </div>
   </div>

@@ -27,15 +27,19 @@
   setupTouch();
   setupSound();
 
-  // Advance the in-world staged cutscenes on tap / any key.
+  // Advance the in-world staged cutscenes. Only Enter (or a tap) advances — NOT
+  // the movement keys, so holding ←/→ when a character walks in can't skip their
+  // lines. And only once they've finished walking in (the engine's 'talk' phase).
   const advanceCutscene = () => {
     const w = Engine.world;
     if (w && w.cutscene && w.cutscene.phase === 'talk') { Sound.play('click'); Engine.cutsceneAdvance(); }
   };
-  canvas.addEventListener('click', advanceCutscene);
+  canvas.addEventListener('click', advanceCutscene); // tap to continue
   window.addEventListener('keydown', (e) => {
     const w = Engine.world;
-    if (w && w.cutscene) { e.preventDefault(); advanceCutscene(); }
+    if (!(w && w.cutscene)) return;
+    // swallow everything during a cutscene, but only Enter advances it
+    if (e.code === 'Enter' || e.code === 'NumpadEnter') { e.preventDefault(); advanceCutscene(); }
   }, true);
 
   try {
@@ -269,6 +273,15 @@ function watchSurge() {
   const inFight = !!(w && w.boss && w.boss.engaged && !w.boss.defeated);
   const ready = !!(w && (w.surgeReady || inFight));
   document.body.classList.toggle('surge-ready', ready);
+  // the ⚡ button does different jobs — say which
+  const dash = document.querySelector('.tbtn.dash');
+  if (dash) {
+    const lbl = dash.querySelector('.lbl');
+    const text = inFight ? 'FIRE' : 'DASH';
+    if (lbl && lbl.textContent !== text) lbl.textContent = text;
+    const aria = inFight ? 'Fire clean energy' : 'Grid-surge dash';
+    if (dash.getAttribute('aria-label') !== aria) dash.setAttribute('aria-label', aria);
+  }
   requestAnimationFrame(watchSurge);
 }
 

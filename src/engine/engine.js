@@ -147,6 +147,7 @@ const Engine = (() => {
         off: 0, dir: -1, fireT: spec.boss.fireInterval || 1.8, flash: 0,
       } : null,
       playerBolts: [], // the player's clean-energy shots at the boss
+      animT: 0, // free-running clock for idle animations (ready-to-act pulse)
     };
     if (world.mechanic && world.mechanic.type === 'storage-meter') {
       world.storage = {
@@ -177,7 +178,9 @@ const Engine = (() => {
       if (b.fired) continue;
       let hit = false;
       if (b.trigger === 'start') hit = true;
-      else if (b.trigger && b.trigger.x != null) hit = world.player.x >= b.trigger.x;
+      // wait until the player is past the x AND standing on the ground, so a
+      // chat never starts mid-jump or while falling
+      else if (b.trigger && b.trigger.x != null) hit = world.player.x >= b.trigger.x && world.player.onGround;
       if (!hit) continue;
       b.fired = true;
       startCutscene(b);
@@ -443,6 +446,8 @@ const Engine = (() => {
     if (world.cutscene) { updateCutscene(dt); return; }
     checkBeats();
     if (world.cutscene) return; // a beat just started a cutscene
+
+    world.animT += dt; // idle-animation clock (ready-to-act pulse)
 
     // move platforms first, and carry the player if they're riding one
     updateActors(dt);
@@ -1148,6 +1153,7 @@ const Engine = (() => {
     drawProjectiles();
     drawPlayerBolts();
     drawPlayer(world.player);
+    drawReadyCharge(world.player); // "ready to throw / surge" hand-spark
     drawParticles();
     if (world.cutscene) drawCutscene();
 
@@ -1724,6 +1730,27 @@ const Engine = (() => {
     ctx.restore();
   }
 
+  // A glowing spark in the hero's leading hand when an action is ready: "ready to
+  // throw" clean energy at the boss, or a surge dash when the meter is full. It's
+  // the at-a-glance "you can press ⚡ / DASH now" cue.
+  function drawReadyCharge(p) {
+    const canFire = world.boss && world.boss.engaged && !world.boss.defeated && world.storage && world.storage.fill > 0;
+    const canSurge = world.surgeReady;
+    if (!canFire && !canSurge) return;
+    const pulse = reduceMotion ? 0.8 : 0.55 + 0.45 * Math.sin(world.animT * 9);
+    const hx = p.facing >= 0 ? p.x + p.w + 1 : p.x - 1; // the leading hand
+    const hy = p.y + p.h * 0.52;
+    const r = 5 + 3 * pulse;
+    const col = canFire ? '94,234,212' : '165,243,252'; // clean-energy teal / surge cyan
+    const grad = ctx.createRadialGradient(hx, hy, 0, hx, hy, r * 2.2);
+    grad.addColorStop(0, `rgba(${col},${0.55 + 0.35 * pulse})`);
+    grad.addColorStop(1, `rgba(${col},0)`);
+    ctx.fillStyle = grad;
+    ctx.beginPath(); ctx.arc(hx, hy, r * 2.2, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = `rgba(245,241,230,${0.7 + 0.3 * pulse})`;
+    ctx.beginPath(); ctx.arc(hx, hy, 2.4, 0, Math.PI * 2); ctx.fill();
+  }
+
   function drawHUD() {
     // Overworld hub: no score/lives/storage — just a title + how-to.
     if (world.hub) {
@@ -1810,7 +1837,7 @@ const Engine = (() => {
       ctx.fillStyle = 'rgba(245,241,230,0.55)';
       ctx.font = '600 12px "IBM Plex Mono", ui-monospace, monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('▸ tap / any key', logicalW / 2, logicalH - 22);
+      ctx.fillText('▸ ENTER / TAP TO CONTINUE', logicalW / 2, logicalH - 22);
       ctx.textAlign = 'left';
     }
 
