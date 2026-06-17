@@ -8,7 +8,8 @@
   { "id": "wind-turbine",   "type": "collectible", "label": "Wind turbine",       "sprite": "public/sprites/wind-turbine.svg",   "points": 25,  "sound": "audio/collect-bright.mp3",
     "realValue": { "metric": "UK offshore wind capacity factor", "value": 41, "unit": "%", "note": "higher + steadier than solar — that's why it's worth more and sits up high" } },
   { "id": "battery-cell",   "type": "collectible", "label": "Battery cell",       "sprite": "public/sprites/battery-cell.svg",   "points": 5,   "sound": "audio/collect-low.mp3",
-    "effect": "grow-storage", "note": "grows the storage meter by one segment. Renewables only bank if there's storage to hold them." },
+    "effect": "grow-storage", "note": "grows the storage meter by one segment. Renewables only bank if there's storage to hold them.",
+    "realValue": { "metric": "round-trip efficiency", "value": 90, "unit": "%", "note": "lithium-ion grid storage returns ~90% of the energy you put in" } },
 
   { "id": "ccgt",           "type": "hazard",      "label": "CCGT gas plant",     "sprite": "public/sprites/ccgt.svg",           "points": 0,   "sound": "audio/lose.mp3",
     "realValue": { "metric": "CCGT carbon intensity", "value": 350, "unit": "gCO2/kWh", "note": "the main villain — gas-fired power" } },
@@ -21,5 +22,6 @@
     "effect": "supercharge",
     "realValue": { "metric": "Heat pump efficiency (SCOP)", "value": 3.5, "unit": "x", "note": "3.5 units of heat per unit of electricity — that's why it powers you up" } },
   { "id": "insulation",     "type": "powerup",     "label": "Insulation",         "sprite": "public/sprites/insulation.svg",     "points": 0,   "sound": "audio/shield.mp3",
-    "effect": "shield-one-hit", "note": "absorbs one hazard hit, then is used up. Fabric first." }
+    "effect": "shield-one-hit", "note": "absorbs one hazard hit, then is used up. Fabric first.",
+    "realValue": { "metric": "cut in wall heat loss", "value": 35, "unit": "%", "note": "insulating cavity walls cuts heat lost through them by about a third" } }
 ]

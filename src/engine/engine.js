@@ -476,7 +476,9 @@ const Engine = (() => {
           world.score += o.points || 0;
           bankedClean();
           sfx('collect-low');
-          tipOnce('battery', 'Storage online — now clean energy banks instead of going to waste.');
+          tipOnce('battery', o.realValue
+            ? 'Storage online — clean energy now banks. ' + realValueTip(o) + '.'
+            : 'Storage online — now clean energy banks instead of going to waste.');
         } else if (s) {
           // renewable on a storage-meter level: only banks if there's room
           if (s.fill < s.capacity) {
@@ -505,7 +507,9 @@ const Engine = (() => {
         if (o.effect === 'shield-one-hit') {
           p.shield = true; // insulation: fabric first
           sfx('shield');
-          tipOnce('insulation', 'Insulated — you can take one hit. Fabric first.');
+          tipOnce('insulation', o.realValue
+            ? 'Insulated — one free hit, fabric first. ' + realValueTip(o) + '.'
+            : 'Insulated — you can take one hit. Fabric first.');
         } else {
           p.powerT = POWER_DURATION; // supercharge (heat pump)
           sfx('powerup');
