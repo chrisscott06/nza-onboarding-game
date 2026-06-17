@@ -21,9 +21,9 @@
   const canvas = document.getElementById('game');
   const menu = document.getElementById('menu');
   const menuBtn = document.getElementById('menu-btn');
-  const listEl = document.getElementById('level-list');
 
-  menuBtn.addEventListener('click', () => { Sound.play('click'); location.reload(); }); // back to picker
+  // "Menu" returns to the 2D world hub (the home screen).
+  menuBtn.addEventListener('click', () => { Sound.play('click'); startLevel(canvas, menu, 'level-hub'); });
   setupTouch();
   setupSound();
 
@@ -42,57 +42,18 @@
     if (e.code === 'Enter' || e.code === 'NumpadEnter') { e.preventDefault(); advanceCutscene(); }
   }, true);
 
-  try {
-    const manifest = await fetchJSON('data/levels.json');
-    const names = manifest.levels || [];
-
-    // Load each level's meta so the card can show name/author/theme/accent.
-    const cards = await Promise.all(
-      names.map(async (name) => ({ name, meta: await fetchJSON(`levels/${name}/meta.json`) }))
-    );
-
-    // "Play again" reloads with ?level=<name> so it jumps straight back in.
-    const autoLevel = new URLSearchParams(location.search).get('level');
-    if (autoLevel && names.includes(autoLevel)) {
-      const boot = document.getElementById('boot');
-      if (boot) boot.hidden = true;
-      startLevel(canvas, menu, autoLevel);
-    } else {
-      renderPicker(listEl, cards, (name) => startLevel(canvas, menu, name));
-      setupWorldMap((name) => startLevel(canvas, menu, name));
-      setupBoot(); // PRESS START → reveal the landing page + type the intro
-    }
-  } catch (err) {
-    listEl.textContent = 'Could not load levels — see console';
-    console.error('[NZA] Level list failed:', err);
-    throw err;
+  // The 2D world hub IS the home screen — PRESS START drops straight into it,
+  // no level menu. (A ?level=<name> deep-link, e.g. "Play again", jumps straight
+  // to that level.)
+  const autoLevel = new URLSearchParams(location.search).get('level');
+  if (autoLevel) {
+    const boot = document.getElementById('boot');
+    if (boot) boot.hidden = true;
+    startLevel(canvas, menu, autoLevel);
+  } else {
+    setupBoot(() => startLevel(canvas, menu, 'level-hub')); // PRESS START → into the world
   }
 })();
-
-// Wire the open world-map nodes (locked ones are inert). World 1 → its level.
-// The "Explore the world map" button drops into the 2D overworld hub, where you
-// walk up to a gate and JUMP to enter it.
-function setupWorldMap(onPick) {
-  document.querySelectorAll('.world.open[data-level]').forEach((el) => {
-    el.addEventListener('click', () => { Sound.play('click'); onPick(el.dataset.level); });
-  });
-  const hubBtn = document.getElementById('enter-hub');
-  if (hubBtn) hubBtn.addEventListener('click', () => { Sound.play('click'); onPick('level-hub'); });
-}
-
-function renderPicker(listEl, cards, onPick) {
-  listEl.innerHTML = '';
-  for (const { name, meta } of cards) {
-    const btn = document.createElement('button');
-    btn.className = 'level-card';
-    btn.style.setProperty('--accent', meta.accentColor || '#2dd4bf');
-    btn.innerHTML =
-      `<div class="name">${escapeHTML(meta.name || name)}</div>` +
-      `<div class="meta"><span class="swatch"></span>${escapeHTML(meta.author || '—')} · ${escapeHTML(meta.theme || '')}</div>`;
-    btn.addEventListener('click', () => { Sound.play('click'); onPick(name); });
-    listEl.appendChild(btn);
-  }
-}
 
 let currentLevel = null;
 
@@ -168,46 +129,8 @@ function buildSpec(level, objectTable, meta) {
   };
 }
 
-// The landing-page intro, typed out like a classic game's opening crawl.
-const INTRO = [
-  { t: 'Welcome, hero.\n' },
-  { t: "The grid's running dirty and the planet's getting toasty.\n" },
-  { t: 'Grab the ' }, { t: 'clean stuff', c: 'hi' },
-  { t: ' — solar panels, wind turbines — and dodge the ' },
-  { t: 'fossil fiends', c: 'bad' },
-  { t: ' — gas boilers, ICE cars, oil slicks.\n' },
-  { t: 'Snag a heat pump to power up, then reach the flag and flip the grid ' },
-  { t: 'GREEN', c: 'hi' }, { t: '.' },
-];
-
-function typeIntro() {
-  const el = document.getElementById('intro-text');
-  if (!el) return;
-  const full = INTRO.reduce((n, s) => n + s.t.length, 0);
-  const render = (shown) => {
-    let html = '', count = 0;
-    for (const s of INTRO) {
-      if (count >= shown) break;
-      const part = escapeHTML(s.t.slice(0, Math.min(s.t.length, shown - count)));
-      html += s.c ? `<span class="${s.c}">${part}</span>` : part;
-      count += s.t.length;
-    }
-    el.innerHTML = html + (shown >= full ? '' : '<span class="cursor">▋</span>');
-  };
-  const reduce = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduce) { render(full); return; }
-  let n = 0, skip = false;
-  const box = el.closest('.intro');
-  if (box) box.addEventListener('click', () => { skip = true; }); // click to skip the crawl
-  (function tick() {
-    if (skip) { render(full); return; }
-    render((n += 1));
-    if (n < full) setTimeout(tick, 14);
-  })();
-}
-
 // Reached the goal: show the celebration overlay, tally the score, offer
-// "play again" (same level) or back to the landing page.
+// "play again" (same level) or back to the world hub.
 function showWin(score) {
   const el = document.getElementById('win');
   const val = document.getElementById('win-score');
@@ -227,24 +150,27 @@ function showWin(score) {
   }
 
   const base = location.pathname;
-  document.getElementById('win-menu').onclick = () => { Sound.play('click'); location.href = base; };
+  document.getElementById('win-menu').onclick = () => {
+    Sound.play('click');
+    el.hidden = true;
+    startLevel(document.getElementById('game'), document.getElementById('menu'), 'level-hub');
+  };
   document.getElementById('win-again').onclick = () => {
     Sound.play('click');
     location.href = base + '?level=' + encodeURIComponent(currentLevel || '');
   };
 }
 
-// Boot screen: a "PRESS START" tone-setter. On dismiss, reveal the landing
-// page and type the intro (also a user gesture, so it unlocks audio).
-function setupBoot() {
+// Boot screen: a "PRESS START" tone-setter. On dismiss it unlocks audio (a user
+// gesture) and drops straight into the world hub.
+function setupBoot(onDismiss) {
   const bootEl = document.getElementById('boot');
-  if (!bootEl) { typeIntro(); return; }
+  const go = () => { Sound.unlock(); Sound.play('click'); onDismiss(); };
+  if (!bootEl) { go(); return; }
   const dismiss = () => {
     if (bootEl.hidden) return;
     bootEl.hidden = true;
-    Sound.unlock();
-    Sound.play('click');
-    typeIntro();
+    go();
   };
   bootEl.addEventListener('click', dismiss);
   window.addEventListener('keydown', dismiss, { once: true });
@@ -310,12 +236,6 @@ function setupTouch() {
     btn.addEventListener('pointerleave', up);
     btn.addEventListener('contextmenu', (e) => e.preventDefault());
   });
-}
-
-function escapeHTML(s) {
-  return String(s).replace(/[&<>"']/g, (c) =>
-    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])
-  );
 }
 
 // If a data file is missing or malformed, say so loudly instead of a blank canvas.

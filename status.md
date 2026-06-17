@@ -172,13 +172,14 @@ Original three verified pieces:
 
 ## Narrative & win (next-version asks)
 
-- **Landing-page intro:** the home screen is now a 16-bit game intro — NZA mark,
-  "NZA Net Zero Hero" title, a typed-out narrative crawl (reduced-motion safe,
-  click to skip), and a how-to-play legend (collect renewables / avoid fossil
-  fuels / heat-pump power-up / reach the goal) built from the real sprites.
+- **Home screen = the 2D world hub.** (Superseded the old landing page: the
+  16-bit intro crawl, how-to legend, world-map cards and sandbox level-picker
+  have all been removed — boot/PRESS START now drops straight into the hub. See
+  the "Story layer" section below.) The boot/title screen (NZA mark + "Net Zero
+  Hero" + PRESS START) is the only pre-game screen; it also unlocks audio.
 - **Finish-line win:** reaching the goal triggers a celebration — confetti
   shower + an overlay that tallies the score (count-up), with "Play again"
-  (reloads `?level=<name>`) and "Menu" (back to the landing page). This delivers
+  (reloads `?level=<name>`) and "Menu" (back to the world hub). This delivers
   the "substation-flip win/level-complete" that was deferred.
 - **Dirty→clean sky transform (built + verified):** levels with a `world` block
   start smoggy (warm/murky sky, brown haze band over the horizon, dim stars) and
@@ -247,17 +248,19 @@ Per `docs/net-zero-hero-story-bible.md` (foil = **Mr Net Stupid Zero**):
   earlier emoji stand-ins, where Ed's "face" was a 🦺 vest and the Baron's a 🎩 hat.)
 - **Atmosphere system** — a beat's `setMood` dims/brightens the scene: dark when
   Mr Net Stupid Zero arrives, re-bright when Ed Megawatt counters.
-- **World map** on the landing — four pillars, World 1 open, 2–4 locked.
-- **2D explorable overworld hub (built + verified):** the landing's "▶ Explore
-  the world map" button drops into a walkable hub level (`levels/level-hub/`) —
-  no score/lives/hazards, a "Choose your world" HUD. You walk past four world
-  gates; Gate 1 (Power Up the Grid) is lit/enterable and JUMP loads `level-grid`,
-  Gates 2–4 are locked (dim + 🔒) and JUMP shows a "coming soon" message instead
-  of entering. Built data-driven: a new `gate` actor type + a `hub: true` flag +
-  an `onEnterGate` engine callback; adding/unlocking a world is JSON-only.
-  Verified in a browser (desktop + 375px mobile): hub renders; Gate 1 → World 1;
-  locked Gate 2 shows "🔒 Beat the Heat — coming soon" and stays in the hub; no
-  console errors.
+- **2D overworld hub IS the home screen (built + verified):** the boot/PRESS
+  START screen now drops STRAIGHT into the hub (`levels/level-hub/`) — there is no
+  level menu, no intro crawl, no sandbox/level-picker, no static world-map cards
+  (all removed). The hub is a single non-scrolling screen showing **four
+  pillar-doors close together**: Gate 1 (Power Up the Grid) is lit and JUMP loads
+  `level-grid`; Gates 2–4 are locked (dim, padlock) and JUMP shows "coming soon".
+  Each door is drawn as a column (base plinth + capital + fluting). No
+  score/lives/hazards; a "Choose your world" HUD. The in-game "Menu" button and
+  the win overlay's "Menu" both return here. Built data-driven: a `gate` actor +
+  `hub: true` flag + an `onEnterGate` engine callback; adding/unlocking a world is
+  JSON-only. Verified in a browser (desktop + 375px mobile): boot → hub directly;
+  all four pillars fit on one screen; Gate 1 → World 1; locked gates show "coming
+  soon" and stay; no console errors.
 
 - **Oil Baron boss fight (built + verified)** — BEAT 5, at the end of World 1.
   Banked clean energy is the ammo: DASH (Shift / ⚡) fires an auto-aiming

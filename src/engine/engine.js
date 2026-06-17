@@ -1390,13 +1390,28 @@ const Engine = (() => {
       ctx.fillRect(x - w, y, w * 3, h + 10);
     }
 
-    // the portal interior
+    // pillar base (plinth) + capital slabs make the door read as a column
+    const stone = locked ? '#2b3344' : '#324056';
+    ctx.fillStyle = stone;
+    ctx.fillRect(x - 12, y + h - 16, w + 24, 16); // base plinth
+    ctx.fillRect(x - 10, y - 8, w + 20, 12);       // capital
+    ctx.fillStyle = hexA(col, locked ? 0.4 : 0.85);
+    ctx.fillRect(x - 10, y - 8, w + 20, 2);        // capital top edge
+
+    // the portal interior (the doorway in the column)
     ctx.fillStyle = locked ? 'rgba(30,41,59,0.85)' : hexA(accent, 0.16);
     ctx.fillRect(x, y, w, h);
     // arch frame
     ctx.strokeStyle = col;
     ctx.lineWidth = locked ? 3 : 4;
     ctx.strokeRect(x, y, w, h);
+    // vertical fluting (column grooves)
+    ctx.strokeStyle = hexA(locked ? '#94a3b8' : '#f5f1e6', 0.13);
+    ctx.lineWidth = 1;
+    for (let i = 1; i <= 3; i++) {
+      const fx = x + (w * i) / 4;
+      ctx.beginPath(); ctx.moveTo(fx, y + 12); ctx.lineTo(fx, y + h - 12); ctx.stroke();
+    }
     // inner keyline for the unlocked, lit look
     if (!locked) {
       ctx.strokeStyle = hexA('#f5f1e6', 0.5);

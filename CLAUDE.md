@@ -192,13 +192,15 @@ mechanic somewhere safe before putting it over a death pit.
 
 ### Optional: the overworld hub (`hub: true`)
 
-A level with `"hub": true` is the **2D world map** — a walkable strip with no
-score, lives, or hazards. The player walks it and steps up to `gate` actors;
-standing in front of an unlocked gate and pressing **JUMP** enters its `level`.
-Locked gates (`"locked": true`, no `level`) show a "coming soon" message instead.
-The one built is `levels/level-hub/`: Gate 1 → `level-grid`, Gates 2–4 locked.
-The landing page's "▶ Explore the world map" button drops into it. Add or unlock
-a world by editing the gates in `level-hub/level.json` — data only.
+A level with `"hub": true` is the **2D world map**, and it IS the home screen:
+the boot/PRESS START screen drops straight into it (there is no level menu). The
+player walks among `gate` actors with no score, lives, or hazards; standing in
+front of an unlocked gate and pressing **JUMP** enters its `level`. Locked gates
+(`"locked": true`, no `level`) show a "coming soon" message instead. The one
+built is `levels/level-hub/`: four pillar-doors on a single non-scrolling screen
+— Gate 1 → `level-grid`, Gates 2–4 locked. The in-game "Menu" button returns
+here. Add or unlock a world by editing the gates in `level-hub/level.json` (data
+only); access to a level is via its gate, not a picker.
 
 ---
 

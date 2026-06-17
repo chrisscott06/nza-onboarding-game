@@ -1,18 +1,18 @@
 {
-  "_comment": "The 2D overworld hub. The player walks along a ground strip past four world gates. Gate 1 (Power Up the Grid) is unlocked and enters level-grid; gates 2-4 are locked ('coming soon'). Gates are data-driven `actors` of type 'gate' — no engine edits to add one. `hub: true` tells the engine this is a map: no score/lives/hazards, and JUMP at a gate enters it.",
+  "_comment": "The 2D world hub = the home screen. Four tall pillar-doors stand close together, all visible on ONE screen (bounds = the 960 view, so the camera never scrolls). Gate 1 enters level-grid; Gates 2-4 are locked ('coming soon'). Walk up to a pillar and JUMP to enter. Data-driven `gate` actors + `hub: true` — adding/unlocking a world is JSON-only.",
   "id": "level-hub",
   "hub": true,
-  "startPosition": { "x": 90, "y": 380 },
-  "bounds": { "x": 0, "y": 0, "w": 2600, "h": 540 },
+  "startPosition": { "x": 40, "y": 380 },
+  "bounds": { "x": 0, "y": 0, "w": 960, "h": 540 },
   "platforms": [
-    { "x": 0, "y": 470, "w": 2600, "h": 70 }
+    { "x": 0, "y": 470, "w": 960, "h": 70 }
   ],
   "goal": null,
   "actors": [
-    { "type": "gate", "x": 320,  "y": 300, "w": 120, "h": 170, "world": 1, "name": "Power Up the Grid", "pillar": "Decarbonisation", "level": "level-grid", "accent": "#2dd4bf", "locked": false },
-    { "type": "gate", "x": 920,  "y": 300, "w": 120, "h": 170, "world": 2, "name": "Beat the Heat",     "pillar": "Adaptation",      "accent": "#fbbf24", "locked": true },
-    { "type": "gate", "x": 1500, "y": 300, "w": 120, "h": 170, "world": 3, "name": "Bring It Back",     "pillar": "Nature",          "accent": "#34d399", "locked": true },
-    { "type": "gate", "x": 2080, "y": 300, "w": 120, "h": 170, "world": 4, "name": "School's In",       "pillar": "Education",        "accent": "#c084fc", "locked": true }
+    { "type": "gate", "x": 100, "y": 200, "w": 110, "h": 270, "world": 1, "name": "Power Up the Grid", "pillar": "Decarbonisation", "level": "level-grid", "accent": "#2dd4bf", "locked": false },
+    { "type": "gate", "x": 315, "y": 200, "w": 110, "h": 270, "world": 2, "name": "Beat the Heat",     "pillar": "Adaptation",      "accent": "#fbbf24", "locked": true },
+    { "type": "gate", "x": 530, "y": 200, "w": 110, "h": 270, "world": 3, "name": "Bring It Back",     "pillar": "Nature",          "accent": "#34d399", "locked": true },
+    { "type": "gate", "x": 745, "y": 200, "w": 110, "h": 270, "world": 4, "name": "School's In",       "pillar": "Education",        "accent": "#c084fc", "locked": true }
   ],
   "placements": []
 }
