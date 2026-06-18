@@ -192,15 +192,19 @@ mechanic somewhere safe before putting it over a death pit.
 
 ### Optional: the overworld hub (`hub: true`)
 
-A level with `"hub": true` is the **2D world map**, and it IS the home screen:
-the boot/PRESS START screen drops straight into it (there is no level menu). The
-player walks among `gate` actors with no score, lives, or hazards; standing in
-front of an unlocked gate and pressing **JUMP** enters its `level`. Locked gates
-(`"locked": true`, no `level`) show a "coming soon" message instead. The one
-built is `levels/level-hub/`: four pillar-doors on a single non-scrolling screen
-— Gate 1 → `level-grid`, Gates 2–4 locked. The in-game "Menu" button returns
-here. Add or unlock a world by editing the gates in `level-hub/level.json` (data
-only); access to a level is via its gate, not a picker.
+A level with `"hub": true` is the **2D world map**, and it IS the home screen.
+Flow: boot/PRESS START → the **intro crawl** (the typed spiel, in `game.js`'s
+`showCrawl`) → a **retro pixel transition** (`src/transition.js`) → the hub. The
+player spawns at the LEFT in open space, walks RIGHT, and the four world
+pillar-doors come into view clustered together. They walk among `gate` actors
+(no score/lives/hazards); standing in front of an unlocked gate and pressing
+**JUMP** plays the transition and enters its `level`. Locked gates
+(`"locked": true`, no `level`) show a "coming soon" message. The one built is
+`levels/level-hub/`: Gate 1 → `level-grid`, Gates 2–4 locked; each door is drawn
+as a column (base/capital/fluting). The in-game "Menu" button and the win
+overlay's "Menu" both return here (via the transition). Add or unlock a world by
+editing the gates in `level-hub/level.json` (data only); access is via its gate,
+not a picker.
 
 ---
 

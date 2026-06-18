@@ -172,11 +172,12 @@ Original three verified pieces:
 
 ## Narrative & win (next-version asks)
 
-- **Home screen = the 2D world hub.** (Superseded the old landing page: the
-  16-bit intro crawl, how-to legend, world-map cards and sandbox level-picker
-  have all been removed — boot/PRESS START now drops straight into the hub. See
-  the "Story layer" section below.) The boot/title screen (NZA mark + "Net Zero
-  Hero" + PRESS START) is the only pre-game screen; it also unlocks audio.
+- **Home screen flow: boot → intro crawl → walk into the 2D world.** PRESS START
+  shows the **intro crawl** (typed spiel: collect renewables / dodge fossils /
+  heat-pump / "four pillars stand between us and net zero — walk in and choose"),
+  then a key/tap plays a **retro pixel transition** into the hub. (The old
+  landing's how-to legend, world-map cards and sandbox level-picker stay removed.)
+  A 350ms "armed" delay stops the boot-dismissing tap from skipping the crawl.
 - **Finish-line win:** reaching the goal triggers a celebration — confetti
   shower + an overlay that tallies the score (count-up), with "Play again"
   (reloads `?level=<name>`) and "Menu" (back to the world hub). This delivers
@@ -248,19 +249,27 @@ Per `docs/net-zero-hero-story-bible.md` (foil = **Mr Net Stupid Zero**):
   earlier emoji stand-ins, where Ed's "face" was a 🦺 vest and the Baron's a 🎩 hat.)
 - **Atmosphere system** — a beat's `setMood` dims/brightens the scene: dark when
   Mr Net Stupid Zero arrives, re-bright when Ed Megawatt counters.
-- **2D overworld hub IS the home screen (built + verified):** the boot/PRESS
-  START screen now drops STRAIGHT into the hub (`levels/level-hub/`) — there is no
-  level menu, no intro crawl, no sandbox/level-picker, no static world-map cards
-  (all removed). The hub is a single non-scrolling screen showing **four
-  pillar-doors close together**: Gate 1 (Power Up the Grid) is lit and JUMP loads
-  `level-grid`; Gates 2–4 are locked (dim, padlock) and JUMP shows "coming soon".
-  Each door is drawn as a column (base plinth + capital + fluting). No
-  score/lives/hazards; a "Choose your world" HUD. The in-game "Menu" button and
-  the win overlay's "Menu" both return here. Built data-driven: a `gate` actor +
-  `hub: true` flag + an `onEnterGate` engine callback; adding/unlocking a world is
-  JSON-only. Verified in a browser (desktop + 375px mobile): boot → hub directly;
-  all four pillars fit on one screen; Gate 1 → World 1; locked gates show "coming
-  soon" and stay; no console errors.
+- **2D overworld hub = the home screen (built + verified):** reached via the
+  crawl + transition above. The hub (`levels/level-hub/`) now spawns the player at
+  the LEFT in open space; you **walk RIGHT** and the **four pillar-doors** come
+  into view, clustered close together so all four are visible at once. Gate 1
+  (Power Up the Grid) is lit and JUMP plays the transition + loads `level-grid`;
+  Gates 2–4 are locked (dim, padlock) and JUMP shows "coming soon". Each door is
+  drawn as a column (base plinth + capital + fluting). No score/lives/hazards; a
+  "Choose your world · WALK RIGHT →" HUD. The in-game "Menu" and the win overlay's
+  "Menu" both return here (via the transition). Built data-driven: a `gate` actor
+  + `hub: true` flag + an `onEnterGate` engine callback; adding/unlocking a world
+  is JSON-only. Verified in a browser (desktop + mobile): crawl → transition →
+  hub; walking right reveals all four pillars; Gate 1 → World 1; locked gates show
+  "coming soon" and stay; no console errors.
+- **Retro pixel transition (`src/transition.js`, built + verified):** a "squash
+  shut → pixelated NZA logo → reopen" wipe — two navy panels close to the centre
+  with chunky pixel-stepped edges, a teal seam + the nearest-neighbour-pixelated
+  NZA mark at the pinch, then reopen; the scene swaps at the covered midpoint.
+  Played entering the world from the crawl, entering a door, and on "Menu".
+  Reduced-motion shortens it; a setTimeout fallback guarantees it completes + the
+  swap fires even if rAF is throttled/paused. Verified: full-cover frame renders
+  the pixelated logo + seam; flow completes into the target scene; no errors.
 
 - **Oil Baron boss fight (built + verified)** — BEAT 5, at the end of World 1.
   Banked clean energy is the ammo: DASH (Shift / ⚡) fires an auto-aiming

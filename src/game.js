@@ -22,8 +22,8 @@
   const menu = document.getElementById('menu');
   const menuBtn = document.getElementById('menu-btn');
 
-  // "Menu" returns to the 2D world hub (the home screen).
-  menuBtn.addEventListener('click', () => { Sound.play('click'); startLevel(canvas, menu, 'level-hub'); });
+  // "Menu" returns to the 2D world hub (the home screen), via the transition.
+  menuBtn.addEventListener('click', () => { Sound.play('click'); Transition.play(() => startLevel(canvas, menu, 'level-hub')); });
   setupTouch();
   setupSound();
 
@@ -42,18 +42,78 @@
     if (e.code === 'Enter' || e.code === 'NumpadEnter') { e.preventDefault(); advanceCutscene(); }
   }, true);
 
-  // The 2D world hub IS the home screen — PRESS START drops straight into it,
-  // no level menu. (A ?level=<name> deep-link, e.g. "Play again", jumps straight
-  // to that level.)
+  // Flow: PRESS START → intro crawl (the spiel) → walk into the 2D world hub.
+  // (A ?level=<name> deep-link, e.g. "Play again", jumps straight to that level.)
   const autoLevel = new URLSearchParams(location.search).get('level');
   if (autoLevel) {
     const boot = document.getElementById('boot');
     if (boot) boot.hidden = true;
     startLevel(canvas, menu, autoLevel);
   } else {
-    setupBoot(() => startLevel(canvas, menu, 'level-hub')); // PRESS START → into the world
+    setupBoot(() => showCrawl(canvas, menu)); // PRESS START → the crawl, then the world
   }
 })();
+
+// The intro crawl: type out the spiel, then a key/tap transitions into the world.
+const INTRO = [
+  { t: 'Welcome, hero.\n' },
+  { t: "The grid's running dirty and the planet's getting toasty.\n" },
+  { t: 'Grab the ' }, { t: 'clean stuff', c: 'hi' },
+  { t: ' — solar panels, wind turbines — and dodge the ' },
+  { t: 'fossil fiends', c: 'bad' },
+  { t: ' — gas boilers, ICE cars, oil slicks.\n' },
+  { t: 'Snag a heat pump to power up, then flip the grid ' },
+  { t: 'GREEN', c: 'hi' }, { t: '.\n\nFour pillars stand between us and net zero. Walk in and choose one.' },
+];
+
+function showCrawl(canvas, menu) {
+  const el = document.getElementById('crawl');
+  const txt = document.getElementById('crawl-text');
+  const go = document.getElementById('crawl-go');
+  const enterWorld = () => Transition.play(() => startLevel(canvas, menu, 'level-hub'));
+  if (!el || !txt) { enterWorld(); return; }
+
+  el.hidden = false;
+  if (go) go.hidden = true;
+  const full = INTRO.reduce((n, s) => n + s.t.length, 0);
+  const render = (shown) => {
+    let html = '', count = 0;
+    for (const s of INTRO) {
+      if (count >= shown) break;
+      const part = escapeHTML(s.t.slice(0, Math.min(s.t.length, shown - count)));
+      html += s.c ? `<span class="${s.c}">${part}</span>` : part;
+      count += s.t.length;
+    }
+    txt.innerHTML = html + (shown >= full ? '' : '<span class="cursor">▋</span>');
+  };
+
+  let done = false, entered = false, armed = false;
+  setTimeout(() => { armed = true; }, 350); // ignore the boot-dismissing tap falling through
+  const finishTyping = () => { done = true; render(full); if (go) go.hidden = false; };
+  const onInput = (e) => {
+    if (e && e.type === 'keydown') e.preventDefault();
+    if (!armed) return;
+    if (!done) { finishTyping(); return; } // first input skips the typing
+    if (entered) return;
+    entered = true;
+    el.removeEventListener('click', onInput);
+    window.removeEventListener('keydown', onInput, true);
+    el.hidden = true;
+    enterWorld();
+  };
+  el.addEventListener('click', onInput);
+  window.addEventListener('keydown', onInput, true);
+
+  const reduce = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) { finishTyping(); return; }
+  let n = 0;
+  (function tick() {
+    if (done) return;
+    render((n += 1));
+    if (n >= full) finishTyping();
+    else setTimeout(tick, 16);
+  })();
+}
 
 let currentLevel = null;
 
@@ -69,8 +129,8 @@ async function startLevel(canvas, menu, levelName) {
     const spec = buildSpec(level, objectTable, meta);
     menu.style.display = 'none';
     document.body.classList.add('playing');
-    // From the hub, entering a gate loads that world (the same code path).
-    Engine.start(canvas, spec, { onWin: showWin, onEnterGate: (lvl) => startLevel(canvas, menu, lvl) });
+    // From the hub, entering a gate plays the retro transition, then loads it.
+    Engine.start(canvas, spec, { onWin: showWin, onEnterGate: (lvl) => Transition.play(() => startLevel(canvas, menu, lvl)) });
     Sound.startMusic(); // backing track (silent until unmuted / after a gesture)
     watchSurge(); // toggles the touch dash button when a grid-surge is ready
   } catch (err) {
@@ -153,7 +213,7 @@ function showWin(score) {
   document.getElementById('win-menu').onclick = () => {
     Sound.play('click');
     el.hidden = true;
-    startLevel(document.getElementById('game'), document.getElementById('menu'), 'level-hub');
+    Transition.play(() => startLevel(document.getElementById('game'), document.getElementById('menu'), 'level-hub'));
   };
   document.getElementById('win-again').onclick = () => {
     Sound.play('click');
@@ -236,6 +296,12 @@ function setupTouch() {
     btn.addEventListener('pointerleave', up);
     btn.addEventListener('contextmenu', (e) => e.preventDefault());
   });
+}
+
+function escapeHTML(s) {
+  return String(s).replace(/[&<>"']/g, (c) =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])
+  );
 }
 
 // If a data file is missing or malformed, say so loudly instead of a blank canvas.

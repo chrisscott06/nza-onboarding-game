@@ -1776,7 +1776,7 @@ const Engine = (() => {
       ctx.fillText('Choose your world', logicalW / 2, 20);
       ctx.fillStyle = 'rgba(203,213,225,0.8)';
       ctx.font = '600 13px "IBM Plex Mono", ui-monospace, monospace';
-      ctx.fillText('← → / A D  TO WALK  ·  STAND AT A GATE + JUMP TO ENTER', logicalW / 2, 58);
+      ctx.fillText('WALK RIGHT →  ·  STAND AT A PILLAR + JUMP TO ENTER', logicalW / 2, 58);
       ctx.textAlign = 'left';
       drawTip();
       return;
