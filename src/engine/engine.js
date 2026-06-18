@@ -538,6 +538,10 @@ const Engine = (() => {
     const g = p.vy > 0 ? t.fallGravity : t.gravity;
     p.vy = Math.min(p.vy + g * dt, t.maxFallSpeed);
 
+    // --- wind updraft: caught in a turbine's airflow, you float upward (hold
+    // jump to rise faster). Steer out the top/sides. Overrides gravity here. ---
+    updateUpdraft(dt);
+
     // --- integrate + collide, one axis at a time ---
     p.onGround = false;
     p.x += p.vx * dt;
@@ -929,6 +933,22 @@ const Engine = (() => {
     const beat = world.beats.find((b) => b.trigger === 'boss-defeat' && !b.fired);
     if (beat) { beat.fired = true; beat.thenWin = true; startCutscene(beat); }
     else { showTip('The Oil Baron flees! Grid clean.', 2.4); triggerWin(); }
+  }
+
+  // Wind updraft: while the player is in a turbine's airflow column, ease their
+  // vertical speed toward a steady rise (hold jump to rise faster). They steer
+  // out the top or sides. Non-solid; pure data actor.
+  function updateUpdraft(dt) {
+    const p = world.player;
+    for (const a of world.actors) {
+      if (a.type !== 'updraft' || !aabb(p, a)) continue;
+      // the wind carries you up at a steady rate (overrides gravity); hold jump
+      // to rise faster. Steer out the top or sides to leave the column.
+      const base = a.lift || 220;
+      p.vy = Input.isJumpHeld() ? -base * 1.6 : -base;
+      p.onGround = false; p.coyote = 0;
+      break;
+    }
   }
 
   // Player vs patrolling enemies: a stomp from above defeats them (bounce +
@@ -1422,6 +1442,31 @@ const Engine = (() => {
     if (a.type === 'spring') return drawSpring(a);
     if (a.type === 'crumble') return drawCrumble(a);
     if (a.type === 'gate') return drawGate(a);
+    if (a.type === 'updraft') return drawUpdraft(a);
+  }
+
+  // Wind updraft: a translucent accent column with chevrons rising up it, so
+  // it reads as "stand here and the wind lifts you".
+  function drawUpdraft(a) {
+    const accent = world.accent || '#2dd4bf';
+    const grad = ctx.createLinearGradient(0, a.y, 0, a.y + a.h);
+    grad.addColorStop(0, hexA(accent, 0.02));
+    grad.addColorStop(1, hexA(accent, 0.18));
+    ctx.fillStyle = grad;
+    ctx.fillRect(a.x, a.y, a.w, a.h);
+    ctx.strokeStyle = hexA(accent, 0.28); ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y); ctx.lineTo(a.x, a.y + a.h);
+    ctx.moveTo(a.x + a.w, a.y); ctx.lineTo(a.x + a.w, a.y + a.h);
+    ctx.stroke();
+    const cx = a.x + a.w / 2, span = 42;
+    const off = reduceMotion ? 0 : (world.animT * 130) % span;
+    ctx.strokeStyle = hexA(accent, 0.55); ctx.lineWidth = 2;
+    for (let y = a.y + a.h - off; y > a.y + 6; y -= span) {
+      ctx.beginPath();
+      ctx.moveTo(cx - 10, y + 6); ctx.lineTo(cx, y); ctx.lineTo(cx + 10, y + 6);
+      ctx.stroke();
+    }
   }
 
   // Overworld gate: a portal/arch into a world. Unlocked = accent-glowing and
@@ -1521,6 +1566,19 @@ const Engine = (() => {
     ctx.stroke();
     ctx.fillStyle = hexA(world.accent || '#2dd4bf', 0.95);
     ctx.fillRect(a.x, top - 5, a.w, 5);
+    // bobbing "launch up" chevrons above the pad so its purpose reads at a glance
+    if (a.squash <= 0) {
+      const bob = reduceMotion ? 0 : Math.sin(world.animT * 5) * 3;
+      const cx = a.x + a.w / 2, cy = top - 16 - bob;
+      ctx.strokeStyle = hexA(world.accent || '#2dd4bf', 0.8);
+      ctx.lineWidth = 3;
+      for (let i = 0; i < 2; i++) {
+        const yy = cy - i * 8;
+        ctx.beginPath();
+        ctx.moveTo(cx - 7, yy + 5); ctx.lineTo(cx, yy); ctx.lineTo(cx + 7, yy + 5);
+        ctx.stroke();
+      }
+    }
   }
 
   // Collapsing platform: earthy slab with cracks; shakes once the fuse is lit.

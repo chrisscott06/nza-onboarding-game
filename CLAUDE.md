@@ -183,6 +183,7 @@ top-left pixels. Delete the ones you don't need.
 | `emitter` | Fires lethal bolts | `dir` `-1`/`+1`, `interval` (s), `speed`; optional `range` (only fire when player within) |
 | `spring` | Bounce pad — launches the player high | `power` (launch speed, ~1300) |
 | `crumble` | Platform that breaks shortly after you land | `w`, `h` |
+| `updraft` | Wind column — stand in it and you float upward (hold jump to rise faster); steer out the top/sides | `w`, `h`, `lift` (rise speed, ~220) |
 | `gate` | Overworld portal into a world (hub levels only) | `world` (number), `name`, `pillar`, `level` (folder to enter), `accent`, `locked` (bool) |
 
 Example: `{ "type": "mover", "x": 600, "y": 430, "w": 96, "h": 16, "axis": "x", "distance": 150, "speed": 70 }`.
