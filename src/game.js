@@ -45,7 +45,8 @@
     }
   }, true);
 
-  // Flow: PRESS START → intro crawl (the spiel) → walk into the 2D world hub.
+  // Flow: boot/intro (mark fills + NET ZERO HERO reveals) → PRESS START →
+  // retro transition → the 2D world hub (the in-world spiel plays there).
   // (A ?level=<name> deep-link, e.g. "Play again", jumps straight to that level.)
   const autoLevel = new URLSearchParams(location.search).get('level');
   if (autoLevel) {
@@ -53,10 +54,27 @@
     if (boot) boot.hidden = true;
     startLevel(canvas, menu, autoLevel);
   } else {
-    // PRESS START → retro transition → into the world (the intro plays in-world)
+    bootCounter(); // tick the 0→100% counter while the mark fills
     setupBoot(() => Transition.play(() => startLevel(canvas, menu, 'level-hub')));
   }
 })();
+
+// Drive the boot screen's 0→100% counter over the ~2s mark-fill (rAF so it
+// tracks the CSS fill on slow devices). The CSS fades the counter out at the end.
+function bootCounter() {
+  const el = document.getElementById('boot-counter');
+  if (!el) return;
+  const reduce = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) { el.textContent = ''; return; }
+  const DUR = 2000, t0 = performance.now();
+  (function tick(now) {
+    const boot = document.getElementById('boot');
+    if (!boot || boot.hidden) return; // skipped early
+    const p = Math.min(100, Math.round(((now - t0) / DUR) * 100));
+    el.textContent = String(p).padStart(3, '0') + '%';
+    if (p < 100) requestAnimationFrame(tick);
+  })(t0);
+}
 
 let currentLevel = null;
 

@@ -172,6 +172,13 @@ Original three verified pieces:
 
 ## Narrative & win (next-version asks)
 
+- **Boot / intro screen (matches the nza-website preloader).** On load the NZA
+  mark "fills with energy" (a teal fill clip-paths bottom→up over a faint hollow
+  outline) while a 0→100% mono counter ticks, then **NET ZERO** rises in cream and
+  **HERO** mask-reveals in teal (coral "ADVISORY" → teal "HERO", game palette on
+  the navy bg), then PRESS START appears. Uses the canonical NZA mark inlined as
+  SVG (so it tints/clips). Verified in a browser: mark fills bottom-up; wordmark
+  reveals; reduced-motion shows it settled.
 - **Home screen flow: boot → transition → walk into the 2D world (intro in-world).**
   PRESS START plays the **retro pixel transition** straight into the hub, where the
   hero stands at the LEFT. The intro spiel types out in a top panel while the hero
