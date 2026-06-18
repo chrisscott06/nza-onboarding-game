@@ -32,6 +32,7 @@
   },
   "platforms": [
     { "x": 0,    "y": 360, "w": 720, "h": 180 },
+    { "x": 620,  "y": 205, "w": 170, "h": 24 },
     { "x": 820,  "y": 300, "w": 200, "h": 24 },
     { "x": 1100, "y": 250, "w": 190, "h": 24 },
     { "x": 1380, "y": 360, "w": 580, "h": 180 },
@@ -76,7 +77,7 @@
     ] }
   ],
   "actors": [
-    { "type": "spring",  "x": 560,  "y": 344, "w": 40, "h": 16, "power": 1300 },
+    { "type": "spring",  "x": 540,  "y": 344, "w": 44, "h": 16, "power": 1480 },
     { "type": "mover",   "x": 740,  "y": 330, "w": 96, "h": 16, "axis": "x", "distance": 110, "speed": 70 },
     { "type": "mover",   "x": 1300, "y": 300, "w": 84, "h": 16, "axis": "y", "distance": 90,  "speed": 55 },
     { "type": "enemy",   "x": 1640, "y": 330, "w": 34, "h": 30, "range": 200, "speed": 80, "points": 50 },
@@ -93,7 +94,7 @@
     { "objectId": "solar-panel",    "x": 210,  "y": 320 },
     { "objectId": "solar-panel",    "x": 380,  "y": 320 },
     { "objectId": "battery-cell",   "x": 450,  "y": 320 },
-    { "objectId": "solar-panel",    "x": 560,  "y": 175 },
+    { "objectId": "solar-panel",    "x": 690,  "y": 165 },
     { "objectId": "solar-panel",    "x": 900,  "y": 260 },
     { "objectId": "wind-turbine",   "x": 1180, "y": 210 },
     { "objectId": "ice-car",        "x": 1450, "y": 320 },

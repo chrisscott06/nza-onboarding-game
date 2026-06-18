@@ -719,14 +719,16 @@ const Engine = (() => {
   }
 
   // Bounce pad: landing on top launches the player higher than a normal jump.
+  // A spring is a launch PAD, not a wall — you can walk straight onto it and it
+  // catapults you up. Fires whenever you're on/over it and not rising (so a
+  // walk-on from flat ground bounces you, not just a fall-on from above).
   function resolveSpring(p, s, axis) {
-    if (!aabb(p, s)) return;
-    if (axis === 'y') {
-      if (p.vy > 0) { p.y = s.y - p.h; p.vy = -(s.power || 1300); s.squash = 0.18; sfx('spring'); }
-      else if (p.vy < 0) { p.y = s.y + s.h; p.vy = 0; }
-    } else {
-      if (p.vx > 0) p.x = s.x - p.w; else if (p.vx < 0) p.x = s.x + s.w;
-      p.vx = 0;
+    if (axis !== 'y' || !aabb(p, s)) return;
+    if (p.vy >= 0) {
+      p.y = s.y - p.h;
+      p.vy = -(s.power || 1300);
+      s.squash = 0.18;
+      sfx('spring');
     }
   }
 
