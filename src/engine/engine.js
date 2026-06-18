@@ -132,6 +132,11 @@ const Engine = (() => {
       hub: !!spec.hub,
       nearGate: null,  // the gate the player is currently standing in front of
       entering: false, // a gate was entered; ignore further input while it loads
+      // hub intro: walk only the left bit while the spiel shows, then a wall
+      // lifts and a "walk right" arrow points to the pillars
+      intro: (spec.hub && spec.intro) ? spec.intro : null,
+      introActive: !!(spec.hub && spec.intro),
+      introT: 0,       // typing clock for the intro panel
       // boss fight (BEAT 5): banked clean energy is ammo against the Oil Baron
       boss: spec.boss ? {
         name: spec.boss.name || 'The Oil Baron',
@@ -204,6 +209,8 @@ const Engine = (() => {
         facing: -1,
       },
     };
+    sfx('talk');                                            // a chime as they walk in
+    if (typeof Sound !== 'undefined' && Sound.setDialogue) Sound.setDialogue(true); // calm the music
   }
 
   function updateCutscene(dt) {
@@ -224,6 +231,7 @@ const Engine = (() => {
         const thenWin = cs.beat.thenWin;
         world.cutscene = null;
         world.paused = false;
+        if (typeof Sound !== 'undefined' && Sound.setDialogue) Sound.setDialogue(false); // music carries on
         if (thenWin) triggerWin(); // the boss-victory beat ends → celebrate
       }
     }
@@ -246,8 +254,8 @@ const Engine = (() => {
     drawNpc(cs);
     if (cs.phase === 'talk') {
       const line = cs.lines[cs.idx];
-      if (line.who !== 'You') drawBubble(line.text, n.x + n.w / 2, n.y);
-      else { const p = world.player; drawBubble(line.text, p.x + p.w / 2, p.y); }
+      if (line.who !== 'You') drawBubble(line.text, n.x + n.w / 2, n.y, line.who);
+      else { const p = world.player; drawBubble(line.text, p.x + p.w / 2, p.y, 'You'); }
     }
   }
 
@@ -354,9 +362,11 @@ const Engine = (() => {
     R(0.38, 0.73, 0.24, 0.05, '#7a3b2a');           // small confident smile
   }
 
-  function drawBubble(text, cx, anchorTopY) {
-    ctx.font = '600 14px "IBM Plex Mono", ui-monospace, monospace';
-    const maxW = 250, lh = 18, padX = 10, padY = 8;
+  function drawBubble(text, cx, anchorTopY, speaker) {
+    const bodyFont = '600 14px "IBM Plex Mono", ui-monospace, monospace';
+    const nameFont = '700 11px "IBM Plex Mono", ui-monospace, monospace';
+    const maxW = 250, lh = 18, padX = 10, padY = 8, hdrH = speaker ? 17 : 0;
+    ctx.font = bodyFont;
     const words = String(text).split(' ');
     const lines = [];
     let cur = '';
@@ -365,9 +375,10 @@ const Engine = (() => {
       if (ctx.measureText(test).width > maxW && cur) { lines.push(cur); cur = w; } else cur = test;
     }
     if (cur) lines.push(cur);
-    const tw = Math.max.apply(null, lines.map((l) => ctx.measureText(l).width));
-    const bw = Math.min(maxW, tw) + padX * 2;
-    const bh = lines.length * lh + padY * 2;
+    let tw = Math.max.apply(null, lines.map((l) => ctx.measureText(l).width));
+    if (speaker) { ctx.font = nameFont; tw = Math.max(tw, ctx.measureText(speaker.toUpperCase()).width); ctx.font = bodyFont; }
+    const bw = Math.min(maxW + 20, tw) + padX * 2;
+    const bh = lines.length * lh + padY * 2 + hdrH;
     const bx = clamp(cx - bw / 2, camera.x + 4, camera.x + logicalW - bw - 4);
     const by = Math.max(4, anchorTopY - bh - 12);
     ctx.fillStyle = '#f5f1e6';
@@ -377,9 +388,17 @@ const Engine = (() => {
     ctx.beginPath(); // tail toward the speaker
     ctx.moveTo(cx - 8, by + bh - 1); ctx.lineTo(cx + 8, by + bh - 1); ctx.lineTo(cx, by + bh + 9);
     ctx.closePath(); ctx.fillStyle = '#f5f1e6'; ctx.fill();
-    ctx.fillStyle = '#0b1220';
     ctx.textBaseline = 'top';
-    lines.forEach((l, i) => ctx.fillText(l, bx + padX, by + padY + i * lh));
+    let ty = by + padY;
+    if (speaker) {
+      ctx.font = nameFont;
+      ctx.fillStyle = NAMECOL[speaker] || '#0b1220';
+      ctx.fillText(speaker.toUpperCase(), bx + padX, ty);
+      ty += hdrH;
+      ctx.font = bodyFont;
+    }
+    ctx.fillStyle = '#0b1220';
+    lines.forEach((l, i) => ctx.fillText(l, bx + padX, ty + i * lh));
     ctx.textBaseline = 'alphabetic';
   }
 
@@ -422,6 +441,11 @@ const Engine = (() => {
     'Mr Net Stupid Zero': { c: '#fb7185' },
     'Oil Baron':          { c: '#111827' },
     'You':                { c: '#2dd4bf' },
+  };
+  // Darker, high-contrast name colours for the cream speech-bubble header.
+  const NAMECOL = {
+    'Ed Megawatt': '#b57d0a', 'Mr Net Stupid Zero': '#d63a50',
+    'Oil Baron': '#8a6d14', 'You': '#0d8a7d', 'PABLO': '#4a52c2',
   };
   const pablo = { img: new Image(), ready: false }; // PABLO shows as its logo
   pablo.img.onload = () => { pablo.ready = true; };
@@ -470,9 +494,16 @@ const Engine = (() => {
 
     // --- jump: coyote time + input buffering ---
     const jumpPressed = Input.consumeJumpPress();
-    // overworld hub: standing at a gate + jump = enter that world (no hop)
-    if (world.hub && handleGate(jumpPressed)) return;
-    if (jumpPressed) p.jumpBufferT = t.jumpBuffer;
+    // hub intro: SPACE/tap finishes the typing then dismisses the intro (no jump,
+    // no gate, and the player is walled into the left bit — see the bounds clamp)
+    if (world.hub && world.introActive) {
+      world.introT += dt;
+      if (jumpPressed) advanceIntro();
+    } else {
+      // overworld hub: standing at a gate + jump = enter that world (no hop)
+      if (world.hub && handleGate(jumpPressed)) return;
+      if (jumpPressed) p.jumpBufferT = t.jumpBuffer;
+    }
     p.jumpBufferT = Math.max(0, p.jumpBufferT - dt);
     p.coyote = p.onGround ? t.coyoteTime : Math.max(0, p.coyote - dt);
 
@@ -526,6 +557,12 @@ const Engine = (() => {
     const b = world.bounds;
     if (p.x < b.x) { p.x = b.x; p.vx = 0; }
     if (p.x + p.w > b.x + b.w) { p.x = b.x + b.w - p.w; p.vx = 0; }
+    // hub intro: an invisible wall keeps the player in the left bit until the
+    // spiel is dismissed (then the wall lifts and the pillars are reachable)
+    if (world.introActive && world.intro && world.intro.barrierX != null) {
+      const lim = world.intro.barrierX - p.w;
+      if (p.x > lim) { p.x = lim; if (p.vx > 0) p.vx = 0; }
+    }
 
     // --- hazards / collectibles / enemies / projectiles ---
     handleObjects();
@@ -1053,6 +1090,22 @@ const Engine = (() => {
   // ---- Win (reach the goal) --------------------------------------------
   function goalBox(g) {
     return { x: g.x - 16, y: g.y - 10, w: 60, h: 90 };
+  }
+
+  // Hub intro: SPACE/tap first finishes the typing, then dismisses the spiel.
+  const INTRO_CPS = 38; // intro typing speed (chars/sec)
+  function introFullChars() {
+    return world.intro ? world.intro.lines.reduce((a, l) => a + l.length, 0) : 0;
+  }
+  function advanceIntro() {
+    if (!world.introActive) return;
+    if (world.introT < 0.3) return; // ignore a stray tap as the hub opens
+    if (!reduceMotion && world.introT * INTRO_CPS < introFullChars()) {
+      world.introT = (introFullChars() + 4) / INTRO_CPS; // finish the typing
+    } else {
+      world.introActive = false; // dismissed → the wall lifts
+      sfx('click');
+    }
   }
 
   // Hub: find the gate the player is standing in front of; a jump enters an
@@ -1766,9 +1819,61 @@ const Engine = (() => {
     ctx.beginPath(); ctx.arc(hx, hy, 2.4, 0, Math.PI * 2); ctx.fill();
   }
 
+  // Hub intro: a top panel that types out the spiel; the hero is visible walking
+  // below it. SPACE / tap finishes the typing, then dismisses it.
+  function drawIntroPanel() {
+    const W = logicalW, lines = world.intro.lines;
+    const full = introFullChars();
+    const shown = reduceMotion ? full : Math.floor(world.introT * INTRO_CPS);
+    const panelH = 26 * lines.length + 64;
+    ctx.fillStyle = 'rgba(8,12,22,0.85)';
+    ctx.fillRect(0, 56, W, panelH);
+    ctx.fillStyle = hexA('#2dd4bf', 0.7);
+    ctx.fillRect(0, 56, W, 2);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillStyle = '#5eead4';
+    ctx.font = '600 12px "IBM Plex Mono", ui-monospace, monospace';
+    ctx.fillText('NET ZERO HERO', W / 2, 68);
+    ctx.fillStyle = '#f5f1e6';
+    ctx.font = '600 15px "IBM Plex Mono", ui-monospace, monospace';
+    let count = 0, y = 90;
+    for (const ln of lines) {
+      const s = shown >= count + ln.length ? ln : (shown > count ? ln.slice(0, shown - count) : '');
+      ctx.fillText(s, W / 2, y);
+      y += 26; count += ln.length;
+    }
+    if (shown >= full) {
+      ctx.fillStyle = '#5eead4';
+      ctx.font = '600 12px "IBM Plex Mono", ui-monospace, monospace';
+      ctx.fillText('▸ SPACE / TAP TO CONTINUE', W / 2, y + 4);
+    }
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  }
+
+  // Hub (after the intro): a pulsing "WALK RIGHT →" arrow until the player nears
+  // the pillars, nudging them over to choose a world.
+  function drawHubArrow() {
+    const gates = world.actors.filter((a) => a.type === 'gate');
+    if (!gates.length) return;
+    const firstX = Math.min.apply(null, gates.map((a) => a.x));
+    if (world.player.x > firstX - 240) return; // close enough — they can see them
+    const pulse = reduceMotion ? 0 : 10 * Math.abs(Math.sin(world.animT * 4));
+    const x = logicalW - 150 + pulse, y = logicalH / 2;
+    ctx.save();
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = hexA('#5eead4', 0.95);
+    ctx.font = '700 40px "IBM Plex Mono", ui-monospace, monospace';
+    ctx.fillText('→', x, y);
+    ctx.fillStyle = 'rgba(245,241,230,0.85)';
+    ctx.font = '600 13px "IBM Plex Mono", ui-monospace, monospace';
+    ctx.fillText('WALK RIGHT', x, y + 34);
+    ctx.restore();
+  }
+
   function drawHUD() {
     // Overworld hub: no score/lives/storage — just a title + how-to.
     if (world.hub) {
+      if (world.introActive) { drawIntroPanel(); ctx.textAlign = 'left'; drawTip(); return; }
       ctx.textBaseline = 'top';
       ctx.textAlign = 'center';
       ctx.fillStyle = '#f5f1e6';
@@ -1776,8 +1881,9 @@ const Engine = (() => {
       ctx.fillText('Choose your world', logicalW / 2, 20);
       ctx.fillStyle = 'rgba(203,213,225,0.8)';
       ctx.font = '600 13px "IBM Plex Mono", ui-monospace, monospace';
-      ctx.fillText('WALK RIGHT →  ·  STAND AT A PILLAR + JUMP TO ENTER', logicalW / 2, 58);
+      ctx.fillText('STAND AT A PILLAR + JUMP TO ENTER', logicalW / 2, 58);
       ctx.textAlign = 'left';
+      drawHubArrow();
       drawTip();
       return;
     }
@@ -1852,7 +1958,7 @@ const Engine = (() => {
       ctx.fillStyle = 'rgba(245,241,230,0.55)';
       ctx.font = '600 12px "IBM Plex Mono", ui-monospace, monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('▸ ENTER / TAP TO CONTINUE', logicalW / 2, logicalH - 22);
+      ctx.fillText('▸ SPACE / TAP TO CONTINUE', logicalW / 2, logicalH - 22);
       ctx.textAlign = 'left';
     }
 
@@ -1949,6 +2055,7 @@ const Engine = (() => {
   return {
     start,
     cutsceneAdvance, // advance the active staged cutscene
+    introAdvance: advanceIntro, // finish/dismiss the hub intro (SPACE / tap)
     get world() { return world; },
     get camera() { return camera; },
   };

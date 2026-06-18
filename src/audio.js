@@ -18,6 +18,7 @@ const Sound = (() => {
   let musicOn = false;
   let musicTimer = null;
   let step = 0;
+  let dialogue = false; // calmer music while a conversation is on screen
 
   try { muted = localStorage.getItem('nza-muted') === '1'; } catch (e) {}
 
@@ -92,6 +93,8 @@ const Sound = (() => {
     lose:             () => { noise(0.13, 0.22); arp([330, 233, 165], 'square', 0.1, 0.2); },
     win:              () => arp([523, 659, 784, 1047, 1319], 'square', 0.11, 0.25),
     click:            () => tone({ type: 'square', f0: 600, f1: 600, dur: 0.04, gain: 0.15 }),
+    // a soft "someone's here" two-note chime when a character walks in to talk
+    talk:             () => arp([587, 440], 'triangle', 0.1, 0.18),
   };
 
   function play(name) {
@@ -106,6 +109,12 @@ const Sound = (() => {
 
   function musicTick() {
     if (muted || !musicOn) { step++; return; }
+    if (dialogue) {
+      // the backing track calms to a soft low hum while characters talk
+      if (step % 4 === 0) tone({ type: 'triangle', f0: 110, f1: 110, dur: 0.5, gain: 0.05 });
+      step++;
+      return;
+    }
     const lead = LEAD[step % LEAD.length];
     if (lead) tone({ type: 'square', f0: lead, f1: lead, dur: 0.18, gain: 0.06 });
     if (step % 2 === 0) {
@@ -137,5 +146,6 @@ const Sound = (() => {
     play, unlock, startMusic, stopMusic,
     toggleMute: () => { setMuted(!muted); return muted; },
     isMuted: () => muted,
+    setDialogue: (on) => { dialogue = !!on; },
   };
 })();

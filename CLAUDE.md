@@ -193,10 +193,13 @@ mechanic somewhere safe before putting it over a death pit.
 ### Optional: the overworld hub (`hub: true`)
 
 A level with `"hub": true` is the **2D world map**, and it IS the home screen.
-Flow: boot/PRESS START → the **intro crawl** (the typed spiel, in `game.js`'s
-`showCrawl`) → a **retro pixel transition** (`src/transition.js`) → the hub. The
-player spawns at the LEFT in open space, walks RIGHT, and the four world
-pillar-doors come into view clustered together. They walk among `gate` actors
+Flow: boot/PRESS START → a **retro pixel transition** (`src/transition.js`) →
+the hub, where the player spawns at the LEFT. If the hub level has an `intro`
+block (`{ barrierX, lines }`), the spiel types out in a top panel while the hero
+is **walkable but walled into the left bit** (an invisible wall at `intro.barrierX`,
+pillars still off-screen); **SPACE / tap** finishes the typing then dismisses it,
+the wall lifts, and a pulsing "WALK RIGHT →" arrow points to the pillars. Walking
+right brings the four pillar-doors into view clustered together. They walk among `gate` actors
 (no score/lives/hazards); standing in front of an unlocked gate and pressing
 **JUMP** plays the transition and enters its `level`. Locked gates
 (`"locked": true`, no `level`) show a "coming soon" message. The one built is

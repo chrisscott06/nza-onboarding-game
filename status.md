@@ -172,12 +172,19 @@ Original three verified pieces:
 
 ## Narrative & win (next-version asks)
 
-- **Home screen flow: boot → intro crawl → walk into the 2D world.** PRESS START
-  shows the **intro crawl** (typed spiel: collect renewables / dodge fossils /
-  heat-pump / "four pillars stand between us and net zero — walk in and choose"),
-  then a key/tap plays a **retro pixel transition** into the hub. (The old
-  landing's how-to legend, world-map cards and sandbox level-picker stay removed.)
-  A 350ms "armed" delay stops the boot-dismissing tap from skipping the crawl.
+- **Home screen flow: boot → transition → walk into the 2D world (intro in-world).**
+  PRESS START plays the **retro pixel transition** straight into the hub, where the
+  hero stands at the LEFT. The intro spiel types out in a top panel while the hero
+  is **walkable but walled into the left bit** (pillars off-screen); **SPACE / tap**
+  finishes + dismisses it, the wall lifts, and a "WALK RIGHT →" arrow points to the
+  pillars. (The old separate crawl overlay + how-to legend + world-map cards +
+  sandbox picker stay removed.) Verified in a browser: hero walks the left area
+  under the panel; dismiss → arrow + wall lifts; no console errors.
+- **Conversation polish:** characters' names now show as a coloured header in the
+  speech bubble (e.g. gold "OIL BARON"); a soft chime plays as they walk in and the
+  music calms to a low hum during the chat, then resumes; **SPACE** (or tap) skips
+  dialogue (no longer Enter; movement keys still never skip). Ed's opening line
+  fixed to "we need to decarbonise this grid by 2030".
 - **Finish-line win:** reaching the goal triggers a celebration — confetti
   shower + an overlay that tallies the score (count-up), with "Play again"
   (reloads `?level=<name>`) and "Menu" (back to the world hub). This delivers

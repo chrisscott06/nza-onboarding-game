@@ -48,7 +48,7 @@
   ],
   "beats": [
     { "trigger": "start", "lines": [
-      { "who": "Ed Megawatt", "text": "Right — you must be the volunteer! We decarbonise this grid by 2030, and I cannot do it alone. Grab every solar panel and wind turbine you can find!" },
+      { "who": "Ed Megawatt", "text": "Right — you must be the volunteer! We need to decarbonise this grid by 2030, and I cannot do it alone. Grab every solar panel and wind turbine you can find!" },
       { "who": "Ed Megawatt", "text": "Offshore wind: 41% capacity factor. Beats solar — that's why it's up high. Real numbers." },
       { "who": "You", "text": "Real numbers. I feel slightly less useless." },
       { "who": "Ed Megawatt", "text": "(a turbine blade sweeps him clean off-screen) WORTH ITwwww—" }

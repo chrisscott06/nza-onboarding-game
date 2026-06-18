@@ -1,9 +1,18 @@
 {
-  "_comment": "The 2D world hub. After the intro crawl, the player drops in at the LEFT in open space (room to set context), then walks RIGHT — the four world pillar-doors come into view, clustered close together so all four are visible at once. Stand at a pillar and JUMP to enter. Gate 1 -> level-grid; Gates 2-4 are locked. Data-driven `gate` actors + `hub: true`.",
+  "_comment": "The 2D world hub = the home screen. You drop in at the LEFT; the `intro` text shows while you can wander only the left bit (an invisible wall at intro.barrierX, pillars still off-screen). SPACE / tap dismisses the intro — the wall lifts and a 'WALK RIGHT' arrow points you to the four pillar-doors, clustered close together so all four are visible at once. Gate 1 -> level-grid; Gates 2-4 locked. Data-driven `gate` actors + `hub: true` + `intro`.",
   "id": "level-hub",
   "hub": true,
   "startPosition": { "x": 80, "y": 380 },
   "bounds": { "x": 0, "y": 0, "w": 2200, "h": 540 },
+  "intro": {
+    "barrierX": 640,
+    "lines": [
+      "The grid's running dirty — we need to flip it GREEN.",
+      "Collect clean energy, dodge the fossil fuels.",
+      "Four pillars stand between us and net zero.",
+      "Walk right and choose where to begin."
+    ]
+  },
   "platforms": [
     { "x": 0, "y": 470, "w": 2200, "h": 70 }
   ],
