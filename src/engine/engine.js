@@ -430,8 +430,18 @@ const Engine = (() => {
   }
 
   // NZA branding: the logo, drawn as a faint watermark behind the play area.
-  const logo = { img: new Image(), ready: false };
-  logo.img.onload = () => { logo.ready = true; };
+  const logo = { img: new Image(), ready: false, pix: null };
+  logo.img.onload = () => {
+    logo.ready = true;
+    // pre-render a low-res copy so the background watermark reads as chunky
+    // pixels (nearest-neighbour upscaled) like the rest of the art, instead of
+    // a smooth anti-aliased SVG.
+    const s = 60;
+    const c = document.createElement('canvas');
+    c.width = s; c.height = s;
+    c.getContext('2d').drawImage(logo.img, 0, 0, s, s);
+    logo.pix = c;
+  };
   logo.img.src = 'public/nza-logo.svg';
 
   // Cutscene cast: in-world character look (body/coat colour). Faces are drawn
@@ -1273,12 +1283,14 @@ const Engine = (() => {
     // stars: hazy/dim under smog, crisp once clean
     drawStars(W, H, cx, wd ? 0.10 + 0.22 * g : 0.32);
 
-    // NZA logo watermark, subtly, behind the play area
-    if (logo.ready) {
+    // NZA logo watermark, subtly, behind the play area — drawn from the low-res
+    // copy and upscaled nearest-neighbour so it's chunky/pixelated like the rest.
+    if (logo.ready && logo.pix) {
       const size = Math.min(W, H) * 0.62;
       ctx.save();
-      ctx.globalAlpha = 0.04;
-      ctx.drawImage(logo.img, (W - size) / 2, (H - size) / 2, size, size);
+      ctx.globalAlpha = 0.05;
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(logo.pix, (W - size) / 2, (H - size) / 2, size, size);
       ctx.restore();
     }
 

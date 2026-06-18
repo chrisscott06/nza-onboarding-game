@@ -92,7 +92,7 @@ async function startLevel(canvas, menu, levelName) {
     document.body.classList.add('playing');
     // From the hub, entering a gate plays the retro transition, then loads it.
     Engine.start(canvas, spec, { onWin: showWin, onEnterGate: (lvl) => Transition.play(() => startLevel(canvas, menu, lvl)) });
-    Sound.startMusic(); // backing track (silent until unmuted / after a gesture)
+    Sound.startMusic(meta.music); // per-level track (silent until unmuted / after a gesture)
     watchSurge(); // toggles the touch dash button when a grid-surge is ready
   } catch (err) {
     showFatal(err);

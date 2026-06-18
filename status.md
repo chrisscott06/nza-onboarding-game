@@ -308,7 +308,12 @@ brief).
 
 - `src/audio.js` — all sound generated in code (no files): retro SFX for jump,
   collect, bank, curtail, surge, power-up, shield, drain, death, win, and UI
-  clicks, plus a light looping chiptune backing track. A 🔊/🔇 toggle (top-right,
+  clicks, plus **per-context looping chiptunes** — a `TRACKS` table with its own
+  tempo/waveforms/patterns per track: `menu` (calm, for the hub/opening), `grid`
+  (driving, for World 1), and `talk` (a gentle melodic motif that swaps in during
+  a conversation and resumes the level track after — replaced the old heartbeat
+  pulse). A level picks its track via `meta.music`; `startMusic(name)` switches.
+  A 🔊/🔇 toggle (top-right,
   persisted in localStorage) and the no-autoplay rule respected (audio unlocks
   on first interaction). Engine fires the SFX on events; game.js starts the
   music + wires the toggle. Verified loading/playing without errors in-browser

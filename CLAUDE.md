@@ -91,6 +91,9 @@ you never edit engine code.**
   folder name.
 - `accentColor` (hex) is your level's identity — it tints your card and your
   character's body.
+- `music` (optional) names the backing track from `src/audio.js`'s `TRACKS`
+  (`"menu"` for the hub/opening, `"grid"` for World 1; defaults to `"grid"`). The
+  gentle `"talk"` motif swaps in automatically during a conversation.
 
 ### `level.json` — the level itself
 

@@ -18,7 +18,8 @@ const Sound = (() => {
   let musicOn = false;
   let musicTimer = null;
   let step = 0;
-  let dialogue = false; // calmer music while a conversation is on screen
+  let currentTrack = 'grid'; // which TRACK is playing
+  let savedTrack = null;     // track to restore after a conversation
 
   try { muted = localStorage.getItem('nza-muted') === '1'; } catch (e) {}
 
@@ -103,32 +104,55 @@ const Sound = (() => {
     if (fn) fn();
   }
 
-  // ---- Music: a light, looping chiptune (square lead + triangle bass) ------
-  const LEAD = [392, 0, 523, 0, 659, 587, 523, 0, 440, 0, 523, 0, 587, 0, 494, 0];
-  const BASS = [98, 131, 165, 131, 110, 147, 165, 147];
+  // ---- Music: looping chiptunes, one per context. Each TRACK has its own
+  // tempo, waveforms and lead/bass note patterns (0 = rest). All generated in
+  // code — no files. Pass a track name to startMusic(); the talk motif swaps in
+  // while a conversation is on screen and the previous track resumes after.
+  const TRACKS = {
+    // Menu / hub / opening — calm, hopeful, unhurried (major arpeggios).
+    menu: {
+      tempo: 215, leadType: 'triangle', leadGain: 0.06, bassType: 'sine', bassGain: 0.05,
+      lead: [523, 0, 659, 0, 784, 0, 659, 0, 587, 0, 698, 0, 587, 0, 0, 0],
+      bass: [131, 0, 196, 0, 147, 0, 196, 0],
+    },
+    // World 1 "Power Up the Grid" — driving, upbeat chiptune.
+    grid: {
+      tempo: 155, leadType: 'square', leadGain: 0.06, bassType: 'triangle', bassGain: 0.07,
+      lead: [392, 0, 523, 0, 659, 587, 523, 0, 440, 0, 523, 0, 587, 0, 494, 0],
+      bass: [98, 131, 165, 131, 110, 147, 165, 147],
+    },
+    // Conversation — gentle, sparse, warm (replaces the old heartbeat pulse).
+    talk: {
+      tempo: 250, leadType: 'sine', leadGain: 0.06, bassType: 'sine', bassGain: 0.045,
+      lead: [659, 0, 0, 587, 0, 0, 523, 0, 0, 587, 0, 0, 494, 0, 440, 0],
+      bass: [147, 0, 0, 0, 165, 0, 0, 0],
+    },
+  };
 
   function musicTick() {
     if (muted || !musicOn) { step++; return; }
-    if (dialogue) {
-      // the backing track calms to a soft low hum while characters talk
-      if (step % 4 === 0) tone({ type: 'triangle', f0: 110, f1: 110, dur: 0.5, gain: 0.05 });
-      step++;
-      return;
-    }
-    const lead = LEAD[step % LEAD.length];
-    if (lead) tone({ type: 'square', f0: lead, f1: lead, dur: 0.18, gain: 0.06 });
+    const tk = TRACKS[currentTrack] || TRACKS.grid;
+    const lead = tk.lead[step % tk.lead.length];
+    if (lead) tone({ type: tk.leadType, f0: lead, f1: lead, dur: 0.18, gain: tk.leadGain });
     if (step % 2 === 0) {
-      const b = BASS[(step / 2) % BASS.length];
-      tone({ type: 'triangle', f0: b, f1: b, dur: 0.22, gain: 0.07 });
+      const b = tk.bass[(step / 2) % tk.bass.length];
+      if (b) tone({ type: tk.bassType, f0: b, f1: b, dur: 0.24, gain: tk.bassGain });
     }
     step++;
   }
 
-  function startMusic() {
+  function runTimer() {
+    if (musicTimer) clearInterval(musicTimer);
+    musicTimer = setInterval(musicTick, (TRACKS[currentTrack] || TRACKS.grid).tempo);
+  }
+
+  // startMusic(name): start (or switch to) the named track. Called per level.
+  function startMusic(name) {
     unlock();
-    if (musicOn) return;
+    currentTrack = (name && TRACKS[name]) ? name : 'grid';
+    savedTrack = null;
     musicOn = true; step = 0;
-    musicTimer = setInterval(musicTick, 165);
+    runTimer();
   }
 
   function stopMusic() {
@@ -142,10 +166,26 @@ const Sound = (() => {
     if (master) master.gain.value = m ? 0 : 0.5;
   }
 
+  // While a conversation is on screen, swap to the gentle "talk" motif, then
+  // resume the level's track when it ends.
+  function setDialogue(on) {
+    if (!musicOn) return;
+    if (on) {
+      if (currentTrack === 'talk') return;
+      savedTrack = currentTrack;
+      currentTrack = 'talk';
+    } else {
+      if (currentTrack !== 'talk') return;
+      currentTrack = savedTrack || 'grid';
+      savedTrack = null;
+    }
+    step = 0;
+    runTimer();
+  }
+
   return {
-    play, unlock, startMusic, stopMusic,
+    play, unlock, startMusic, stopMusic, setDialogue,
     toggleMute: () => { setMuted(!muted); return muted; },
     isMuted: () => muted,
-    setDialogue: (on) => { dialogue = !!on; },
   };
 })();
