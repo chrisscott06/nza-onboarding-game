@@ -14,6 +14,13 @@
     rel="stylesheet" />
 
   <style>
+    /* Stolzl — the NZA brand display face (local .otf, same files as the
+       nza-website). Used for the NET ZERO HERO wordmark. See CREDITS.md. */
+    @font-face { font-family: "Stolzl"; src: url("public/fonts/stolzl_light.otf") format("opentype");   font-weight: 300; font-display: swap; }
+    @font-face { font-family: "Stolzl"; src: url("public/fonts/stolzl_book.otf") format("opentype");    font-weight: 400; font-display: swap; }
+    @font-face { font-family: "Stolzl"; src: url("public/fonts/stolzl_medium.otf") format("opentype");  font-weight: 500; font-display: swap; }
+    @font-face { font-family: "Stolzl"; src: url("public/fonts/stolzl_bold.otf") format("opentype");    font-weight: 700; font-display: swap; }
+
     :root {
       /* NZA design system */
       --navy:   #0b1220;
@@ -25,6 +32,7 @@
       --cream:  #f5f1e6;
 
       --font-display: "DM Serif Display", Georgia, serif;
+      --font-brand: "Stolzl", "DM Serif Display", system-ui, sans-serif;
       --font-ui: "Inter", system-ui, sans-serif;
       --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
     }
@@ -234,13 +242,13 @@
 
     /* WORDMARK — "Net" + "Zero" rise up from below; "Hero" mask-reveals in teal. */
     #boot .boot-title {
-      margin: 0; display: flex; gap: 0.26em; align-items: baseline; justify-content: center;
-      font-family: var(--font-display); font-weight: 400;
-      font-size: clamp(34px, 7.5vw, 66px); line-height: 1; letter-spacing: 0.01em;
+      margin: 0; display: flex; gap: 0.24em; align-items: baseline; justify-content: center;
+      font-family: var(--font-brand); font-weight: 500;
+      font-size: clamp(34px, 7.5vw, 66px); line-height: 1; letter-spacing: 0.005em;
     }
     #boot .bw { display: inline-block; overflow: hidden; padding: 0 0.04em; }
     #boot .bw-in {
-      display: inline-block; color: var(--cream);
+      display: inline-block; color: var(--cream); font-weight: 500; /* Stolzl Medium */
       transform: translateY(115%); opacity: 0;
       animation: boot-rise 700ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
@@ -248,7 +256,7 @@
     #boot .bw-in.zero { animation-delay: 2350ms; }
     @keyframes boot-rise { to { transform: translateY(0); opacity: 1; } }
     #boot .bw-mask {
-      position: relative; display: inline-block; color: var(--teal);
+      position: relative; display: inline-block; color: var(--teal); font-weight: 300; /* Stolzl Light */
       clip-path: inset(0 100% 0 0);
       animation: boot-mask-text 1000ms cubic-bezier(0.7, 0, 0.3, 1) 2900ms forwards;
     }

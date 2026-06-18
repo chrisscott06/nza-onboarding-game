@@ -36,6 +36,11 @@ commercial use, embedding allowed):
 - **Inter** (Rasmus Andersson) — body and UI.
 - **IBM Plex Mono** (IBM) — data/score readouts and labels.
 
+**Stolzl** (NOT OFL — a licensed brand face) — the NZA display font, used for the
+"NET ZERO HERO" wordmark on the boot/intro screen. Self-hosted from
+`public/fonts/stolzl_*.otf` (the same files as the NZA website). Covered by the
+NZA Stolzl licence — do not redistribute outside NZA projects.
+
 ## Logo (Part F)
 
 - `public/nza-logo.svg` — the **official NZA mark** (layered triangles in a ring,
